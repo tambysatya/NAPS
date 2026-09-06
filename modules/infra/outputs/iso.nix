@@ -17,7 +17,10 @@ let
 in {
 
     infra.outputs.iso = {
-        boot.kernelParams = ["console=tty1" "console=ttyS0,115200"];
+        boot.kernelParams = [
+            #"console=tty1"
+            "console=ttyS0,115200"
+        ];
         /*
         nix.settings.experimental-features = ["nix-command" "flakes"]; #enable flakes
         environment.systemPackages = [pkgs.dmidecode 
