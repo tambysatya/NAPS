@@ -1,4 +1,4 @@
-{lib, inputs, flakeRoot, pkgs , config, path, ...}:
+{lib, inputs, flakeRoot, pkgs, config, path, ...}:
 
 let
     utils = import ./lib {inherit lib inputs flakeRoot;};

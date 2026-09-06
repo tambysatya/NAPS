@@ -37,7 +37,7 @@ let
     compileModule = # A SINGLE FUNCTION TO RULE THEM ALL
         {inventory, extraArgs ? {path = "${inputs.self.outPath}/.secrets";}}:
            (lib.evalModules {
-               specialArgs = {inherit inputs lib flakeRoot;} // extraArgs;
+               specialArgs = {inherit inputs lib pkgs flakeRoot;} // extraArgs;
                modules = [
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/infra
@@ -157,10 +157,10 @@ let
             let infra = compileInfra args;
             in lib.nixosSystem {
                 inherit system;
-                specialArgs = {inherit inputs lib pkgs flakeRoot;} // args.extraArgs;
+                specialArgs = {inherit inputs lib flakeRoot;} // args.extraArgs;
                 modules = [
                         "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-                        #./modules/autoinstall
+                        ./modules/autoinstall
                         infra.outputs.iso
                 ];
             };
