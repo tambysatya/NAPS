@@ -18,6 +18,7 @@ in {
 
     infra.outputs.iso = {
         boot.kernelParams = ["console=tty1" "console=ttyS0,115200"];
+        /*
         nix.settings.experimental-features = ["nix-command" "flakes"]; #enable flakes
         environment.systemPackages = [pkgs.dmidecode 
                                       inputs.disko.packages.${pkgs.system}.disko];
@@ -29,6 +30,6 @@ in {
                             path = path;
                         };
         };
-        #users = utils.mergeAll (map mkUser config.infra.deploy.users);
-
+        users = utils.mergeAll (map mkUser config.infra.deploy.users);
+        */
 }

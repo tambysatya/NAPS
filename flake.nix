@@ -160,7 +160,7 @@ let
                 specialArgs = {inherit inputs lib;} // args.extraArgs;
                 modules = [
                         "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-                        ./modules/autoinstall
+                        #./modules/autoinstall
                         infra.outputs.iso
                 ];
             };
