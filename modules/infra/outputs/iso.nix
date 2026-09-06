@@ -29,6 +29,6 @@ in {
                             path = path;
                         };
         };
-        users = utils.mergeAll (map mkUser config.infra.deploy.users);
+        #users = utils.mergeAll (map mkUser config.infra.deploy.users);
 
 }
