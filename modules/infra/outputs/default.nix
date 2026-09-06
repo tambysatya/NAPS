@@ -42,6 +42,7 @@ in
     imports = [./options
                ./systems
                ./domains
+               ./iso.nix
               ];
     #infra.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.infra.deploy.systems);
     infra.outputs.systems = lib.mapAttrs defaultConf config.infra.topology.vms;

@@ -1,7 +1,7 @@
 {lib, inputs, flakeRoot, pkgs , config, path, ...}:
 
 let
-    utils = import ./lib {inherit lib inputs;};
+    utils = import ./lib {inherit lib inputs flakeRoot;};
     mkUser = {name, uid}:
         {
             users.${name} = {
@@ -21,7 +21,6 @@ in {
             #"console=tty1"
             "console=ttyS0,115200"
         ];
-        /*
         nix.settings.experimental-features = ["nix-command" "flakes"]; #enable flakes
         environment.systemPackages = [pkgs.dmidecode 
                                       inputs.disko.packages.${pkgs.system}.disko];
@@ -31,8 +30,7 @@ in {
         environment.etc."nixos".source = builtins.path {
                             name = "deploy-flake";
                             path = path;
-                        };
         };
         users = utils.mergeAll (map mkUser config.infra.deploy.users);
-        */
+    };
 }

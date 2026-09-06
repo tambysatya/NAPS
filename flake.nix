@@ -157,7 +157,7 @@ let
             let infra = compileInfra args;
             in lib.nixosSystem {
                 inherit system;
-                specialArgs = {inherit inputs lib;} // args.extraArgs;
+                specialArgs = {inherit inputs lib flakeRoot;} // args.extraArgs;
                 modules = [
                         "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
                         #./modules/autoinstall
