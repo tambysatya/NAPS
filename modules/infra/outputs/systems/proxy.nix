@@ -8,7 +8,7 @@ let
     mkBackendI =  # mkBackendI "test.domain.fr" 2 = test2.domain.fr
         domain: i:
         let parts = lib.splitString "." domain;
-        in "${builtins.head parts}${lib.toString i}.${lib.concatStringsSep "." (builtins.tail parts)}";
+        in "${builtins.head parts}_${lib.toString i}.${lib.concatStringsSep "." (builtins.tail parts)}";
 
     processL4Proxy = 
         mode: # tcp or udp
