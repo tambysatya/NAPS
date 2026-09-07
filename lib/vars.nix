@@ -5,10 +5,10 @@
 let
 
     #paths 
-    ssl_root = "/var/lib/ssl";
-    ssl_basedir = name: "${ssl_root}/${name}";
-    ssl_crt_path = name: "${ssl_basedir name}/${name}.crt";
-    ssl_key_path = name: "${ssl_basedir name}/${name}.key";
+    ssl_root = "/var/lib/secrets";
+    pemdir = "/var/lib/certs";
+    ssl_crt_path = name: "${ssl_root}/${name}.crt";
+    ssl_key_path = name: "${ssl_root}/${name}.key";
 
     #naming conventions
     container_id = vmname: service: "${vmname}-${service}"; #returns the containers ID
@@ -28,7 +28,7 @@ let
         env: {inherit (env) priority tags; type="vm"; host=envHost env;};
 
 in {
-    inherit ssl_root ssl_basedir ssl_crt_path ssl_key_path;
+    inherit ssl_root ssl_crt_path ssl_key_path pemdir;
     inherit s3_key s3_key_id db_key;
     inherit directory_id;
     inherit envUID envHost hostDeployementEnv;

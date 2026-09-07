@@ -48,6 +48,7 @@ let
                             (srvuid: {
                                 ${srvuid} = {
                                     autoStart = true;
+                                    specialArgs = {inherit flakeRoot path;};
                                     config = config.infra.outputs.systems.${srvuid}.config // {
                                                     imports = ["${flakeRoot}/services/step-renew"];
                                                     environment.systemPackages = systemPackages;

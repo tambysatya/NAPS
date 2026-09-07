@@ -60,12 +60,10 @@ let
                                 lib.nixosSystem {
                                     inherit system; 
                                     specialArgs = {
-                                        inherit inputs;
+                                        inherit inputs flakeRoot;
                                     };
                                     modules = [
                                         inputs.disko.nixosModules.disko    
-                                        #./profiles/vm.nix
-                                        ./services/step-renew
                                         vmconf
                                     ];
                                 })

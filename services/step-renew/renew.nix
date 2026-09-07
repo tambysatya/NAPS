@@ -1,18 +1,19 @@
 
-{inputs, config, lib, pkgs,infra, ... }:
+{flakeRoot, inputs, config, lib, pkgs, ... }:
 
 let
 
-  vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra inputs;};
+  vars = import "${flakeRoot}/lib/vars.nix" {inherit lib inputs;};
   cfg = config.services.step-renew;
 
   certEntries =
-    lib.mapAttrsToList
-      (name: cert: ''
-        echo "Renewing ${name}"
+    map
+      ({hostname, owner, reload,...}:
+      ''
+        echo "Renewing ${hostname}"
 
-        CRT_PATH=${vars.ssl_crt_path name}
-        KEY_PATH=${vars.ssl_key_path name}
+        CRT_PATH=${vars.ssl_crt_path hostname}
+        KEY_PATH=${vars.ssl_key_path hostname}
 
         old_hash=$(${pkgs.coreutils}/bin/sha256sum "$CRT_PATH" | cut -d' ' -f1)
 
@@ -21,16 +22,18 @@ let
           "$KEY_PATH" \
           --force
 
+        cat "$CRT_PATH" "$KEY_PATH" > ${vars.pemdir}/${hostname}.pem
+
         new_hash=$(${pkgs.coreutils}/bin/sha256sum "$CRT_PATH" | cut -d' ' -f1)
 
         if [ "$old_hash" != "$new_hash" ]; then
-          echo "${name} changed"
+          echo "${hostname} changed"
 
           ${lib.concatMapStringsSep "\n"
             (service:
               "${pkgs.systemd}/bin/systemctl reload-or-restart ${service}"
             )
-            cert.reload}
+            reload}
         fi
       '')
       cfg.certs;

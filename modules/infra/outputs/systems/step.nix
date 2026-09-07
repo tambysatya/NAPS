@@ -8,11 +8,13 @@ let
             config = {
                 #imports = ["${flakeRoot}/services/step-renew"];
                 services.step-renew = {
+                    enable = true;
                     caURL = "ca.${config.infra.topology.domain}";
                     caFingerprint = "${path}/.secrets/git/fingerprint";
                     certs = sslCertificates;
                 };
             };
+            imports = ["${flakeRoot}/services/step-renew"];
         };
         
 

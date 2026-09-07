@@ -1,6 +1,6 @@
-{ inputs, lib, ... }:
+{flakeRoot, inputs, lib, ... }:
 
-let customtypes = import ../../lib/registry/types {inherit lib inputs;};
+let customtypes = import ../../lib/types {inherit lib inputs;};
 in {
   imports = [
     ./bootstrap.nix # bootstrap step-ca at the first launch
@@ -29,7 +29,7 @@ in {
 
     certs = lib.mkOption {
       default = {};
-      type = lib.types.attrsOf customtypes.sslCertificate;
+      type = lib.types.listOf customtypes.sslCertificate;
     };
   };
 }

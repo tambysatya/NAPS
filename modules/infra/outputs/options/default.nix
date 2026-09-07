@@ -62,14 +62,30 @@ let
         merge = loc: defs:
           utils.mergeAll (map (def: def.value) defs);
     };
+
+    systemConfig = types.submodule {
+        options = {
+            config = lib.mkOption {
+                description = "Generated NixOS configurations";
+                type = extraConfigType;
+                default = {};
+            };
+            imports = lib.mkOption {
+                description = "Generated NixOS imports";
+                type = types.listOf (types.either types.str types.path);
+                default = [];
+                apply = lib.unique;
+            };
+        };
+
+    };
     
 in
 {
     options.infra.outputs.systems = lib.mkOption {
-        description = "Generated NixOS configurations";
-        #type = types.attrsOf config;
-        type = extraConfigType;
-        default = {};
+            description = "System configurations";
+            type = types.attrsOf systemConfig;
+            default = {};
     };
     options.infra.outputs.domains= lib.mkOption {
         description = "Generated Terranix configurations";
