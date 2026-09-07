@@ -47,6 +47,7 @@ let
                         (lib.map 
                             (srvuid: {
                                 ${srvuid} = {
+                                    autostart = true;
                                     config = config.infra.outputs.systems.${srvuid}.config // {imports = ["${flakeRoot}/services/step-renew"];};
                                 };
                              })
