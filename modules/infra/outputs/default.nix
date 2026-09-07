@@ -41,7 +41,7 @@ let
                         (lib.map 
                             (srvuid: {
                                 ${srvuid} = {
-                                    config = config.infra.outputs.systems.${srvuid}.config // {imports = ["${flakeRoot}/modules/step-renew"];};
+                                    config = config.infra.outputs.systems.${srvuid}.config // {imports = ["${flakeRoot}/services/step-renew"];};
                                 };
                              })
                          config.infra.topology.vms.${vmname}.containers);
