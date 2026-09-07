@@ -2,7 +2,7 @@
 
 let
     utils = import ./lib.nix {inherit lib inputs flakeRoot;};
-    users = lib.concatMap (builtins.getAttr "users") (builtins.attrValues config.infra.services);
+    users = lib.concatMap (builtins.getAttr "users") (builtins.attrValues config.infra.services) ++ [{name = "haproxy"; uid=9999;}];
     assertUsers =
         let dupUser = utils.getFirstDupplicate (map (builtins.getAttr "name" (lib.unique users)));
         in {

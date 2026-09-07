@@ -2,6 +2,8 @@
 
 let
 
+    utils = import ./lib {inherit inputs lib flakeRoot;};
+
     defaultConf = 
         vmname: _:
         {
@@ -33,8 +35,12 @@ let
                     allowedTCPPorts = [22]; # ++ generateTCPPorts vmconf.services 
                     allowedUDPPorts = []; # ++ generateUDPPorts vmconf.services
                   };
+
+                  containers = utils.mergeAll (lib.map (srvuid: {${srvuid} = config.infra.outputs.systems.${srvuid};}) config.infra.topology.vms.${vmname}.containers);
             };  
         };
+
+
 
 in
 
