@@ -35,7 +35,7 @@ rec {
             };
     };
 
-    secretType = types.enum ["plain" "password" "ldapssha" "sslCertificates" "postgres" "s3" "step-ca"];
+    secretType = types.enum ["plain" "password" "ldapssha" "sslCertificate" "postgres" "s3" "step-ca"];
 
     secret = types.submodule {
         options = {

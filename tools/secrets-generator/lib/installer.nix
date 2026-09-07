@@ -52,7 +52,7 @@ let
             "plain" = _: "";
             "password" = installPassword;
             "ldapssha" = installLDAP;
-            "sslCertificates" = installSSL;
+            "sslCertificate" = installSSL;
             "postgres" = installDB;
             "s3" = installS3;
             "step-ca" = installStep;

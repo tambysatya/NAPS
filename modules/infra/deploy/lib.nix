@@ -22,7 +22,7 @@ let
             "plain" = [];
             "password" = [content.filename];
             "ldapssha" = [content.filename];
-            "sslCertificates" = let host = content.hostname;
+            "sslCertificate" = let host = content.hostname;
                                in ["${host}.crt" "${host}.key"];
             "postgres" = [(utils.db_key content)];
             "s3" = [(utils.s3_key_id content) (utils.s3_key content)];

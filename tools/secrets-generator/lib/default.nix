@@ -91,7 +91,7 @@ let
              "ldapssha" = processLDAP recipients content;
              "postgres" = processPostgres recipients content;
              "s3" = processS3Access recipients content;
-             "sslCertificates" = processSSLCert recipients content;
+             "sslCertificate" = processSSLCert recipients content;
              "step-ca" = processStep recipients; # always generated first
         }.${type};
 
