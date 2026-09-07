@@ -36,7 +36,7 @@ let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
         let tcpFrontend = 
                 {
                     frontend = {
-                        ip = if hostHasContainers env then "192.168.1.1" else "127.0.0.1";
+                        ip = if hostHasContainers env then "192.168.100.1" else "127.0.0.1";
                         inherit port;
                      };
                  };
