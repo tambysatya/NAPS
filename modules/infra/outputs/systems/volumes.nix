@@ -102,6 +102,12 @@ let
                 disko.devices.disk = utils.mergeAll ([genDiskoRoot] ++ map genDisko deploy.storage.mappings);
                 systemd.mounts = map genMountService deploy.storage.binds;
                 systemd.services = mkInitDirServices deploy.storage.ensureDirs;
+                containers = lib.mapAttrs 
+                                (ctname: dirs: {
+                                    bindMounts = lib.mapAttrs (bindTo: dir: {inherit (dir) hostPath isReadOnly;}) dirs;
+                                }) 
+                                deploy.storage.containers;
+
             };
         };
 

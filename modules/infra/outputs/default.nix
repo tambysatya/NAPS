@@ -3,6 +3,11 @@
 let
 
     utils = import ./lib {inherit inputs lib flakeRoot;};
+    systemPackages = [pkgs.nix-index
+                      pkgs.vim pkgs.git
+                      pkgs.htop pkgs.wget
+                      pkgs.molly-guard
+                      pkgs.rxvt-unicode];
 
     defaultConf = 
         vmname: _:
@@ -35,12 +40,7 @@ let
                     allowedTCPPorts = [22]; # ++ generateTCPPorts vmconf.services 
                     allowedUDPPorts = []; # ++ generateUDPPorts vmconf.services
                   };
-                  environment.systemPackages = [pkgs.nix-index
-				    pkgs.vim pkgs.git
-				    pkgs.htop pkgs.wget
-				    pkgs.molly-guard
-				    pkgs.rxvt-unicode];
-
+                  environment.systemPackages = systemPackages;
 
                   containers = 
                     utils.mergeAll 
@@ -48,7 +48,10 @@ let
                             (srvuid: {
                                 ${srvuid} = {
                                     autoStart = true;
-                                    config = config.infra.outputs.systems.${srvuid}.config // {imports = ["${flakeRoot}/services/step-renew"];};
+                                    config = config.infra.outputs.systems.${srvuid}.config // {
+                                                    imports = ["${flakeRoot}/services/step-renew"];
+                                                    environment.systemPackages = systemPackages;
+                                                 };
                                 };
                              })
                          config.infra.topology.vms.${vmname}.containers);
