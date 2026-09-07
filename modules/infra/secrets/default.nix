@@ -21,6 +21,16 @@ let
             recipients = lib.unique (additionalRecipients ++ deployements);
         } else {};
 
+    processRevProxy = 
+        deployementsAttr:
+        secret:
+        let deployements = map infralib.hostDeployementEnv (builtins.attrValues deployementsAttr); # this secrets are always sent to the hosting vm, never to a container
+        in if deployements != [] then
+        {
+            type = "sslCertificate";
+            content = secret // {owner="haproxy";};
+            recipients = deployements;
+        } else {};
     serviceSecrets = 
         srvname: {deployements, links, store, endpoints, ...}: 
         let
@@ -28,7 +38,7 @@ let
             passwords = store.passwords;
 
             revproxies = lib.filter (builtins.getAttr "tls") endpoints.http;
-            certs = store.sslCertificates ++ map (l: l // {owner="haproxy";}) revproxies;
+            certs = store.sslCertificates; # ++ map (l: l // {owner="haproxy";}) revproxies;
 
             postgres = links.postgres;
             ldap = links.ldap;
@@ -39,6 +49,7 @@ let
         ++  map (processSecret deployements "postgres") postgres
         ++  map (processSecret deployements "ldapssha") ldap
         ++  map (processSecret deployements "s3") s3
+        ++  map (processRevProxy deployements) revproxies
         ++  (if srvname == "step-ca"
                 then [(processSecret deployements "step-ca" null)] 
                 else []);

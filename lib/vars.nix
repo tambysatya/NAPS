@@ -24,9 +24,12 @@ let
                    else if env.type == "vm" then env.host
                    else env.host.vm;
 
+    hostDeployementEnv = # get the hosting deployement environment
+        env: {inherit (env) priority tags; type="vm"; host=envHost env;};
+
 in {
     inherit ssl_root ssl_basedir ssl_crt_path ssl_key_path;
     inherit s3_key s3_key_id db_key;
     inherit directory_id;
-    inherit envUID envHost;
+    inherit envUID envHost hostDeployementEnv;
 }
