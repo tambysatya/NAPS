@@ -105,7 +105,43 @@ let
                 }
                 else {};
 
+
+    processFirewall = 
+        vmname: deploy:
+        let getPorts = 
+                proxyEntries:
+                let frontends = lib.mapAttrsToList (_: {frontend, ...}: {inherit (frontend) ip port;}) proxyEntries;
+                    parts= lib.partition ({ip,...}: ip == "0.0.0.0") frontends; #right = openned everywhere, wrong = open only on the private interface
+                in {world= map (builtins.getAttr "port") parts.right;
+                    local = map (builtins.getAttr "port") parts.wrong;};
+            
+            tcp = getPorts deploy.proxy.tcp;
+            udp =  getPorts deploy.proxy.udp;
+            http = if deploy.proxy.http != {} then [443] else [];
+            hascontainersP = config.infra.topology.vms.${vmname}.containers != [];
+
+        in {
+           ${vmname}.config.networking.firewall.interfaces =
+                utils.mergeAll [
+                    {
+                        enp1s0 = { /*Direct network interface*/
+                            allowedTCPPorts = tcp.world ++ http;
+                            allowedUDPPorts = udp.world;
+                        };
+                    }
+                    (if hascontainersP then {
+                        eth0 = { /*Containers interface*/
+                            allowedTCPPorts = tcp.world ++ tcp.local ++ http;
+                            allowedUDPPorts = udp.world ++ udp.local;
+                        };
+                    }
+                    else {})
+                ];
+        };
+
     allVMs = lib.filterAttrs (_: {env,...}: env.type == "vm") config.infra.deploy.systems;
 in {
-    config.infra.outputs.systems = utils.mergeAll (lib.mapAttrsToList processVM allVMs);
+    config.infra.outputs.systems = utils.mergeAll 
+                                        (lib.mapAttrsToList processVM allVMs
+                                        ++ lib.mapAttrsToList processFirewall allVMs);
 }
