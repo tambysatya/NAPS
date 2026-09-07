@@ -21,7 +21,8 @@ in {
                     passwordFile = config.sops.secrets."db-keycloak-keycloak.key".path;
                     useSSL = true;
                     host = "postgres.${infra.domain}";
-                    caCert = "/etc/intermediate_ca.crt";
+                    #caCert = "/etc/intermediate_ca.crt";
+                    caCert = "/etc/ssl/certs/ca-bundle.crt";
                   };
                   settings = {
                     hostname = servicevhost;
