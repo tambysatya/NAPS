@@ -71,7 +71,7 @@ let
         ''
             frontend https
                 mode ${if terminatesTLS then "http" else "tcp"}
-                bind :443 ${if terminatesTLS then "ssl crt /var/lib/secrets" else ""}
+                bind :443 ${if terminatesTLS then "ssl crt /var/lib/certs" else ""}
                 ${lib.concatStringsSep "\n" (map mkFrontEnd (builtins.attrNames allEntries))}
 
         '';
