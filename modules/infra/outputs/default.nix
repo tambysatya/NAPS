@@ -35,6 +35,12 @@ let
                     allowedTCPPorts = [22]; # ++ generateTCPPorts vmconf.services 
                     allowedUDPPorts = []; # ++ generateUDPPorts vmconf.services
                   };
+                  environment.systemPackages = [pkgs.nix-index
+				    pkgs.vim pkgs.git
+				    pkgs.htop pkgs.wget
+				    pkgs.molly-guard
+				    pkgs.rxvt-unicode];
+
 
                   containers = 
                     utils.mergeAll 
