@@ -109,6 +109,8 @@ let
                 systemd.services = mkInitDirServices deploy.storage.ensureDirs;
             };
         };
+
+    vmDeploys = lib.filterAttrs (_: {env,...}: env.type == "vm") config.infra.deploy.systems; # Only VMs configure the filesystems, not the containers
 in{
-    config.infra.outputs.systems = utils.mergeAll (lib.mapAttrsToList generateFileSystem config.infra.deploy.systems);
+    config.infra.outputs.systems = utils.mergeAll (lib.mapAttrsToList generateFileSystem vmDeploys); 
 }
