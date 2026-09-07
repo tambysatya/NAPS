@@ -1,27 +1,6 @@
 {flakeRoot, lib, inputs, ...}:
 let
     types = lib.types // (import "${flakeRoot}/lib/types" {inherit lib inputs;});
-    secretType = types.enum ["plain" "password" "ldapssha" "sslCertificates" "postgres" "s3" "step-ca"];
-
-    secret = types.submodule {
-        options = {
-            type = lib.mkOption {
-                description = "Type of the secret";
-                type = secretType;
-            };
-            content = lib.mkOption {
-                description = "Content of the secret. Must match the type";
-                type = with types;
-                        #nullOr (oneOf [plaintext password sslCertificate postgresAccess s3Access ldapSSHA]);
-                        nullOr attrs; #TODO
-            };
-            recipients = lib.mkOption {
-                description = "Identity names of the recipients.";
-                type = types.listOf types.deployementEnvironment;
-            };
-        };
-    };
-
 in 
 
 {
@@ -36,12 +15,12 @@ in
                 };
                 allSecrets = lib.mkOption {
                     description = "Summary of the secrets dispatched across the infrastructure. Useful for automatic secret generations.";
-                    type = types.listOf secret;
+                    type = types.listOf types.secret;
                     default = [];
                 };
                 perVM = lib.mkOption {
                     description = "List of the secrets per virtual machine";
-                    type = types.attrsOf (types.listOf secret);
+                    type = types.attrsOf (types.listOf types.secret);
                     default = {};
                 };
             };

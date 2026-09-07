@@ -11,8 +11,14 @@ let
             fi
         '';
     
-    mkInitDirServices = ensuredirs:
-        let reload = lib.unique (lib.concatMap (builtins.getAttr "reload") ensuredirs);
+    mkInitDirServices = ensuredirs: #Initializes the shared volumes (creates the expected directories if they does not exist)
+        let reload = lib.unique 
+                        (lib.concatMap 
+                            (dir@{env,reload,...}: 
+                                if env.type == "vm" then reload
+                                else if env.type == "container" then ["container@${utils.envUID env}.service"]
+                                else throw "mkInitDir: not implementend for deployement type ${env.type}")
+                         ensuredirs);
             script = lib.concatMapStringsSep "\n" initDir ensuredirs;
             mntservices = lib.unique (map ({mount,...}: utils.pathToMountUnit mount) ensuredirs);
         in {
@@ -30,15 +36,6 @@ let
     generateFileSystem = 
         vmname: deploy:
         let 
-            /*
-            genFS = {letter, mount,fs,options,...}: {
-                            ${mount} = {
-                                fsType = fs;
-                                device = "/dev/vd${letter}";
-                                inherit options;
-                            };
-                    };
-            */
             genDiskoRoot = {
                 vda = {
                     type = "disk";
@@ -71,8 +68,8 @@ let
                                         format = "ext4";
                                         mountpoint = "/";
                                     };
-                                };
                             };
+                        };
                         };
                 };
             };
@@ -98,12 +95,9 @@ let
                     type = "none";
                 };           
 
-            #fileSystems = utils.mergeAll (map genFS deploy.storage.mappings);
             env = deploy.env;
         in {
             ${vmname}.config = {
-                #fileSystems = fileSystems;
-                #imports = [inputs.disko.nixosModules.disko];
                 boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "sr_mod" "virtio_blk" ];
                 disko.devices.disk = utils.mergeAll ([genDiskoRoot] ++ map genDisko deploy.storage.mappings);
                 systemd.mounts = map genMountService deploy.storage.binds;

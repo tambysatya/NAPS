@@ -4,7 +4,8 @@ let
     libtypes = lib.types;
     filestypes = import ./files.nix {inherit lib inputs;};
     networktypes = import ./network.nix {inherit lib inputs;};
-    types = libtypes // filestypes // networktypes;
+    envtypes= import ./deployement.nix {inherit lib inputs;}; 
+    types = libtypes // filestypes // networktypes // envtypes;
 in  with types; 
 rec {
 
@@ -32,6 +33,27 @@ rec {
             options = {
                 inherit hostname owner reload;
             };
+    };
+
+    secretType = types.enum ["plain" "password" "ldapssha" "sslCertificates" "postgres" "s3" "step-ca"];
+
+    secret = types.submodule {
+        options = {
+            type = lib.mkOption {
+                description = "Type of the secret";
+                type = secretType;
+            };
+            content = lib.mkOption {
+                description = "Content of the secret. Must match the type";
+                type = with types;
+                        #nullOr (oneOf [plaintext password sslCertificate postgresAccess s3Access ldapSSHA]);
+                        nullOr attrs; #TODO
+            };
+            recipients = lib.mkOption {
+                description = "Identity names of the recipients.";
+                type = types.listOf types.deployementEnvironment;
+            };
+        };
     };
 
 

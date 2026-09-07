@@ -1,6 +1,6 @@
 {lib, inputs,...}:
 let
-types = lib.types // import ./files.nix {inherit lib;};
+types = lib.types // import ./files.nix {inherit lib;} // import ./deployement.nix {inherit lib inputs;};
 fsType = lib.types.enum ["xfs" "ext4" "ntfs"];
 
 
@@ -82,6 +82,10 @@ directory = types.submodule {
         path = types.filename;
         mode = types.dirmode;
         inherit (types) owner reload;
+        env = lib.mkOption {
+            description = "Which environment requests the directory";
+            type = types.deployementEnvironment;
+        };
         mount = lib.mkOption {
             description = "Mountpoint where the directory is supposed to exists";
             type = types.str;
