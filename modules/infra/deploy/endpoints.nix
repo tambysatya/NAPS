@@ -17,7 +17,7 @@ let
                         ip = if env.type == "container"
                              then utils.envIP config env
                              else "localhost";
-                        inherit port;
+                        inherit port env;
                     }
                 ];
             };
@@ -34,7 +34,7 @@ let
             ${utils.envHost env}.proxy.tcp.${hostname} = {
                 frontend = {ip = "0.0.0.0"; inherit port;};
                 backends = [
-                    {ip = utils.envIP config env; inherit port;}
+                    {ip = utils.envIP config env; inherit port env;}
                 ];
                 inherit extraConfig;
             };

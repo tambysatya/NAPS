@@ -45,7 +45,7 @@ let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
             ${utils.envHost env}.proxy.${mode}.${name} =
                 utils.mergeAll [
                     (if mode == "tcp" then tcpFrontend else if mode == "udp" then udpFrontend else {})
-                    { backends = map (env: {ip=getEnvHostIP env; inherit port;}) backendsEnv;}
+                    { backends = map (env: {ip=getEnvHostIP env; inherit port; inherit env;}) backendsEnv;}
                 ];
         };
 

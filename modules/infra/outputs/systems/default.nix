@@ -30,6 +30,7 @@ in
     imports = [./step.nix
                ./volumes.nix
                ./network.nix
+               ./proxy.nix
               ];
     #infra.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.infra.deploy.systems);
     infra.outputs.systems = 

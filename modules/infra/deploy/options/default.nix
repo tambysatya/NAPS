@@ -143,12 +143,21 @@ let
             inherit (types) ip port;
         };  
     };
+    backend = types.submodule {
+        options = {
+            inherit (types) ip port;
+            env = lib.mkOption {
+                description = "Where the backend is deployed";
+                type = types.deployementEnvironment;
+            };
+        };
+    };
 
     httpProxyEntry = types.submodule {
         options = {
             backends = lib.mkOption {
                 description = "List of backends, ordered by priority";
-                type = types.listOf addr;
+                type = types.listOf backend;
                 default = [];
             };
             tls = lib.mkOption {
@@ -171,7 +180,7 @@ let
             };
             backends = lib.mkOption {
                 description = "List of backends, ordered by priority";
-                type = types.listOf addr;
+                type = types.listOf backend;
                 default = [];
             };
             extraConfig = lib.mkOption {
