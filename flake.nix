@@ -206,7 +206,7 @@ let
           terranix = compileTerranix args;
           #nixosConfigurations = compileNixos args // {iso = compileIso args;};
 
-          #checks.${system} = gen-config-checks inputs;
+          checks.${system} = gen-config-checks inputs;
 
           packages.${system}.options-doc = 
             let module = compileModule args;

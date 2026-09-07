@@ -12,7 +12,7 @@ let
         '';
     
     mkInitDirServices = ensuredirs:
-        let reload = lib.unique (map (builtins.getAttr "reload") ensuredirs);
+        let reload = lib.unique (lib.concatMap (builtins.getAttr "reload") ensuredirs);
             script = lib.concatMapStringsSep "\n" initDir ensuredirs;
             mntservices = lib.unique (map ({mount,...}: utils.pathToMountUnit mount) ensuredirs);
         in {

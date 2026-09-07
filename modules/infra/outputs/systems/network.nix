@@ -71,7 +71,7 @@ let
                     hostName = ctname;
                     useHostResolvConf = lib.mkForce false;
                     defaultGateway = hostDefaultAddress;
-                    interfaces.eth0.ipv4.address = [ #eth0 is the default interface of containers
+                    interfaces.eth0.ipv4.addresses = [ #eth0 is the default interface of containers
                         {address = deploy.ip; prefixLength = 24;}
                     ];
                     hosts = mkHosts deploy; #configure the proxy to connect on the host
