@@ -5,6 +5,11 @@
 let
     utils = import ../lib {inherit lib inputs flakeRoot;};
 
+    mkBackendI =  # mkBackendI "test.domain.fr" 2 = test2.domain.fr
+        domain: i:
+        let parts = lib.splitString "." domain;
+        in "${builtins.head parts}${lib.toString i}.${lib.concatStringsSep "." (builtins.tail parts)}";
+
     processL4Proxy = 
         mode: # tcp or udp
         name:
@@ -12,7 +17,7 @@ let
         let sortedBackends = builtins.sort (b: b': b.env.priority >= b'.env.priority) backends; #sorted by decreasing priority
             mkBackendEntry = i: {ip, port, ...}:
             ''
-                server ${name}${lib.toString i} ${ip}:${lib.toString port} check ${if i == 1 then "" else "backup"}
+                server ${mkBackendI name i}${ip}:${lib.toString port} check ${if i == 1 then "" else "backup"}
             '';
         in 
         ''
@@ -27,11 +32,11 @@ let
 
     generateHTTPProxy =
         allEntries:
-        let terminatesTLS = allEntries != [] && (lib.head allEntries).tls; # Either we terminates TLS for everyone, or for nobody
+        let terminatesTLS = allEntries != {} && (lib.head (builtins.attrValues allEntries)).tls; # Either we terminates TLS for everyone, or for nobody
         in
         ''
             ${generateHTTPFrontends terminatesTLS allEntries}
-            ${lib.concatStringSep "\n"
+            ${lib.concatStringsSep "\n"
                 (lib.mapAttrsToList (generateHTTPBackend terminatesTLS) allEntries)}
         '';
         
@@ -42,13 +47,13 @@ let
         let sortedBackends = builtins.sort (b: b': b.env.priority >= b'.env.priority) backends; #sorted by decreasing priority
             mkBackendEntry = i: {ip, port, ...}:
             ''
-                server ${vhost}${i} ${ip}:${lib.toString port} check ${if i == 1 then "" else "backup"}
+                server ${mkBackendI vhost i} ${ip}:${lib.toString port} check ${if i == 1 then "" else "backup"}
             '';
         in
         ''
             backend be_${vhost}
                 mode ${if terminatesTLS then "http" else "tcp"}
-                ${lib.concatStringSep "\n"
+                ${lib.concatStringsSep "\n"
                     (lib.imap mkBackendEntry sortedBackends)}
         '';
 
@@ -82,7 +87,7 @@ let
         vmname: deploy:
         let tcp = deploy.proxy.tcp;
             udp = deploy.proxy.udp;
-            http = deploy.proxy.udp;
+            http = deploy.proxy.http;
         in if (tcp != {} || udp != {} || http != {}) 
                 then 
                 {
