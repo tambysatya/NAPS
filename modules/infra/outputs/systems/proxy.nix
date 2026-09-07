@@ -19,8 +19,8 @@ let
             frontend ${name}
                 mode ${mode}
                 bind ${frontend.ip}:${lib.toString frontend.port}
-                default_backend ${name} 
-            backend ${name}
+                default_backend be_${name} 
+            backend be_${name}
                 mode ${mode}
                 ${lib.concatStringsSep "\n" (lib.imap mkBackendEntry backends)}
         '';
@@ -46,7 +46,7 @@ let
             '';
         in
         ''
-            backend ${vhost}
+            backend be_${vhost}
                 mode ${if terminatesTLS then "http" else "tcp"}
                 ${lib.concatStringSep "\n"
                     (lib.imap mkBackendEntry sortedBackends)}
@@ -61,11 +61,11 @@ let
                     if terminatesTLS
                     then # tls = true: the proxy terminates TLS
                         ''
-                            use_backend ${vhost} if { hdr(host) -i ${vhost} }
+                            use_backend be_${vhost} if { hdr(host) -i ${vhost} }
                         ''
                     else # else, haproxy checks the SNI to know which backend is requested
                         ''
-                            use_backend ${vhost} if { req.ssl_sni -i ${vhost} }
+                            use_backend be_${vhost} if { req.ssl_sni -i ${vhost} }
                         '';
         in 
         ''
