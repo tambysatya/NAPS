@@ -104,6 +104,7 @@ let
             ${vmname}.config = {
                 #fileSystems = fileSystems;
                 #imports = [inputs.disko.nixosModules.disko];
+                boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "sr_mod" "virtio_blk" ];
                 disko.devices.disk = utils.mergeAll ([genDiskoRoot] ++ map genDisko deploy.storage.mappings);
                 systemd.mounts = map genMountService deploy.storage.binds;
                 systemd.services = mkInitDirServices deploy.storage.ensureDirs;

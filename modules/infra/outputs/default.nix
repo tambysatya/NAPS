@@ -36,7 +36,15 @@ let
                     allowedUDPPorts = []; # ++ generateUDPPorts vmconf.services
                   };
 
-                  containers = utils.mergeAll (lib.map (srvuid: {${srvuid} = config.infra.outputs.systems.${srvuid};}) config.infra.topology.vms.${vmname}.containers);
+                  containers = 
+                    utils.mergeAll 
+                        (lib.map 
+                            (srvuid: {
+                                ${srvuid} = {
+                                    config = config.infra.outputs.systems.${srvuid}.config // {imports = ["${flakeRoot}/modules/step-renew"];};
+                                };
+                             })
+                         config.infra.topology.vms.${vmname}.containers);
             };  
         };
 
