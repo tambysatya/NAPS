@@ -3,6 +3,7 @@
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
     installdir = "/mnt/var/lib/secrets";
+    pemdir = "/mnt/var/lib/certs";
 
     installFile = 
         filename: owner: mode:
@@ -26,6 +27,13 @@ let
         in ''
             ${installFile crt owner "0400"} 
             ${installFile key owner "0400"} 
+
+            mkdir -p ${pemdir}
+            cat ${installdir}/${crt} ${installdir}/${key} > ${pemdir}/${hostname}.pem
+            chown ${owner} ${pemdir}/${hostname}.pem
+            chmod 0400 ${pemdir}/${hostname}.pem
+
+
         '';
 
     installDB = 
