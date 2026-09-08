@@ -77,7 +77,13 @@ let
             frontend https
                 mode ${if terminatesTLS then "http" else "tcp"}
                 bind :443 ${if terminatesTLS then "ssl crt /var/lib/certs" else ""}
+
+                option forwardfor
+                http-request set-header X-Forwarded-Proto https
+                http-request set-header X-Forwarded-Host %[req.hdr(host)]
+
                 ${lib.concatStringsSep "\n" (map mkFrontEnd (builtins.attrNames allEntries))}
+
 
         '';
     
