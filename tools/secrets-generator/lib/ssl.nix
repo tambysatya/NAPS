@@ -27,7 +27,7 @@ let
                 --provisioner=ca
 
             # Patching STEPPATH
-            sed -i "s+$STEPPATH/secrets+/run/secrets+" "$STEPPATH"/config/ca.json 
+            sed -i "s+$STEPPATH/secrets+/var/lib/secrets+" "$STEPPATH"/config/ca.json 
             sed -i "s+$STEPPATH/certs+/etc+" "$STEPPATH"/config/ca.json 
             sed -i "s+$STEPPATH+/var/lib/step-ca+" "$STEPPATH"/config/ca.json 
 
