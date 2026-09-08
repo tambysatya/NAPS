@@ -11,8 +11,16 @@ let
     mkHosts =
         deploy:
         let proxyAddr = if deploy.env.type == "vm" then "127.0.0.1" else "192.168.1.1";
+            caenvs = config.infra.deploy.endpoints."ca.${domain}";
+        in 
+        assert caenvs != [] || throw "step-ca service must be deployed";
+        assert builtins.length caenvs == 1 || throw "step-ca service must be deployed once (no failover is implemented yet)"; #TODO
+        let cauid = utils.envUID (lib.head caenvs).env;
         in {
-            ${proxyAddr} = builtins.attrNames config.infra.deploy.endpoints; # all endpoints are sent to the proxy
+            ${proxyAddr} = ["postgres.${domain}" "s3.${domain}" "ldap.${domain}"]; # all links are sent to the proxy
+            ${config.infra.deploy.systems.${cauid}.ip} = ["ca.${domain}"];
+            
+            
         };
 
     generateNetworking = 
