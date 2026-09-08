@@ -32,7 +32,6 @@ Main module: config.infra
 
 # TODO
 
-- generates IP/hostname correspondance of each service in /etc/hosts  (for each vm)
 - custom service config should be decided in "infra.services" in order to avoid infinite recursion
 
 - step-renew increase the refresh rate
@@ -41,24 +40,17 @@ Main module: config.infra
 - network config in infra + regroup the options by theme 
 
 
-- unify the sources of truth regarding the secrets paths (imho all the packages confs should refer to `sops.secrets.<name>.path`)
-- unify the source of truth for the IP addresses
 
 - persistence of datas: Two independent tofu states: compute state (destroyable) and storage state (persistent)
-- persistence: TODO: handle the case where the file should be mounted in a container
 
 
 - TODO tests (config works + secrets exists + secrets are properly encrypted + no clash between users)
 - logging
 
-- TODO use only vmconf (do not inherit vmnames) to avoid clashes definitions in accesses (e.g. infra.vms.services instead of vmconf.services). This may be helpful to handle containers transparently, since the container is seen as a custom vmconf. => Maybe do not inherit from INFRA entirely (avoid passing the configurations of the other VMs).
 
-- secret-generator: generates only the secrets for the services activated. It is mostly done but not for some strings e.g. keycloak-initial-admin
-- secret-generator: maybe rewrite: 1/ the secrets are generated depending on which service is activated IN THE INFRA. 2/ the secrets are encrypted depending on the VM running the service
 
 - users: some usersID are set by their own service. Now we FORCE it to a new value (our) but not sure if this is a good approach TODO
 
-- Move functions process* in modules/compiler into lib/
 
 - Factorize the basic types (with constructors, e.g mkFStypeOption, mkDirOption, ...)
 - Sanitize the code:
@@ -71,6 +63,7 @@ Main module: config.infra
 
 
 - TODO: put a infra.vms."name".config containing the entire config of each vm ? THis could allow us to avoid infinite recursion
+- TODO: params the ip address of the containers private network (actually its forced to be 192.168.100.0/24)
 
 Deployement:
 - curent refactor involved deployement options (like priority), but VMs may also have tags (like testing, backup) that is applied to their services
@@ -103,6 +96,7 @@ Migration:
 - containerMount non-shared persistent volumes
 - pg_ready services + fix pg-setup-script 
 - haproxy: handle both tls termination + passthrough (https://pastebin.com/pkRsp9cc)
+- config: use deploy.<name>.reverseProxy and deploy.<name>.proxy to handle clearly both directions of the proxy and resolves conflicts ?
 
 
 CHECKS:

@@ -15,6 +15,12 @@ let
         name:
         {frontend, backends, extraConfig}: #TODO extraConfig is ignored at the moment
         let sortedBackends = builtins.sort (b: b': b.env.priority >= b'.env.priority) backends; #sorted by decreasing priority
+            port = lib.toString frontend.port;
+            bind = if frontend.ip == "192.168.100.1"
+                   then "192.168.100.1:${port},127.0.0.1:${port}" #TODO if the frontend is available to the containers, bind it also on localhost (for the infra-deps services required by the containers service)
+                   else "${frontend.ip}:${port}";
+
+            
             mkBackendEntry = i: {ip, port, ...}:
             ''
                 server ${mkBackendI name i} ${ip}:${lib.toString port} check ${if i == 1 then "" else "backup"}
