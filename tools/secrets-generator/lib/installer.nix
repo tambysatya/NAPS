@@ -25,16 +25,18 @@ let
         let 
             key = "${hostname}.key";
             crt = "${hostname}.crt";
+            peminstall = ''
+                mkdir -p ${pemdir}
+                cat ${installdir}/${crt} ${installdir}/${key} > ${pemdir}/${hostname}.pem
+                chown ${owner} ${pemdir}/${hostname}.pem
+                chmod 0400 ${pemdir}/${hostname}.pem
+            '';
+
+
         in ''
             ${installFile crt owner owner "0400"} 
             ${installFile key owner owner "0400"} 
-
-            mkdir -p ${pemdir}
-            cat ${installdir}/${crt} ${installdir}/${key} > ${pemdir}/${hostname}.pem
-            chown ${owner} ${pemdir}/${hostname}.pem
-            chmod 0400 ${pemdir}/${hostname}.pem
-
-
+            ${if owner == "haproxy" then peminstall else ""}
         '';
 
     installDB = 
