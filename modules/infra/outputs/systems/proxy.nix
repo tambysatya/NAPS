@@ -15,12 +15,6 @@ let
         name:
         {frontend, backends, extraConfig}: #TODO extraConfig is ignored at the moment
         let sortedBackends = builtins.sort (b: b': b.env.priority >= b'.env.priority) backends; #sorted by decreasing priority
-            port = lib.toString frontend.port;
-            bind = if frontend.ip == "192.168.100.1"
-                   then "192.168.100.1:${port},127.0.0.1:${port}" #TODO if the frontend is available to the containers, bind it also on localhost (for the infra-deps services required by the containers service)
-                   else "${frontend.ip}:${port}";
-
-            
             mkBackendEntry = i: {ip, port, ...}:
             ''
                 server ${mkBackendI name i} ${ip}:${lib.toString port} check ${if i == 1 then "" else "backup"}
@@ -29,7 +23,7 @@ let
         ''
             frontend ${name}
                 mode ${mode}
-                bind ${frontend.ip}:${lib.toString frontend.port}
+                bind :${lib.toString frontend.port} #binds on all interfaces. The access will be managed by the firewall
                 default_backend be_${name} 
             backend be_${name}
                 mode ${mode}
@@ -38,7 +32,7 @@ let
 
     generateHTTPProxy =
         allEntries:
-        let terminatesTLS = allEntries != {} && (lib.head (builtins.attrValues allEntries)).tls; # Either we terminates TLS for everyone, or for nobody
+        let terminatesTLS = allEntries != {} && (lib.head (builtins.attrValues allEntries)).tls; # Either we terminates TLS for everyone, or for nobody TODO
         in
         ''
             ${generateHTTPFrontends terminatesTLS allEntries}
@@ -89,12 +83,8 @@ let
                 http-request set-header X-Forwarded-Host %[req.hdr(host)]
 
                 ${lib.concatStringsSep "\n" (map mkFrontEnd (builtins.attrNames allEntries))}
-
-
         '';
     
-
-
     processVM = 
         vmname: deploy:
         let tcp = deploy.proxy.tcp;
@@ -122,55 +112,9 @@ let
                 else {};
 
 
-    processFirewall = 
-        vmname: deploy:
-        let getPorts = 
-                proxyEntries:
-                let frontends = lib.mapAttrsToList (_: {frontend, ...}: {inherit (frontend) ip port;}) proxyEntries;
-                    parts= lib.partition ({ip,...}: ip == "0.0.0.0") frontends; #right = openned everywhere, wrong = open only on the private interface
-                in {world= map (builtins.getAttr "port") parts.right;
-                    local = map (builtins.getAttr "port") parts.wrong;};
-            
-            tcp = getPorts deploy.proxy.tcp;
-            udp =  getPorts deploy.proxy.udp;
-            http = if deploy.proxy.http != {} then [443] else [];
-            hascontainersP = config.infra.topology.vms.${vmname}.containers != [];
-
-        in {
-           ${vmname}.config = {
-               networking.firewall.interfaces =
-                    utils.mergeAll [
-                        {
-                            enp1s0 = { /*Direct network interface*/
-                                allowedTCPPorts = tcp.world ++ http;
-                                allowedUDPPorts = udp.world;
-                            };
-                        }
-                        (if hascontainersP then {
-                            eth0 = { /*Containers interface*/
-                                allowedTCPPorts = tcp.world ++ tcp.local ++ http;
-                                allowedUDPPorts = udp.world ++ udp.local;
-                            };
-                        }
-                        else {})
-                    ];
-                boot.kernel.sysctl."net.ipv4.ip_nonlocal_bind" = if hascontainersP then 1 else 0; # to allow haproxy to listen BEFORE the container private network is created  
-            };
-        };
-
-    processContainerFirewall = 
-        env: {
-            ${utils.envUID env}.config.networking.firewall.enable=false;
-        };
 
     allVMs = lib.filterAttrs (_: {env,...}: env.type == "vm") config.infra.deploy.systems;
-    allContainers = lib.concatMap 
-                        ({deployements,...}:
-                            lib.filter ({type,...}: type == "container") (builtins.attrValues deployements)) 
-                        (builtins.attrValues config.infra.services);
 in {
     config.infra.outputs.systems = utils.mergeAll 
-                                        (lib.mapAttrsToList processVM allVMs
-                                        ++ lib.mapAttrsToList processFirewall allVMs
-                                        ++ map processContainerFirewall allContainers);
+                                        (lib.mapAttrsToList processVM allVMs);
 }

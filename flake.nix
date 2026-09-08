@@ -60,10 +60,12 @@ let
                                 lib.nixosSystem {
                                     inherit system; 
                                     specialArgs = {
-                                        inherit inputs flakeRoot infra;
+                                        inherit inputs flakeRoot infra vmname;
                                     } // extraArgs;
                                     modules = [
                                         inputs.disko.nixosModules.disko    
+
+                                        ./modules/firewall
                                         vmconf
                                     ];
                                 })
