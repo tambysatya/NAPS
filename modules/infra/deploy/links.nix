@@ -41,13 +41,15 @@ let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
                      };
                  };
             udpFrontend = throw "UDP protocol not implemented";
-        in {
-            ${utils.envHost env}.proxy.${mode}.${name} =
-                utils.mergeAll [
-                    (if mode == "tcp" then tcpFrontend else if mode == "udp" then udpFrontend else {})
-                    { backends = map (env: {ip=getEnvHostIP env; inherit port; inherit env;}) backendsEnv;}
-                ];
-        };
+        in if ! builtins.elem (utils.envUID env) (map utils.envHost backendsEnv) then # If the environment hosts the requested service, do not create the haproxy (bc there will be an adress already in use)
+                {
+                    ${utils.envHost env}.proxy.${mode}.${name} =
+                        utils.mergeAll [
+                            (if mode == "tcp" then tcpFrontend else if mode == "udp" then udpFrontend else {})
+                            { backends = map (env: {ip=getEnvHostIP env; inherit port; inherit env;}) backendsEnv;}
+                        ];
+                }
+            else {};
 
 
     processLdap =
