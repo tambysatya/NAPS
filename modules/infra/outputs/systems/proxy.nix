@@ -94,6 +94,10 @@ let
                     ${vmname}.config.services.haproxy = {
                         enable = true;
                         config = ''
+                                defaults:
+                                    timeout connect 5s
+                                    timeout client 30s
+                                    timeout server 30s
                                 ${lib.concatStringsSep "\n"
                                     (lib.mapAttrsToList (processL4Proxy "tcp") tcp)}
                                 ${lib.concatStringsSep "\n"
