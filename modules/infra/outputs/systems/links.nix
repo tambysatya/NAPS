@@ -51,9 +51,14 @@ let
 
     processVM =
         vmname: links:
-        utils.mergeAll [
-                (mkDBDependencies (lib.concatMap ({access,...}: access.reload) links.postgres))
-                (mkS3Dependencies (lib.concatMap ({access,...}: access.reload) links.s3))
+        let getServiceFromLink = 
+                {access, env}:
+                if env.type == "container"
+                then ["container@${utils.envUID env}.service"] # in case of service running within a container, the dependency is the container itself
+                else access.reload;
+        in utils.mergeAll [
+            (mkDBDependencies (lib.concatMap getServiceFromLink links.postgres))
+            (mkS3Dependencies (lib.concatMap getServiceFromLink links.s3))
         ];
 
 in {
