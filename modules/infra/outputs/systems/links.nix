@@ -16,10 +16,12 @@ let
                 requiredBy = reloads;
                 serviceConfig = { 
                     Type = "oneshot";
+                    RemainAfterExit = true;
                     ExecStart = pkgs.writeShellScript "wait-for-postgres" '' 
                             until ${pkgs.postgresql}/bin/pg_isready -h postgres.${domain} -p 5432; do
                                 sleep 1
                             done
+                            echo "Connected to postgres"
                         '';
                 };
             };
@@ -38,6 +40,7 @@ let
                 requiredBy = reloads;
                 serviceConfig = { 
                     Type = "oneshot";
+                    RemainAfterExit = true;
                     ExecStart = pkgs.writeShellScript "wait-for-s3" '' 
                             until ${pkgs.netcat}/bin/nc -z s3.${domain} 443; do
                                 echo "Testing s3 connectivity..."
