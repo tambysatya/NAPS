@@ -10,7 +10,7 @@ let
                 services.step-renew = {
                     enable = true;
                     caURL = "ca.${config.infra.topology.domain}";
-                    caFingerprint = "${path}/.secrets/git/fingerprint";
+                    caFingerprint = builtins.readFile "${path}/.secrets/git/fingerprint";
                     certs = sslCertificates;
                 };
             };
