@@ -10,7 +10,7 @@ let
 
     mkHosts =
         deploy:
-        let proxyAddr = if deploy.env.type == "vm" then "127.0.0.1" else "192.168.1.1";
+        let proxyAddr = if deploy.env.type == "vm" then "127.0.0.1" else "192.168.100.1";
             caenvs = config.infra.deploy.endpoints."ca.${domain}";
         in 
         assert caenvs != [] || throw "step-ca service must be deployed";
