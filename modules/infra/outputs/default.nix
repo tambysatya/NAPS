@@ -48,7 +48,7 @@ let
                             (srvuid: {
                                 ${srvuid} = {
                                     autoStart = true;
-                                    specialArgs = {inherit flakeRoot path;};
+                                    specialArgs = {inherit flakeRoot path; inherit (config) infra;};
                                     config = config.infra.outputs.systems.${srvuid}.config // {
                                                     imports = config.infra.outputs.systems.${srvuid}.imports;
                                                     environment.systemPackages = systemPackages;
