@@ -131,22 +131,25 @@ let
             hascontainersP = config.infra.topology.vms.${vmname}.containers != [];
 
         in {
-           ${vmname}.config.networking.firewall.interfaces =
-                utils.mergeAll [
-                    {
-                        enp1s0 = { /*Direct network interface*/
-                            allowedTCPPorts = tcp.world ++ http;
-                            allowedUDPPorts = udp.world;
-                        };
-                    }
-                    (if hascontainersP then {
-                        eth0 = { /*Containers interface*/
-                            allowedTCPPorts = tcp.world ++ tcp.local ++ http;
-                            allowedUDPPorts = udp.world ++ udp.local;
-                        };
-                    }
-                    else {})
-                ];
+           ${vmname}.config = {
+               networking.firewall.interfaces =
+                    utils.mergeAll [
+                        {
+                            enp1s0 = { /*Direct network interface*/
+                                allowedTCPPorts = tcp.world ++ http;
+                                allowedUDPPorts = udp.world;
+                            };
+                        }
+                        (if hascontainersP then {
+                            eth0 = { /*Containers interface*/
+                                allowedTCPPorts = tcp.world ++ tcp.local ++ http;
+                                allowedUDPPorts = udp.world ++ udp.local;
+                            };
+                        }
+                        else {})
+                    ];
+                boot.kernel.sysctl."net.ipv4.ip_nonlocal_bind" = if hascontainersP then 1 else 0; # to allow haproxy to listen BEFORE the container private network is created  
+            };
         };
 
     processContainerFirewall = 
