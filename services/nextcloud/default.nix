@@ -1,10 +1,10 @@
-{flakeRoot, inputs, config, lib, pkgs, ... }:
+{flakeRoot, inputs, config, lib, pkgs, infra, ... }:
 
 # https://danubedata.ro/blog/nextcloud-s3-compatible-primary-storage-2026
 
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
-    domain = config.infra.topology.domain;
+    domain = infra.topology.domain;
     hostname = "nextcloud.${domain}";
 in {
 

@@ -50,7 +50,7 @@ let
     compileInfra = args: (compileConfig args).infra;
     compileRegistry = args: (compileConfig args).registry;
 
-    nixos-generator = args@{inventory, extraArgs ?{}}: 
+    nixos-generator = args@{inventory, extraArgs}: 
         let infra = compileInfra args; 
             vmconfs = lib.filterAttrs 
                             (name: value: infra.deploy.systems.${name}.env.type == "vm")
@@ -60,8 +60,8 @@ let
                                 lib.nixosSystem {
                                     inherit system; 
                                     specialArgs = {
-                                        inherit inputs flakeRoot;
-                                    };
+                                        inherit inputs flakeRoot infra;
+                                    } // extraArgs;
                                     modules = [
                                         inputs.disko.nixosModules.disko    
                                         vmconf
