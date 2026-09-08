@@ -48,18 +48,19 @@ let
     processUDP = throw "UDP not implemented yet";
     processService = 
         srv@{deployements, endpoints,...}:
-        let envs = builtins.attrValues deployements;
+        let allenvs = builtins.attrValues deployements;
+            ctenvs = lib.filter (env: env.type == "container") allenvs; #TCP/UDP proxy are deployed only when the service runs within a container
             allTCP =
                 lib.concatMap
                     (env: map (mkTCPProxy env) endpoints.tcp)
-                    envs;
+                    ctenvs; 
             allUDP =
                 lib.concatMap
                     (env: map (processUDP env) endpoints.udp)
-                    envs;
+                    ctenvs;
             allHTTP = lib.concatMap
                         (env: map (mkHTTPProxy env) endpoints.http)
-                        envs;
+                        allenvs; #we build a reverse proxy for all http endpoints (otherwise they should be declared TCP)
         in utils.mergeAll (allTCP ++ allHTTP ++ allUDP);
 in {
     config.infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList (srvname: srv: processService srv) config.infra.services);
