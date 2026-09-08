@@ -139,9 +139,19 @@ let
                 ];
         };
 
+    processContainerFirewall = 
+        env: {
+            ${utils.envUID env}.config.networking.firewall.enable=false;
+        };
+
     allVMs = lib.filterAttrs (_: {env,...}: env.type == "vm") config.infra.deploy.systems;
+    allContainers = lib.concatMap 
+                        ({deployements,...}:
+                            lib.filter ({type,...}: type == "container") (builtins.attrValues deployements)) 
+                        (builtins.attrValues config.infra.services);
 in {
     config.infra.outputs.systems = utils.mergeAll 
                                         (lib.mapAttrsToList processVM allVMs
-                                        ++ lib.mapAttrsToList processFirewall allVMs);
+                                        ++ lib.mapAttrsToList processFirewall allVMs
+                                        ++ map processContainerFirewall allContainers);
 }
