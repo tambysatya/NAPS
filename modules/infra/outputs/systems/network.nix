@@ -30,6 +30,7 @@ let
                     address = topo.gateway;
                     interface = iface;
                 };
+                nameservers = config.infra.topology.dns;
                 hosts = mkHosts deploy;
                 interfaces.${iface}.ipv4 = {
                     addresses = [

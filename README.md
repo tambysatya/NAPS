@@ -99,6 +99,7 @@ Migration:
 - container mounts: pass directly the secret dir
 - proxy conf
 - Use UserID instead of proper user creation (for the secrets and files within the containers)
+- All endpoints should be reachable by all HAproxies
 
 
 CHECKS:
