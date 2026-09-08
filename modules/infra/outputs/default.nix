@@ -52,6 +52,7 @@ let
                                     config = config.infra.outputs.systems.${srvuid}.config // {
                                                     imports = ["${flakeRoot}/services/step-renew"];
                                                     environment.systemPackages = systemPackages;
+                                                    system.stateVersion = "26.05";
                                                  };
                                 };
                              })
