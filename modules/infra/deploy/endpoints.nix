@@ -16,7 +16,7 @@ let
                     {
                         ip = if env.type == "container"
                              then utils.envIP config env
-                             else "localhost";
+                             else "127.0.0.1";
                         inherit port env;
                     }
                 ];
