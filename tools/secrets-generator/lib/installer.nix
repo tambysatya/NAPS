@@ -6,17 +6,18 @@ let
     pemdir = "/mnt/var/lib/certs";
 
     installFile = 
-        filename: owner: mode:
+        filename: owner: group: mode:
         let
             tgt = "${installdir}/${filename}"; 
         in ''
            cp "$1/${filename}" ${tgt}
            chown ${owner} ${tgt}
+           chgrp ${group} ${tgt}
            chmod ${mode} ${tgt}
         '';
 
     installPassword = 
-        {filename, owner, mode,...}: installFile filename owner mode;
+        {filename, owner, mode,...}: installFile filename owner owner mode;
 
     installLDAP = installPassword;
     installSSL = 
@@ -25,8 +26,8 @@ let
             key = "${hostname}.key";
             crt = "${hostname}.crt";
         in ''
-            ${installFile crt owner "0400"} 
-            ${installFile key owner "0400"} 
+            ${installFile crt owner owner "0400"} 
+            ${installFile key owner owner "0400"} 
 
             mkdir -p ${pemdir}
             cat ${installdir}/${crt} ${installdir}/${key} > ${pemdir}/${hostname}.pem
@@ -38,20 +39,20 @@ let
 
     installDB = 
         access@{database, owner,...}:
-        installFile (utils.db_key access) owner "0400";
+        installFile (utils.db_key access) owner "postgres" "0440"; #since only postgres is in the group postgres: the db can read safely all the certificates
 
     installS3 = 
         access@{bucket, owner,...}:
         ''
-            ${installFile (utils.s3_key_id access) owner "0400"}
-            ${installFile (utils.s3_key access) owner "0400"}
+            ${installFile (utils.s3_key_id access) owner "garage" "0440"} 
+            ${installFile (utils.s3_key access) owner "garage" "0440"}
         '';
 
     installStep = 
         _:
         ''
-            ${installFile "ca-password.key" "step-ca" "0400"}
-            ${installFile "intermediate_ca_key" "step-ca" "0400"}
+            ${installFile "ca-password.key" "step-ca" "step-ca" "0400"}
+            ${installFile "intermediate_ca_key" "step-ca" "step-ca" "0400"}
         '';
 
     installSecret = 
