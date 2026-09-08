@@ -101,6 +101,8 @@ Migration:
 - Use UserID instead of proper user creation (for the secrets and files within the containers)
 - All endpoints should be reachable by all HAproxies
 - containerMount non-shared persistent volumes
+- pg_ready services + fix pg-setup-script 
+- haproxy: handle both tls termination + passthrough (https://pastebin.com/pkRsp9cc)
 
 
 CHECKS:

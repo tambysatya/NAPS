@@ -52,7 +52,7 @@ config =
                 script = lib.concatStringsSep "\n"
                                     (access@{database,...}:
                                         ''
-                                              PASSWORD="$(< /run/secrets/db-${name}-${access.database}.key)"
+                                              PASSWORD="$(< /run/secrets/db-${access.database}.key)"
                                               ${pkgs.postgresql}/bin/psql -U postgres \
                                                 -c "ALTER ROLE ${access.database} WITH PASSWORD '$PASSWORD';"
                                         '')
