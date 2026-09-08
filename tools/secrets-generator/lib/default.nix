@@ -17,6 +17,12 @@ let
                                                 > ${dstPath filename}
         '';
     
+    processPlain = 
+        content@{filename, ...}:
+        ''
+            ${generateSSLString content}
+            cp .secrets/plain/${filename} .secrets/git/
+        '';
     processPassword = 
         recipients:
         sslargs@{filename,...}:
@@ -37,6 +43,8 @@ let
                 (genString key)
                 (lib.concatMapStringsSep "\n" (basic.give id) recipients)
                 (lib.concatMapStringsSep "\n" (basic.give key) recipients)
+                "cp .secrets/plain/${id} .secrets/git"
+
             ];
     processPostgres = 
         recipients: {database,...}:
@@ -57,6 +65,8 @@ let
                     cat ${plain}/${filename} \
                     | ${pkgs.openldap}/bin/slappasswd -s -- -h "{SSHA}" \
                     > ${plain}/${filename}.ssha
+
+                    cp ${plain}/${filename}.ssha .secrets/git/
                 ''
             ];
     processSSLCert =
@@ -86,7 +96,7 @@ let
     processSecret = 
         {type, content, recipients, ...}:
         {
-             "plain" = generateSSLString content;
+             "plain" = processPlain content; #moved in git/
              "password" = processPassword recipients content;
              "ldapssha" = processLDAP recipients content;
              "postgres" = processPostgres recipients content;

@@ -1,11 +1,9 @@
-{lib, inputs, infra, registry, vmname, vmconf, pkgs, config, ...}:
+{flakeRoot, lib, inputs, config, pkgs, path,...}:
 
 
 
 let
-    
-    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra pkgs registry;};
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
+    utils = import "${flakeRoot}/lib" {inherit inputs lib;};
     servicevhost = "auth.${infra.domain}";
     serviceaddr = "127.0.0.1";
     serviceport = 8000;
@@ -15,14 +13,13 @@ in {
 
                 services.keycloak = {
                   enable = true;
-                  initialAdminPassword = builtins.readFile "${infra.flakePath}/${vars.git}/keycloak-initial-admin";
+                  initialAdminPassword = builtins.readFile "${path}/.secrets/git/keycloak-initial-admin";
 
                   database = {
-                    passwordFile = config.sops.secrets."db-keycloak-keycloak.key".path;
+                    passwordFile = "/var/lib/secrets/db-keycloak.key";
                     useSSL = true;
                     host = "postgres.${infra.domain}";
-                    #caCert = "/etc/intermediate_ca.crt";
-                    caCert = "/etc/ssl/certs/ca-bundle.crt";
+                    caCert = "/etc/intermediate_ca.crt";
                   };
                   settings = {
                     hostname = servicevhost;

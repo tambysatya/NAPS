@@ -1,10 +1,9 @@
 
-{lib, inputs, infra, vmname, vmconf, pkgs, config, ...}:
+{flakeRoot, lib, inputs, pkgs, config, path, ...}:
 
 let
-
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib vmconf vmname infra inputs;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
+    domain = config.infra.topology.domain;
     domainToLdapSuffix = domain:
         let parts = lib.reverseList (lib.splitString "." domain);
         in lib.concatStringsSep "," (lib.map (x: "dc=${x}") parts);
@@ -25,8 +24,8 @@ in {
             settings = {
                 attrs = {
                     olcTLSCACertificateFile = "/etc/root_ca.crt";
-                    olcTLSCertificateFile = vars.ssl_crt_path "openldap.${infra.domain}";
-                    olcTLSCertificateKeyFile = vars.ssl_key_path "openldap.${infra.domain}";
+                    olcTLSCertificateFile = vars.ssl_crt_path "openldap.${domain}";
+                    olcTLSCertificateKeyFile = vars.ssl_key_path "openldap.${domain}";
 # facultatif
                     olcTLSProtocolMin = "3.1";      # TLS 1.2+
                         olcTLSVerifyClient = "never";
@@ -47,7 +46,7 @@ in {
                             ];
                             olcSuffix = suffix;
                             olcRootDN = "cn=admin,${suffix}";
-                            olcRootPW = builtins.readFile "${infra.flakePath}/${vars.git}/ldap-adminpass.ssha";
+                            olcRootPW = builtins.readFile "${path}/.secrets/git/ldap-adminpass.ssha";
                             olcDbDirectory = "/var/lib/openldap/data";  #TODO persistent
                                 olcDbIndex = [
                                 "objectClass eq"

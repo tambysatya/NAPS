@@ -1,54 +1,31 @@
-{ inputs, config, lib, pkgs, infra, registry, vmname, vmconf, ... }:
+{flakeRoot, inputs, config, lib, pkgs, ... }:
 
 # https://danubedata.ro/blog/nextcloud-s3-compatible-primary-storage-2026
 
 let
-    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs;};
-    hostname = "nextcloud.${infra.domain}";
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
+    domain = config.infra.topology.domain;
+    hostname = "nextcloud.${domain}";
 in {
 
     config = lib.mkIf (infralib.runsService "nextcloud")
     {
         networking.firewall.allowedTCPPorts = [443 80];
-        services.nginx.clientMaxBodySize = "100G";
-        services.nginx.virtualHosts."nextcloud.${infra.domain}" = 
-            {
-                #forceSSL = true;
-                #sslCertificate = "/run/secrets/${hostname}.crt";
-                #sslCertificateKey = "/run/secrets/${hostname}.key";
-                extraConfig = ''
-                        proxy_request_buffering off;
-                        proxy_buffering off;
-                        proxy_http_version 1.1;
-                        proxy_read_timeout 1h;
-                        proxy_send_timeout 1h;
-                        send_timeout 3600s;
-
- 
-                        client_body_timeout 3600s;
-                        fastcgi_request_buffering off;
-                        fastcgi_read_timeout 3600s;
-                    '';
-            };
-
         services.nextcloud = {
             enable = true;	
-
             #https = true; /*IMPORTANT IF HTTPS*/
-
             home = "/var/lib/nextcloud";
-            hostName = "nextcloud.${infra.domain}";
+            hostName = "nextcloud.${domain}";
             #phpPackage = lib.mkForce (pkgs.php83.withExtensions ({ all, enabled }: enabled ++ [ all.smbclient ]));
 
             maxUploadSize = "100G";
 
             config.adminuser = "admin";
-            config.adminpassFile = config.sops.secrets."nextcloud-admin.key".path;
+            config.adminpassFile = "/var/lib/secrets/nextcloud-admin.key";
             config.dbtype = "pgsql";
-            config.dbhost = "postgres.${infra.domain}:5432";
+            config.dbhost = "postgres.${domain}:5432";
             config.dbuser = "nextcloud";
-            config.dbpassFile = config.sops.secrets."db-nextcloud-nextcloud.key".path;
+            config.dbpassFile = "/var/lib/secrets/db-nextcloud.key";
             
             occ = ["user:report"];
 
@@ -67,7 +44,6 @@ in {
                 "opcache.save_comments" = 1;
             };
             settings = {
-                #instanceid = builtins.readFile "${infra.secretsPath}/plain/nextcloud-instanceid";
                 #loglevel = 1;
                 #log_type = "file";
                 maintenance_window_start = 0;
@@ -81,19 +57,8 @@ in {
                     "192.168.100.0" #containers proxy TODO
                     
                 ];
-                overwritehost = "nextcloud.${infra.domain}";	
+                overwritehost = hostname;
                 #overwriteprotocol = "https";
-
-               # objectstore = {
-               #     class = "\\OC\\Files\\ObjectStore\\S3";
-               #     arguments = {
-               #             timeout = 300;
-               #             connect_timeout = 300;
-               #             concurrency = 5;
-               #             uploadPartSize = 524288000;
-               #             putSizeLimit = 524288000;
-               #     };
-               # };
             };
             config.objectstore.s3 = {
                   enable = true;
@@ -101,10 +66,10 @@ in {
                   region = "garage";
                   #autocreate = true;
                   verify_bucket_exists = true;
-                  key = builtins.readFile "${infra.flakePath}/${vars.git}/s3-nextcloud_id"; #Key ID #TODO
-                  secretFile = config.sops.secrets."s3-nextcloud.key".path;
+                  key = builtins.readFile "${path}/.secrets/git/s3-nextcloud.id"; #Key ID #TODO
+                  secretFile = "/var/lib/secrets/s3-nextcloud.key";
 
-                  hostname = "s3.${infra.domain}";
+                  hostname = "s3.${domain}";
                   useSsl = true;
                   port = 443;
                   usePathStyle = true;
@@ -116,19 +81,6 @@ in {
         };
 
         systemd.services.nextcloud-setup = {
-#            wants = [
-#                "network.target"
-#            ];
-#
-#            after = [
-#                "network.target"
-#            ];
-#            serviceConfig = { 
-#                ExecStartPre = 
-#                    "${pkgs.netcat}/bin/nc -z postgres.${infra.domain} 5432"; # wait for the database to be up²
-#                Restart = "on-failure";
-#                RestartSec = "30s"; #TODO put a condition (like touch a file) to avoid running this at every startup
-#            };
             environment = {
                 PGSSLMODE = "require";
             };
