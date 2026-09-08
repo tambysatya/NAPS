@@ -40,6 +40,7 @@ in
                ./volumes.nix
                ./network.nix
                ./proxy.nix
+               ./links.nix # services dependency
               ];
     #infra.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.infra.deploy.systems);
     infra.outputs.systems = 
