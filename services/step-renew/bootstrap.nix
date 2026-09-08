@@ -39,7 +39,7 @@ in
           echo "Bootstrapping Step"
 
           until ${pkgs.step-cli}/bin/step ca bootstrap \
-		    --ca-url ${lib.escapeShellArg cfg.caURL} \
+		    --ca-url ${lib.escapeShellArg cfg.caURL}:8443 \
 		    --fingerprint ${lib.escapeShellArg cfg.caFingerprint}
           do
             echo "Remote CA not available, retrying in 30s"
