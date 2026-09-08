@@ -1,24 +1,11 @@
-{lib, inputs, infra, registry, vmname, vmconf, pkgs, config,...}:
+{flakeRoot, lib, inputs, pkgs, config,...}:
 
 let 
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    sec = import "${inputs.self.outPath}/lib/compiler/security.nix" {inherit inputs lib vmconf vmname infra;};
-    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
-    s3lib = import ./lib.nix {inherit lib pkgs config infra registry inputs;};
-    #servicenames = lib.concatMap (v: v.use-s3) (lib.attrValues registry.vms);
-    servicenames =  lib.filter (srv: 
-                                  let srvconf = registry.services.${srv};
-                                  in (srvconf.s3Accesses != []) #the service requests S3
-                                  && !((srvconf.hosts.containers == []) && srvconf.hosts.vms == [])) # the services is actually hosted
-                        (builtins.attrNames registry.services);
-    accesses = lib.concatMap (v: registry.services.${v}.s3Accesses) servicenames;
+    s3lib = import ./lib.nix {inherit lib inputs pkgs flakeRoot;};
+    accesses = lib.concatMap (_: {links,...}: links.s3) config.infra.services;
     
-    secret = {
-            names = lib.map vars.s3_key accesses; #all access keys
-            reload = ["garage.service"];
-            owner = "garage";
-    };
 
 
 in {
@@ -36,7 +23,7 @@ config = lib.mkIf
                                 #data_dir = "/srv/data";
                                 #metadata_dir = "/srv/meta";
                                 rpc_bind_addr = "[::]:3901";
-                                rpc_secret_file = config.sops.secrets."garage-rpc.key".path;
+                                rpc_secret_file = "/var/lib/secrets/garage-rpc.key";
                                 replication_factor = 1;
 
                                 /* TESTS */
@@ -54,8 +41,8 @@ config = lib.mkIf
                                 };
                                 admin = {
                                     api_bind_addr = "127.0.0.1:3903"; # localhost because not encrypted
-                                    admin_token_file = config.sops.secrets."garage-admin.key".path;
-                                    metrics_token_file =  config.sops.secrets."garage-metrics.key".path;
+                                    admin_token_file = "/var/lib/secrets/garage-admin.key";
+                                    metrics_token_file =  "/var/lib/secrets/garage-metrics.key";
                                 };
                             };
                         };
@@ -114,8 +101,7 @@ config = lib.mkIf
                             script = lib.concatStringsSep "\n" 
                                             [s3lib.bootstrapNode
                                              (lib.concatMapStringsSep "\n" 
-                                                  (args: s3lib.generateAccess args.fst args.snd) 
-                                                  (lib.lists.zipLists servicenames accesses))];
+                                                s3lib.generateAccess accesses)];
                         };
                     }
         ]);

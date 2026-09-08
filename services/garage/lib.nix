@@ -1,7 +1,7 @@
-{lib,pkgs, config, inputs, infra, gitpath, ...}:
+{lib,pkgs, config, inputs, flakeRoot, ...}:
 
 let
-    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra;};
+    utils = import "${flakeRoot}/lib" {inherit inputs lib;};
     bootstrapNode = ''
                     set -euo pipefail
 
@@ -20,7 +20,7 @@ let
                     fi
     '';
 
-    generateAccess = servicename: access@{bucket, ...}:
+    generateAccess = access@{bucket, ...}: #TODO: the key has the name of the bucket
                     ''
                 if [ ! -f "/var/lib/garage/bootstrap-${bucket}" ]; then
                         if ! ${pkgs.garage_2}/bin/garage bucket info ${bucket}; then
@@ -29,20 +29,20 @@ let
                         else
                             echo "Skipping bucket creation: ${bucket}"
                         fi
-                        if ! ${pkgs.garage_2}/bin/garage key info ${servicename}; then
-                            echo "Creating nextcloud key"
+                        if ! ${pkgs.garage_2}/bin/garage key info ${bucket}; then
+                            echo "Creating ${bucket} key"
                                 ${pkgs.garage_2}/bin/garage key import --yes \
-                                ${builtins.readFile "${gitpath}/${vars.s3_key_id access}"} \
-                                $(cat  ${config.sops.secrets."${vars.s3_key access}".path}) \
-                                -n ${servicename}
+                                $(cat /var/lib/secrets/${utils.s3_key_id access})
+                                $(cat /var/lib/secrets/${utils.s3_key access})
+                                -n ${bucket}
                                 ${pkgs.garage_2}/bin/garage bucket allow \
                                 --read \
                                 --write \
                                 --owner \
                                 ${bucket}\
-                                --key ${servicename}
+                                --key ${bucket}
                         else
-                            echo "Skipping creation ${servicename}:${bucket} [key already exists]"
+                            echo "Skipping creation ${bucket} [key already exists]"
                         fi
 
                 touch /var/lib/garage/bootstrap-${bucket}
