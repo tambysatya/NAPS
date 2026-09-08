@@ -12,7 +12,7 @@ let
         deploy:
         let proxyAddr = if deploy.env.type == "vm" then "127.0.0.1" else "192.168.1.1";
         in {
-            ${proxyAddr} = ["s3.${domain}" "ldap.${domain}" "postgres.${domain}"];
+            ${proxyAddr} = builtins.attrNames config.infra.deploy.endpoints; # all endpoints are sent to the proxy
         };
 
     generateNetworking = 
@@ -30,7 +30,7 @@ let
                     address = topo.gateway;
                     interface = iface;
                 };
-                nameservers = config.infra.topology.dns;
+                #nameservers = config.infra.topology.dns; # TODO useful ?
                 hosts = mkHosts deploy;
                 interfaces.${iface}.ipv4 = {
                     addresses = [

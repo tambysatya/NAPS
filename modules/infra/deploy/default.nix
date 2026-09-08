@@ -26,6 +26,19 @@ let
         in utils.mergeAll ([vmconf]  ++ ctconfs);
 
 
+    processService =  #generates the endpoints list
+        _: {endpoints, deployements,...}:
+        let processEndpoint = 
+            {hostname, port,...}:{
+                ${hostname} = map (env: {inherit env port;}) (builtins.attrValues deployements);
+            };
+        in utils.mergeAll [
+                (utils.mergeAll (map processEndpoint endpoints.tcp))
+                (utils.mergeAll (map processEndpoint endpoints.http))
+                (utils.mergeAll (map processEndpoint endpoints.udp))
+            ];
+
+
 in {
     imports = [./options
                ./users.nix
@@ -35,4 +48,5 @@ in {
                ./endpoints.nix
                ];
     infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList processVM config.infra.topology.vms);
+    infra.deploy.endpoints = utils.mergeAll (lib.mapAttrsToList processService config.infra.services);
 }

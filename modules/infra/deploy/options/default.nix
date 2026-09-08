@@ -221,24 +221,14 @@ let
 
         };
     };
-    network = types.submodule {
-        options = {
-            postgres = lib.mkOption {
-                description = "List of hosts providing a database";
-                type = types.listOf location;
-                default = [];
-            };
-            s3 = lib.mkOption {
-                description = "List of hosts providing an S3 access";
-                type = types.listOf location;
-                default = [];
-            };
-            ldap = lib.mkOption {
-                description = "List of hosts providing an ldap access";
-                type = types.listOf location;
-                default = [];
-            };
 
+    endpointEntry = types.submodule {
+        options = {
+            env = lib.mkOption {
+                description = "Which environment runs the endpoint";
+                type = types.deployementEnvironment;
+            };
+            inherit (types) port;
         };
     };
         
@@ -249,10 +239,10 @@ in
         description = "Intermediate representation of a virtual machine configuration";
         type = types.attrsOf deployementConfig;
     };
-    options.infra.deploy.network= lib.mkOption {
+    options.infra.deploy.endpoints = lib.mkOption {
         internal = true;
         description = "Intermediate representation of the entire network.";
-        type = network;
+        type = types.attrsOf (types.listOf endpointEntry); # domainname => [env]
     };
     options.infra.deploy.users = lib.mkOption {
         internal = true;
