@@ -61,8 +61,8 @@
         ];
 
         ip = "192.168.1.202";
-        containers = ["pg-main"]; 
-        #services = ["pg-main"]; 
+        #containers = ["pg-main"]; 
+        services = ["pg-main"]; 
       };
       apps = {
         host = "cpuhost1";
@@ -70,8 +70,8 @@
         memory = 16000;
 
         ip = "192.168.1.203";
-        #services = ["nextcloud"]; 
-        containers = ["nc-main"]; 
+        services = ["nc-main"]; 
+        #containers = ["nc-main"]; 
         disks = [
             {type="qcow"; path="persistent"; fs="ext4"; shared=true;}
             {type="qcow"; path="test"; mount="/srv/persistent"; fs="ext4"; shared=false;}

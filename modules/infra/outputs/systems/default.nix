@@ -7,12 +7,12 @@ let
     mkUser = {name, uid}:
         {
             users.${name} = {
-               inherit uid;
-               group = name;
-               isSystemUser = true;
+                uid = lib.mkForce uid;
+                group = name;
+                isSystemUser = true;
             };
             groups.${name} = {
-                gid = uid;
+                gid = lib.mkForce uid;
             };
         };
     processUsers = 

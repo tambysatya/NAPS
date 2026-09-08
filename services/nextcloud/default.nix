@@ -1,4 +1,4 @@
-{flakeRoot, inputs, config, lib, pkgs, infra, ... }:
+{flakeRoot, inputs, config, lib, pkgs, infra, path, ... }:
 
 # https://danubedata.ro/blog/nextcloud-s3-compatible-primary-storage-2026
 
@@ -8,7 +8,7 @@ let
     hostname = "nextcloud.${domain}";
 in {
 
-    config = lib.mkIf (infralib.runsService "nextcloud")
+    config = 
     {
         networking.firewall.allowedTCPPorts = [443 80];
         services.nextcloud = {
@@ -49,11 +49,11 @@ in {
                 maintenance_window_start = 0;
                 maintenance_window_end = 3;
                 trusted_domains = [
-                    "nextcloud.${infra.domain}"	
+                    "nextcloud.${domain}"	
                 ];
                 trusted_proxies = [
                     #"162.38.243.60"
-                    infra.vmSubnet
+                    infra.topology.vmSubnet
                     "192.168.100.0" #containers proxy TODO
                     
                 ];

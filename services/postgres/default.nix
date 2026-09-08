@@ -4,7 +4,7 @@ let
 
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
     domain = infra.topology.domain;
-    dbaccesses = lib.concatMap ({links,...}: links.postgres) (builtins.attrValues config.infra.services); #list of dbAccesses in the infrastructure
+    dbaccesses = lib.concatMap ({links,...}: links.postgres) (builtins.attrValues infra.services); #list of dbAccesses in the infrastructure
     users = lib.map (access: 
                         {
                             name = access.database;
@@ -31,8 +31,8 @@ config =
                 settings = {
                     password_encryption = "scram-sha-256";
                     ssl = true;
-                    ssl_cert_file = vars.ssl_crt_path "postgres.${domain}";
-                    ssl_key_file = vars.ssl_key_path "postgres.${domain}";
+                    ssl_cert_file = "/var/lib/secrets/postgres.${domain}.crt";
+                    ssl_key_file = "/var/lib/secrets/postgres.${domain}.key";
                     ssl_ca_file = "/etc/root_ca.crt";
                 };
             };
@@ -49,14 +49,14 @@ config =
 
                 };
 
-                script = lib.concatStringsSep "\n"
+                script = lib.concatMapStringsSep "\n"
                                     (access@{database,...}:
                                         ''
                                               PASSWORD="$(< /run/secrets/db-${access.database}.key)"
                                               ${pkgs.postgresql}/bin/psql -U postgres \
                                                 -c "ALTER ROLE ${access.database} WITH PASSWORD '$PASSWORD';"
                                         '')
-                                    dbacceses;
+                                    dbaccesses;
 
 
             };
