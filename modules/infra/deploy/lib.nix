@@ -24,7 +24,7 @@ let
             "ldapssha" = [content.filename];
             "sslCertificate" = let host = content.hostname;
                                in ["${host}.crt" "${host}.key"];
-            "postgres" = [(utils.db_key content)];
+            "postgres" = [(utils.db_key content) "${utils.db_key content}.pgpass"];
             "s3" = [(utils.s3_key_id content) (utils.s3_key content)];
             "step-ca" = ["intermediate_ca_key" "ca-password.key"];
         }.${type};
