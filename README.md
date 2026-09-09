@@ -1,7 +1,9 @@
 
 
 
-# Small-lab: automated and reproducible deployement of services.
+# Nix-based Automated Plumbing System
+
+![With NAPS, enjoy more naps !](./images/naps.png)
 
 Features: 
 
