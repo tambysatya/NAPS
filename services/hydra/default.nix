@@ -12,7 +12,7 @@ config.services.hydra = {
     dbi = "dbi:Pg:dbname=hydra;host=postgres.${domain};user=hydra;";
     notificationSender = "hydra@${domain}";
     extraEnv = {
-        PGPASSFILE = lib.mkForce "/var/lib/secrets/db-hydra.pgpass";
+        PGPASSFILE = lib.mkForce "/var/lib/secrets/db-hydra.key.pgpass";
     };
 };
 }
