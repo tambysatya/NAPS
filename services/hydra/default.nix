@@ -17,7 +17,17 @@ config.services.hydra = {
     };
     */
 };
-config.systemd.tmpfiles.rules = [
-      "L+ /var/lib/hydra/pgpass-www - - - - /var/lib/secrets/db-hydra.key.pgpass" # hydra erase the PGPASSFILE
-    ];
+config.systemd.services.hydra-init.preStart = lib.mkAfter ''
+  install -m 0600 -o hydra -g hydra \
+    /var/lib/secrets/db-hydra.key.pgpass \
+    /var/lib/hydra/pgpass
+
+  install -m 0600 -o hydra-www -g hydra \
+    /var/lib/secreast/db-hydra.key.pgpass \
+    /var/lib/hydra/pgpass-www
+
+  install -m 0600 -o hydra-queue-runner -g hydra \
+    /var/lib/secrets/db-hydra.key.pgpass \
+    /var/lib/hydra/pgpass-queue-runner
+'';
 }
