@@ -1,9 +1,11 @@
 
 
 
-# Nix-based Automated Plumbing System
+# NAPS: Nix-based Automated Plumbing System
 
 ![With NAPS, enjoy more naps !](./images/naps.png)
+
+Status: WIP, experimental
 
 Features: 
 
