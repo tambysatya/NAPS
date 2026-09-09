@@ -54,7 +54,7 @@ let
     installDB = 
         access@{database, owner,...}:
         ''
-        ${installFile (utils.db_key access) owner "postgres" "0440"}; #since only postgres is in the group postgres: the db can read safely all the certificates
+        ${installFile (utils.db_key access) owner "postgres" "0440"} #since only postgres is in the group postgres: the db can read safely all the certificates
         ${mkPgPass access}
         '';
 
