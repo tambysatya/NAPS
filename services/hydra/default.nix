@@ -11,8 +11,13 @@ config.services.hydra = {
     hydraURL = hostname;
     dbi = "dbi:Pg:dbname=hydra;host=postgres.${domain};user=hydra;";
     notificationSender = "hydra@${domain}";
+    /*
     extraEnv = {
         PGPASSFILE = lib.mkForce "/var/lib/secrets/db-hydra.key.pgpass";
     };
+    */
 };
+config.systemd.tmpfiles.rules = [
+      "L+ /var/lib/hydra/pgpass-www - - - - /var/lib/secrets/db-hydra.key.pgpass" # hydra erase the PGPASSFILE
+    ];
 }
