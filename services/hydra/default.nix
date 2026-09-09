@@ -23,7 +23,7 @@ config.systemd.services.hydra-init.preStart = lib.mkAfter ''
     /var/lib/hydra/pgpass
 
   install -m 0600 -o hydra-www -g hydra \
-    /var/lib/secreast/db-hydra.key.pgpass \
+    /var/lib/secrets/db-hydra.key.pgpass \
     /var/lib/hydra/pgpass-www
 
   install -m 0600 -o hydra-queue-runner -g hydra \
