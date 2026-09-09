@@ -1,9 +1,10 @@
-{flakeRoot, lib, inputs,...}:
+{flakeRoot, lib, inputs, infra,...}:
 
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
     installdir = "/mnt/var/lib/secrets";
     pemdir = "/mnt/var/lib/certs";
+    domain = infra.topology.domain;
 
     installFile = 
         filename: owner: group: mode:
@@ -39,9 +40,23 @@ let
             ${if owner == "haproxy" then peminstall else ""}
         '';
 
+    mkPgPass = 
+        access@{database, owner,...}:
+        let str = "postgres.${domain}:5482:${database}:${database}";
+            tgt = "${installdir}/${utils.db_key access}.pgpass";
+        in
+        ''
+        CONTENT=$(cat $1/${utils.db_key access})
+        echo "${str}:$CONTENT" > ${tgt}
+        chown ${owner} ${tgt}
+        chmod 0400 ${tgt}
+        '';
     installDB = 
         access@{database, owner,...}:
-        installFile (utils.db_key access) owner "postgres" "0440"; #since only postgres is in the group postgres: the db can read safely all the certificates
+        ''
+        ${installFile (utils.db_key access) owner "postgres" "0440"}; #since only postgres is in the group postgres: the db can read safely all the certificates
+        ${mkPgPass access}
+        '';
 
     installS3 = 
         access@{bucket, owner,...}:
