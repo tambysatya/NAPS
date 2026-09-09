@@ -101,6 +101,7 @@ Migration:
 - pg_ready services + fix pg-setup-script 
 - haproxy: handle both tls termination + passthrough (https://pastebin.com/pkRsp9cc)
 - config: use deploy.<name>.reverseProxy and deploy.<name>.proxy to handle clearly both directions of the proxy and resolves conflicts ?
+- instead of working in domain (local.fr) create a subdomain like (naps.local.fr) to ensure no clash with existing installation
 
 
 CHECKS:

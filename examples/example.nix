@@ -21,6 +21,7 @@
         "s3-main".is = "garage";
         "pg-main".is = "postgres";
         "nc-main".is = "nextcloud";
+        "hydra-main".is = "hydra";
     };
     hosts = {
       cpuhost1 = {
@@ -42,7 +43,7 @@
       };
       storage = {
         host = "cpuhost1";
-        vcpu = 24;
+        vcpu = 4;
         memory = 8000;
         disks = [
             {type="disk"; path="/dev/pvhdd/s3"; mount="/var/lib/garage/data"; fs="xfs"; options=["nofail"];}
@@ -76,6 +77,14 @@
             {type="qcow"; path="persistent"; fs="ext4"; shared=true;}
             {type="qcow"; path="test"; mount="/srv/persistent"; fs="ext4"; shared=false;}
         ];
+      };
+      build = {
+        host = "cpuhost1";
+        vcpu = 8;
+        memory = 8000;
+
+        ip = "192.168.1.204";
+        services = ["hydra-main"];
       };
 
     };
