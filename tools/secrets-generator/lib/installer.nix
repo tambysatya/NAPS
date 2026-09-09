@@ -42,7 +42,7 @@ let
 
     mkPgPass = 
         access@{database, owner,...}:
-        let str = "postgres.${domain}:5482:${database}:${database}";
+        let str = "postgres.${domain}:5432:${database}:${database}";
             tgt = "${installdir}/${utils.db_key access}.pgpass";
         in
         ''
