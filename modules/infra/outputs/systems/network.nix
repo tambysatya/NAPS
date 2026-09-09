@@ -78,6 +78,7 @@ let
             ${ctname}.config = {
                 networking = {
                     hostName = ctname;
+                    firewall.enable = false; #No firewall on the containers
                     useHostResolvConf = lib.mkForce false;
                     defaultGateway = hostDefaultAddress;
                     interfaces.eth0.ipv4.addresses = [ #eth0 is the default interface of containers

@@ -56,18 +56,7 @@ Main module: config.infra
 - users: some usersID are set by their own service. Now we FORCE it to a new value (our) but not sure if this is a good approach TODO
 
 
-- Factorize the basic types (with constructors, e.g mkFStypeOption, mkDirOption, ...)
-- Sanitize the code:
-	+ avoid configs = in order to avoid infinite recursions 
-	+ do everything in one step instead of having multiple evalModules
-	+ move and regroup the code in order to never have a function editing multiple root fields of config (eg config.users and config.services)
 
-
-- TODO add multiple provisioenrs in step-ca
-
-
-- TODO: put a infra.vms."name".config containing the entire config of each vm ? THis could allow us to avoid infinite recursion
-- TODO: params the ip address of the containers private network (actually its forced to be 192.168.100.0/24)
 
 Deployement:
 - curent refactor involved deployement options (like priority), but VMs may also have tags (like testing, backup) that is applied to their services
@@ -93,15 +82,13 @@ Migration:
 
 ### Prio
 
-- container mounts: pass directly the secret dir
-- proxy conf
 - Use UserID instead of proper user creation (for the secrets and files within the containers)
-- All endpoints should be reachable by all HAproxies
 - containerMount non-shared persistent volumes
-- pg_ready services + fix pg-setup-script 
 - haproxy: handle both tls termination + passthrough (https://pastebin.com/pkRsp9cc)
 - config: use deploy.<name>.reverseProxy and deploy.<name>.proxy to handle clearly both directions of the proxy and resolves conflicts ?
 - instead of working in domain (local.fr) create a subdomain like (naps.local.fr) to ensure no clash with existing installation
+- params the ip address of the containers private network (actually its forced to be 192.168.100.0/24) 
+- have a different interface per container + open firewall on containers
 
 
 CHECKS:
@@ -110,3 +97,6 @@ CHECKS:
 - each mountpoint is declared by one disk
 - Two services does not request the same repository
 
+
+EXPERIMENTS:
+- check multiple containers running on the same VM
