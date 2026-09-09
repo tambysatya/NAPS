@@ -46,7 +46,7 @@ let
             tgt = "${installdir}/${utils.db_key access}.pgpass";
         in
         ''
-        CONTENT=$(cat $1/${utils.db_key access})
+        CONTENT=$(cat "$1"/${utils.db_key access})
         echo "${str}:$CONTENT" > ${tgt}
         chown ${owner} ${tgt}
         chmod 0400 ${tgt}
