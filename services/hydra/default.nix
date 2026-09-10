@@ -19,6 +19,7 @@ let
             "$(LC_ALL=C ${pkgs.coreutils}/bin/tr -dc '[:alnum:]' < /dev/urandom | ${pkgs.coreutils}/bin/head -c16)" \
             -id -t 3 -k 262144 -p 1 -l 16 -e
       )"
+      export PGPASSFILE=/var/lib/hydra/pgpass
       ${config.services.hydra.package}/bin/hydra-create-user admin \
         --password-hash "$hash" \
         --role admin
