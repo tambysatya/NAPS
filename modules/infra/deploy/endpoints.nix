@@ -30,7 +30,10 @@ let
     processL4Endpoint =
         mode: vmname: endpoint: env:
         let isLocal = utils.envHost env == vmname; #true if the endpoint is located within a container on the VM (services running natively on the VM have been previously filtered)
-            backendIP = if isLocal then utils.envIP config env else utils.envHostIP config env; # the backend ip of the service points either to the container or to the host
+            #backendIP = if isLocal then utils.envIP config env else utils.envHostIP config env; # the backend ip of the service points either to the container or to the host
+            backendIP = if ! isLocal then utils.envHostIP config env # the backend ip of the service points either to the container or to the host
+                        else if utils.envUID env == vmname then "127.0.0.1"
+                        else utils.envIP config env;
         in {
            proxy.${mode}.${lib.toString endpoint.port} = {
                     frontend = {
@@ -48,7 +51,10 @@ let
     processHTTPEndpoint =
         vmname: endpoint: env:
         let isLocal = utils.envHost env == vmname; 
-            backendIP = if isLocal then utils.envIP config env else utils.envHostIP config env; # the backend ip of the service points either to the container or to the host
+            #backendIP = if isLocal then utils.envIP config env else utils.envHostIP config env; # the backend ip of the service points either to the container or to the host
+            backendIP = if ! isLocal then utils.envHostIP config env # the backend ip of the service points either to the container or to the host
+                        else if utils.envUID env == vmname then "127.0.0.1"
+                        else utils.envIP config env;
         in {
             proxy.http.${endpoint.hostname} = {
                 inherit (endpoint) extraConfig;
