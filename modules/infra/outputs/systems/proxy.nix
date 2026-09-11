@@ -56,15 +56,16 @@ let
             tlsmap = pkgs.writeText "tls.map" (mkMap "http" (builtins.attrNames tls));
             nontlsmap = pkgs.writeText ("nontls.map")(mkMap "tcp" (builtins.attrNames nontls));
 
+            name = if public then "https_public" else "https_private";
             bind = mkBind vmname 443 public;
 
 
             conf = ''
-                frontend https
+                frontend ${name}
                     bind ${bind}
                     mode tcp
                     tcp-request inspect-delay 5s
-                    tcp-request content accept if {req_ssl_hello_type 1}
+                    tcp-request content accept if { req_ssl_hello_type 1 }
                     use_backend %[req.ssl_sni,lower,map_dom(${nontlsmap},nonSNI_be)]
                 backend nonSNI_be
                     mode tcp
