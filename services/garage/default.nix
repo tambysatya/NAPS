@@ -63,6 +63,9 @@ config =
                 "var-lib-garage-data.mount"
             ];
 
+            before = ["garage.service"];
+            requiredBy = ["garage.service"];
+
             serviceConfig.Type = "oneshot";
             script = ''
                 chown -R garage:garage /var/lib/garage/meta
