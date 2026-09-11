@@ -19,7 +19,8 @@ let
     getPorts =
         proxyEntries: 
         let parts = utils.partitionAttrs (port: {frontend,...}: frontend.public) proxyEntries;
-        in {world = builtins.attrNames parts.right; local = builtins.attrNames parts.wrong;};
+        in {world = map builtins.fromJSON (builtins.attrNames parts.right);
+            local = map builtins.fromJSON (builtins.attrNames parts.wrong);};
 
     tcp = getPorts deploy.proxy.tcp;
     udp =  getPorts deploy.proxy.udp;
