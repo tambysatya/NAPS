@@ -56,31 +56,33 @@ let
             tlsmap = pkgs.writeText "tls.map" (mkMap "http" (builtins.attrNames tls));
             nontlsmap = pkgs.writeText ("nontls.map")(mkMap "tcp" (builtins.attrNames nontls));
 
-            name = if public then "https_public" else "https_private";
+            suffix = if public then "public" else "private";
             bind = mkBind vmname 443 public;
 
 
             conf = ''
-                frontend ${name}
+                frontend https_${suffix}
                     bind ${bind}
                     mode tcp
                     tcp-request inspect-delay 5s
                     tcp-request content accept if { req_ssl_hello_type 1 }
-                    use_backend %[req.ssl_sni,lower,map_dom(${nontlsmap},nonSNI_be)]
-                backend nonSNI_be
+                    use_backend %[req.ssl_sni,lower,map_dom(${nontlsmap},nonSNI_be_${suffix})]
+                backend nonSNI_be_${suffix}
                     mode tcp
-                    server nonSNI_fe 127.0.0.1:9443 check check-ssl
+                    server nonSNI_fe_${suffix} 127.0.0.1:9443 check check-ssl
 
-                frontend nonSNI_fe
+                frontend nonSNI_fe_${suffix}
                     bind :9443 ssl crt /var/lib/certs
                     mode http
-                    use_backend %[req.hdr(host),lower,map_dom(${tlsmap},http_back)]
+                    use_backend %[req.hdr(host),lower,map_dom(${tlsmap},http_back_${suffix})]
                 ${utils.concatMapAttrsStringsSep "\n"
                     (name: {backends,...}: generateBackends "http" 443 name backends)
                     tls}
                 ${utils.concatMapAttrsStringsSep "\n"
                     (name: {backends,...}: generateBackends "tcp" 443 name backends)
                     nontls}
+                backedn http_back_${suffix}
+                    http-request return status 404
             '';
         in conf;            
 
