@@ -32,9 +32,10 @@ let
                         if ! ${pkgs.garage_2}/bin/garage key info ${bucket}; then
                             echo "Creating ${bucket} key"
                                 ${pkgs.garage_2}/bin/garage key import --yes \
-                                $(cat /var/lib/secrets/${utils.s3_key_id access})
-                                $(cat /var/lib/secrets/${utils.s3_key access})
-                                -n ${bucket}
+                                $(cat /var/lib/secrets/${utils.s3_key_id access}) \
+                                $(cat /var/lib/secrets/${utils.s3_key access}) \
+                                -n ${bucket} 
+
                                 ${pkgs.garage_2}/bin/garage bucket allow \
                                 --read \
                                 --write \
