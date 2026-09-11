@@ -62,7 +62,6 @@ let
 
 
             conf = ''
-                    ssl-server-verify none
                 frontend https_${suffix}
                     bind ${bind}
                     mode tcp
@@ -108,6 +107,7 @@ let
                     ${vmname}.config.services.haproxy = {
                         enable = true;
                         config = ''
+                                    ssl-server-verify none
                                 defaults
                                     timeout connect 5s
                                     timeout client 30s
