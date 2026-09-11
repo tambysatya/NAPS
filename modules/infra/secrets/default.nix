@@ -53,8 +53,10 @@ let
         ++  (if srvname == "step-ca"
                 then [(processSecret deployements "step-ca" null)] 
                 else []);
-    allSecrets= lib.unique (lib.concatLists (lib.mapAttrsToList serviceSecrets config.infra.services));
-    allEnvs = lib.unique (lib.concatMap (srv: builtins.attrValues srv.deployements) (builtins.attrValues config.infra.services));
+
+    deployedServices = lib.filterAttrs (_: {deployements,...}: deployements != {}) config.infra.services;
+    allSecrets= lib.unique (lib.concatLists (lib.mapAttrsToList serviceSecrets deployedServices));
+    allEnvs = lib.unique (lib.concatMap (srv: builtins.attrValues srv.deployements) (builtins.attrValues deployedServices));
 
     groupByVM =
         secret@{recipients, ...}:
