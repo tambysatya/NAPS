@@ -69,7 +69,7 @@ let
                     use_backend %[req.ssl_sni,lower,map_dom(${nontlsmap},nonSNI_be_${suffix})]
                 backend nonSNI_be_${suffix}
                     mode tcp
-                    server nonSNI_fe_${suffix} 127.0.0.1:9443 check check-ssl
+                    server nonSNI_fe_${suffix} 127.0.0.1:9443 check check-ssl ca-file /etc/intermediate_ca.crt
 
                 frontend nonSNI_fe_${suffix}
                     bind :9443 ssl crt /var/lib/certs
