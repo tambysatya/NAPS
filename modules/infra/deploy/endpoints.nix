@@ -4,63 +4,65 @@ let
     utils = import ./lib.nix {inherit lib inputs flakeRoot;};
 
 
-    mkHTTPProxy = 
-    env:
-    {hostname, port, tls, extraConfig,...}:
-    let cert = {inherit hostname; owner="haproxy"; reload=["haproxy.service"];};
-    in {
-        ${utils.envHost env} = {
-            proxy.http.${hostname} = {
-                inherit tls extraConfig;
-                backends = [
-                    {
-                        ip = if env.type == "container"
-                             then utils.envIP config env
-                             else "127.0.0.1";
-                        inherit port env;
-                    }
-                ];
-            };
-            secrets = if tls then utils.certToSecret cert else [];
-            sslCertificates = if tls then [cert] else [];
-        };
-    };
-
-    mkTCPProxy = 
-    env:
-    {hostname, port, extraConfig,...}:
-    if (env.type == "container") then #TCP Proxy are deployed only behind a container
-        {
-            ${utils.envHost env}.proxy.tcp.${hostname} = {
-                frontend = {ip = "0.0.0.0"; inherit port;};
-                backends = [
-                    {ip = utils.envIP config env; inherit port env;}
-                ];
-                inherit extraConfig;
-            };
-        }
-    else {};
 
 
+    processVM = # For each VM, all the endpoints are registered
+        vmname: utils.mergeAll (lib.mapAttrsToList (processService vmname) config.infra.services);
 
-
-
-    processUDP = throw "UDP not implemented yet";
     processService = 
-        srv@{deployements, endpoints,...}:
-        let envs = builtins.attrValues deployements;
-            allTCP =
-                lib.concatMap
-                    (env: map (mkTCPProxy env) endpoints.tcp)
-                    envs; 
-            allUDP =
-                lib.concatMap
-                    (env: map (processUDP env) endpoints.udp)
-                    envs;
-            allHTTP = lib.concatMap
-                        (env: map (mkHTTPProxy env) endpoints.http)
-                        envs;
-        in utils.mergeAll (allTCP ++ allHTTP ++ allUDP);
+        vmname: srvname: {deployements, endpoints,...}:
+        let tcp = map (processEndpoint vmname "tcp" deployements) endpoints.tcp;
+            udp = map (processEndpoint vmname "udp" deployements) endpoints.udp;
+            http = map (processEndpoint vmname "http" deployements) endpoints.http;
+        in utils.mergeAll (tcp ++ udp ++ http);
+
+    processEndpoint= 
+        vmname: mode: deployements: endpoint:
+        let isHostedNatively = builtins.elem vmname (map utils.envUID (builtins.attrValues deployements)); # true if the vm runs the service natively
+        in if mode != "http" && ! isHostedNatively # creates the L4 proxy only if the VM does not host the service natively, to avoid raising an Address already in use error.
+        then utils.mergeAll (map (processL4Endpoint mode vmname endpoint) (builtins.attrValues deployements))
+        else if mode == "http" # even if the service runs natively, registering an HTTP endpoint implies registering the Vhost in haproxy
+        then utils.mergeAll (map (processHTTPEndpoint vmname endpoint) (builtins.attrValues deployements))
+        else {};
+
+
+
+    processL4Endpoint =
+        mode: vmname: endpoint: env:
+        let isLocal = utils.envHost env == vmname; #true if the endpoint is located within a container on the VM (services running natively on the VM have been previously filtered)
+            backendIP = if isLocal then utils.envIP config env else utils.envHostIP config env; # the backend ip of the service points either to the container or to the host
+        in {
+           proxy.${mode}.${lib.toString endpoint.port} = {
+                    frontend = {
+                        public = isLocal; # gives access to everyone if the service is hosted locally 
+                        inherit (endpoint) hostname;
+                    };
+                    backends = [{
+                        inherit env;  
+                        ip = backendIP;
+                        inherit (endpoint) port;
+                    }];
+                    inherit (endpoint) extraConfig;
+            };
+        };
+    processHTTPEndpoint =
+        vmname: endpoint: env:
+        let isLocal = utils.envHost env == vmname; 
+            backendIP = if isLocal then utils.envIP config env else utils.envHostIP config env; # the backend ip of the service points either to the container or to the host
+        in {
+            proxy.http.${endpoint.hostname} = {
+                inherit (endpoint) extraConfig;
+                tls = if isLocal then endpoint.tls else false; # never terminates tls if the service is not hosted locally.
+                public = isLocal;
+                backends = [{
+                    inherit env;
+                    ip = backendIP;
+                    port = if isLocal then endpoint.port else 443;
+                }];
+            };
+        };
+
+
 in {
-    config.infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList (srvname: srv: processService srv) config.infra.services);
+    config.infra.deploy.systems = lib.mapAttrs (name: _: processVM name) (config.infra.topology.vms);
 }

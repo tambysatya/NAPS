@@ -138,10 +138,14 @@ let
         };
     };
 
-    addr = types.submodule {
+    frontend = types.submodule {
         options = {
-            inherit (types) ip port;
-        };  
+            inherit (types) hostname;
+            public = lib.mkOption {
+                description = "True if the proxy should be openned to the entire network (i.e. the host hosts a service). False if the proxy is openned only to the containers and localhost";
+                type = types.bool;
+            };
+        };
     };
     backend = types.submodule {
         options = {
@@ -160,6 +164,10 @@ let
                 type = types.listOf backend;
                 default = [];
             };
+            public = lib.mkOption {
+                description = "True if the proxy should be openned to the entire network (i.e. the host hosts a service). False if the proxy is openned only to the containers and localhost";
+                type = types.bool;
+            };
             tls = lib.mkOption {
                 description = "If set to true, the HA proxy terminates TLS: a certificate will be generated automatically";
                 type = types.bool;
@@ -176,7 +184,7 @@ let
         options = {
             frontend = lib.mkOption {
                 description = "Listening server";
-                type = addr;
+                type = frontend;
             };
             backends = lib.mkOption {
                 description = "List of backends, ordered by priority";
@@ -194,12 +202,12 @@ let
     proxy = types.submodule {
         options = {
             tcp = lib.mkOption {
-                description = "Correspondances name => frontend/backend";
+                description = "Correspondances PORT => frontend/backend";
                 type = types.attrsOf proxyEntry;
                 default = {};
             };
             udp = lib.mkOption {
-                description = "Correspondances name => frontend/backend";
+                description = "Correspondances PORT => frontend/backend";
                 type = types.attrsOf proxyEntry;
                 default = {};
             };
@@ -242,7 +250,25 @@ in
     options.infra.deploy.endpoints = lib.mkOption {
         internal = true;
         description = "Intermediate representation of the entire network.";
-        type = types.attrsOf (types.listOf endpointEntry); # domainname => [env]
+        type = types.submodule {
+            options = {
+                tcp = lib.mkOption {
+                    description = "TCP endpoints";
+                    type = types.attrsOf (types.listOf endpointEntry); # domainname => [env]
+                    default = {};
+                };
+                udp = lib.mkOption {
+                    description = "UDP endpoints";
+                    type = types.attrsOf (types.listOf endpointEntry); # domainname => [env]
+                    default = {};
+                };
+                http = lib.mkOption {
+                    description = "HTTP endpoints";
+                    type = types.attrsOf (types.listOf endpointEntry); # domainname => [env]
+                    default = {};
+                };
+            };
+        };
     };
     options.infra.deploy.users = lib.mkOption {
         internal = true;

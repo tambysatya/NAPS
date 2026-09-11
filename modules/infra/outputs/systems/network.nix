@@ -8,6 +8,7 @@ let
 
 
 
+    /*
     mkHosts =
         deploy:
         let proxyAddr = if deploy.env.type == "vm" then "127.0.0.1" else "192.168.100.1";
@@ -19,9 +20,17 @@ let
         in {
             ${proxyAddr} = ["postgres.${domain}" "s3.${domain}" "ldap.${domain}"]; # all links are sent to the proxy
             ${config.infra.deploy.systems.${cauid}.ip} = ["ca.${domain}"];
-            
-            
         };
+    */
+    mkHosts =
+        deploy:
+        let proxyAddr = if deploy.env.type == "vm" then "127.0.0.1" else "192.168.100.1";
+            endpoints = config.infra.deploy.endpoints;
+            allEndpoints = lib.concatMap builtins.attrNames [endpoints.tcp endpoints.udp endpoints.http];
+        in {
+            ${proxyAddr} = lib.unique allEndpoints; #all endpoints are routed to the proxy
+        };
+
 
     generateNetworking = 
         name: deploy: if deploy.env.type == "vm" then generateVMNetworking name deploy else generateContainerNetworking name deploy;

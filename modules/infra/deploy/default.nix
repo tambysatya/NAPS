@@ -32,11 +32,11 @@ let
             {hostname, port,...}:{
                 ${hostname} = map (env: {inherit env port;}) (builtins.attrValues deployements);
             };
-        in utils.mergeAll [
-                (utils.mergeAll (map processEndpoint endpoints.tcp))
-                (utils.mergeAll (map processEndpoint endpoints.http))
-                (utils.mergeAll (map processEndpoint endpoints.udp))
-            ];
+        in {
+                tcp = (utils.mergeAll (map processEndpoint endpoints.tcp));
+                http = (utils.mergeAll (map processEndpoint endpoints.http));
+                udp = (utils.mergeAll (map processEndpoint endpoints.udp));
+        };
 
 
 in {

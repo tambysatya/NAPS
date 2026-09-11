@@ -42,7 +42,7 @@ let
 
 
     envIP = config: env: config.infra.deploy.systems.${utils.envUID env}.ip;
-    envHostIP = config: env:  # Retrives the IP of the host vm if the env is a container
+    envHostIP = config: env:  # Retrieves the IP of the host vm if the env is a container
         if env.type == "vm"
             then envIP config env
             else config.infra.deploy.systems.${env.host.vm}.ip;

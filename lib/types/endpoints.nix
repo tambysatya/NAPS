@@ -45,7 +45,7 @@ rec {
         options = {
             udp = lib.mkOption {
                 description = "UDP endpoints.";
-                type = types.listOf udpEndpoint;
+                type = types.listOf udpEndpoint; # endpoints are list because the same hostname can lead to multiple ports
                 default = [];
             };
             tcp = lib.mkOption {

@@ -13,16 +13,9 @@ in
 {
 infra.services.step-ca = {
     users = [{name="step-ca"; uid=10006;}];
-    endpoints.tcp = [
-        {inherit hostname port;}
+    endpoints.http = [
+        {inherit hostname port; tls=false;}
     ];
 };
-/*
-    config.registry = 
-                (lib.mkMerge [
-                    (reg.registerSecret "step-ca" "step-ca-keys" secrets)
-                    (reg.registerUser "step-ca" "step-ca" 10006)
-                ]);
-*/                    
 }
 
