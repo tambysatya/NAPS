@@ -23,20 +23,30 @@ let
             mode ${mode}
             ${lib.concatStringsSep "\n" (lib.imap mkBackendEntry sortedBackends)}
         '';
-    processL4Proxy = 
+
+    mkBind = 
+        vmname: port: public:
+        let deploy = config.infra.deploy.systems.${vmname};
+            containersips = map (env: utils.envIP config env) deploy.containers;
+        in if public then "0.0.0.0:${lib.toString port}" else lib.concatMapStringsSep "\n" (ip: "${ip}:${lib.toString port}") containersips;
+    generateL4Proxy = 
+        vmname:
         mode: # tcp or udp
         name:
         {frontend, backends, extraConfig}: #TODO extraConfig is ignored at the moment
-        ''
+        let bind= mkBind vmname frontend.port frontend.public ;
+        in ''
             frontend ${name}
                 mode ${mode}
-                bind :${lib.toString frontend.port} #binds on all interfaces. The access will be managed by the firewall
+                bind ${bind} #binds on all interfaces. 
                 default_backend be_${name} 
             ${generateBackends mode name backends}
         '';
 
 
     generateHTTPProxy=
+        vmname:
+        public:
         allEntries:
         let parts = utils.partitionAttrs (_: {tls,...}: tls) allEntries;
             tls = parts.right;
@@ -45,10 +55,12 @@ let
             tlsmap = pkgs.writeText "tls.map" (mkMap (builtins.attrNames tls));
             nontlsmap = pkgs.writeText ("nontls.map")(mkMap (builtins.attrNames nontls));
 
+            bind = mkBind vmname 443 public;
+
 
             conf = ''
                 frontend https
-                    bind *:443
+                    bind ${bind}
                     mode tcp
                     tcp-request inspect-delay 5s
                     tcp-request content accept if {req_ssl_hello_type 1}
@@ -75,68 +87,15 @@ let
             (name: "${name}         be_${name}")
             vhosts;
             
-/*
-    generateHTTPProxy =
-        allEntries:
-        let terminatesTLS = allEntries != {} && (lib.head (builtins.attrValues allEntries)).tls; # Either we terminates TLS for everyone, or for nobody TODO
-        in
-        ''
-            ${generateHTTPFrontends terminatesTLS allEntries}
-            ${lib.concatStringsSep "\n"
-                (lib.mapAttrsToList (generateHTTPBackend terminatesTLS) allEntries)}
-        '';
-        
-    generateHTTPBackend =
-        terminatesTLS:
-        vhost:
-        {backends, extraConfig,...}:
-        let sortedBackends = builtins.sort (b: b': b.env.priority >= b'.env.priority) backends; #sorted by decreasing priority
-            mkBackendEntry = i: {ip, port, ...}:
-            ''
-                server ${mkBackendI vhost i} ${ip}:${lib.toString port} check ${if i == 1 then "" else "backup"}
-            '';
-        in
-        ''
-            backend be_${vhost}
-                mode ${if terminatesTLS then "http" else "tcp"}
-                ${lib.concatStringsSep "\n"
-                    (lib.imap mkBackendEntry sortedBackends)}
-        '';
-
-    generateHTTPFrontends =  #Note that if the TLS termination is enabled, the proxy will terminate TLS for all vhost. TODO solution ? use two different ips ?
-        terminatesTLS:
-        allEntries:
-        let
-            mkFrontEnd =
-                vhost:
-                    if terminatesTLS
-                    then # tls = true: the proxy terminates TLS
-                        ''
-                            use_backend be_${vhost} if { hdr(host) -i ${vhost} }
-                        ''
-                    else # else, haproxy checks the SNI to know which backend is requested
-                        ''
-                            use_backend be_${vhost} if { req.ssl_sni -i ${vhost} }
-                        '';
-        in 
-        ''
-            frontend https
-                mode ${if terminatesTLS then "http" else "tcp"}
-                bind :443 ${if terminatesTLS then "ssl crt /var/lib/certs" else ""}
-
-                option forwardfor
-                http-request set-header X-Forwarded-Proto https
-                http-request set-header X-Forwarded-Host %[req.hdr(host)]
-
-                ${lib.concatStringsSep "\n" (map mkFrontEnd (builtins.attrNames allEntries))}
-        '';
-  */  
     processVM = 
         vmname: deploy:
         let tcp = deploy.proxy.tcp;
             udp = deploy.proxy.udp;
-            http = deploy.proxy.http;
-        in if (tcp != {} || udp != {} || http != {}) 
+            parts = utils.partitionAttrs (_: attr: builtins.getAttr "public" attr) deploy.proxy.http;
+            publicHTTP = parts.right;
+            privateHTTP = parts.wrong;
+
+        in if (tcp != {} || udp != {} || publicHTTP != {} || privateHTTP != {})  
                 then 
                 {
                     ${vmname}.config.services.haproxy = {
@@ -147,10 +106,11 @@ let
                                     timeout client 30s
                                     timeout server 30s
                                 ${lib.concatStringsSep "\n"
-                                    (lib.mapAttrsToList (processL4Proxy "tcp") tcp)}
+                                    (lib.mapAttrsToList (generateL4Proxy vmname "tcp") tcp)}
                                 ${lib.concatStringsSep "\n"
-                                    (lib.mapAttrsToList (processL4Proxy "udp") udp)}
-                                ${if http != {} then generateHTTPProxy http else ""}
+                                    (lib.mapAttrsToList (generateL4Proxy vmname "udp") udp)}
+                                ${if publicHTTP != {} then generateHTTPProxy vmname true publicHTTP else ""}
+                                ${if privateHTTP != {} then generateHTTPProxy vmname false privateHTTP else ""}
 
                             '';
                     };

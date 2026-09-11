@@ -134,6 +134,11 @@ let
                 description = "Persistent storage  configuration";
                 type = storage;
             };
+            containers = lib.mkOption {
+                description = "List of containers environments";
+                type = types.listOf types.deployementEnvironment;
+                default = [];
+            };
 
         };
     };

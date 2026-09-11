@@ -30,8 +30,8 @@ let
         links@{s3, postgres,...}:
         env:
         let uid = utils.envUID env;
-            s3hosts = infra.deploy.endpoints."s3.${domain}";
-            pghosts = infra.deploy.endpoints."postgres.${domain}";
+            s3hosts = infra.deploy.endpoints.http."s3.${domain}";
+            pghosts = infra.deploy.endpoints.tcp."postgres.${domain}";
 
             connect' = tgtname: tgt: tcp@{port,...}:  "${uid}_${clean srvname}_${lib.toString port} -> ${ageUID tgt.env}_${tgtname}";
             connect = tgtname: tgt: lib.concatMapStringsSep "\n" (connect' tgtname tgt) endpoints.tcp;

@@ -10,11 +10,14 @@ let
         let
             mkEnv = name: {type="container"; host={container=name; vm=vmname;};};
             ctconfs = lib.imap 
-                        (i: name: {
-                            ${utils.envUID (mkEnv name)} = {
+                        (i: name:
+                        let env = mkEnv name;
+                        in {
+                            ${utils.envUID env} = {
                                 ip = "192.168.100.${lib.toString (50+i)}";
                                 env = mkEnv name;
                             };
+                            ${utils.envHost env}.containers = [env];
                         })
                         containers;
             vmconf = {
