@@ -50,7 +50,7 @@ let
     #TODO LDAP links
 in {
 
-options.infra.links.perVM = lib.mkOption {
+options.infra.links = lib.mkOption {
     description = "Summary of the links in the infrastructure per real virtual machine (containers are excluded)" ;
     type = types.attrsOf systemLinks;
 

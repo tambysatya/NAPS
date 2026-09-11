@@ -1,6 +1,6 @@
-{lib, inputs, config, infra, ...}:
+{lib, inputs, config, topology, ...}:
 
-let domain = "journald.${infra.topology.domain}";
+let domain = "journald.${topology.domain}";
     
 
 in {

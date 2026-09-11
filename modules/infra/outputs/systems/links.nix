@@ -2,9 +2,9 @@
 let
     utils = import ../lib {inherit lib inputs flakeRoot;};
     domain = config.infra.topology.domain;
-    mkDBDependencies = reloads:
+    mkDBDependencies = env: reloads:
         {
-            config.systemd.services."postgres-wait" = {
+            ${utils.envUID env}.config.systemd.services."postgres-wait" = {
                 description = "Waiting for postgres to be reachable [dependency of service]...";
                 wants = [
                     "network.target"
@@ -26,9 +26,9 @@ let
                 };
             };
         };
-    mkS3Dependencies = reloads:
+    mkS3Dependencies = env: reloads:
         {
-            config.systemd.services."s3-wait" = {
+            ${utils.envUID env}.config.systemd.services."s3-wait" = {
                 description = "Waiting for s3 to be reachable [dependency of service]...";
                 wants = [
                     "network.target"
@@ -52,18 +52,16 @@ let
             };
         };
 
-    processVM =
-        vmname: links:
+    processSystem =
+        sysname: links:
         let getServiceFromLink = 
-                {access, env}:
-                if env.type == "container"
-                then ["container@${utils.envUID env}.service"] # in case of service running within a container, the dependency is the container itself
-                else access.reload;
+                {access, env}: access.reload;
+            sysenv = config.infra.deploy.systems.${sysname}.env;
         in utils.mergeAll [
-            (mkDBDependencies (lib.concatMap getServiceFromLink links.postgres))
-            (mkS3Dependencies (lib.concatMap getServiceFromLink links.s3))
+            (mkDBDependencies sysenv (lib.concatMap getServiceFromLink links.postgres))
+            (mkS3Dependencies sysenv (lib.concatMap getServiceFromLink links.s3))
         ];
 
 in {
-    infra.outputs.systems = lib.mapAttrs processVM config.infra.links.perVM;
+    infra.outputs.systems = utils.mergeAll (lib.mapAttrsToList processSystem config.infra.links);
 }

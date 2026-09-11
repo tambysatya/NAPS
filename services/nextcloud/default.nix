@@ -1,10 +1,10 @@
-{flakeRoot, inputs, config, lib, pkgs, infra, path, ... }:
+{flakeRoot, inputs, config, lib, pkgs, topology, path, ... }:
 
 # https://danubedata.ro/blog/nextcloud-s3-compatible-primary-storage-2026
 
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
-    domain = infra.topology.domain;
+    domain = topology.domain;
     hostname = "nextcloud.${domain}";
 in {
 
@@ -53,7 +53,7 @@ in {
                 ];
                 trusted_proxies = [
                     #"162.38.243.60"
-                    infra.topology.vmSubnet
+                    topology.vmSubnet
                     "192.168.100.0" #containers proxy TODO
                     
                 ];

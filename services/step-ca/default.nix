@@ -1,4 +1,4 @@
-{flakeRoot, lib, inputs, config, pkgs, path, infra,...}:
+{flakeRoot, lib, inputs, config, pkgs, path, topology,...}:
 let 
 
 
@@ -8,7 +8,7 @@ config =
         {
             services.step-ca = {
                 enable = true;
-                address = "ca.${infra.topology.domain}";
+                address = "ca.${topology.domain}";
                 port = 8443;
                 openFirewall = true;
                 intermediatePasswordFile = "/var/lib/secrets/ca-password.key";

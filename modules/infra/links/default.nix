@@ -4,7 +4,7 @@ let
     utils = import ./lib {inherit lib inputs flakeRoot;};
 
     add = name: accesses: env: {
-        ${utils.envHost env}.${name} = map (access: {inherit env access;}) accesses;
+        ${utils.envUID env}.${name} = map (access: {inherit env access;}) accesses;
     };
 
     processService = 
@@ -17,6 +17,6 @@ let
 
 in {
     imports = [./options];
-    infra.links.perVM =
+    infra.links =
         utils.mergeAll (lib.mapAttrsToList processService config.infra.services);
 }

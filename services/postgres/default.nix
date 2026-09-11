@@ -1,10 +1,10 @@
-{flakeRoot, lib, inputs, config, pkgs, infra,...}:
+{flakeRoot, lib, inputs, config, pkgs, topology, services, ...}:
 
 let 
 
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
-    domain = infra.topology.domain;
-    dbaccesses = lib.concatMap ({links,...}: links.postgres) (builtins.attrValues infra.services); #list of dbAccesses in the infrastructure
+    domain = topology.domain;
+    dbaccesses = lib.concatMap ({links,...}: links.postgres) (builtins.attrValues services); #list of dbAccesses in the infrastructure
     users = lib.map (access: 
                         {
                             name = access.database;

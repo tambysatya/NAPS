@@ -1,8 +1,8 @@
 
-{flakeRoot, inputs, config, lib, pkgs, infra, path, ... }:
+{flakeRoot, inputs, config, lib, pkgs, topology, path, ... }:
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
-    domain = infra.topology.domain;
+    domain = topology.domain;
     hostname = "hydra.${domain}";
     /* 
     sudo -u hydra env \

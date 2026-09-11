@@ -1,10 +1,10 @@
-{flakeRoot, lib, inputs, pkgs, config, infra,...}:
+{flakeRoot, lib, inputs, pkgs, config, topology, services, ...}:
 
 let 
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
     s3lib = import ./lib.nix {inherit lib inputs pkgs flakeRoot;};
-    accesses = lib.concatMap ({links,...}: links.s3) (builtins.attrValues infra.services);
+    accesses = lib.concatMap ({links,...}: links.s3) (builtins.attrValues services);
     
 
 
@@ -23,7 +23,7 @@ config =
                 s3_api = {
                     api_bind_addr = "127.0.0.1:3900"; # localhost because not encrypted
                     s3_region = "garage";
-                    root_domain = "s3.${infra.topology.domain}";
+                    root_domain = "s3.${topology.domain}";
                 };
                 admin = {
                     api_bind_addr = "127.0.0.1:3903"; # localhost because not encrypted

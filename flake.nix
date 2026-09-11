@@ -60,7 +60,10 @@ let
                                 lib.nixosSystem {
                                     inherit system; 
                                     specialArgs = {
-                                        inherit inputs flakeRoot infra vmname;
+                                        inherit inputs flakeRoot vmname;
+                                        inherit (infra) topology;
+                                        deploy = infra.deploy.systems.${vmname};
+                                        services = infra.services;
                                     } // extraArgs;
                                     modules = [
                                         inputs.disko.nixosModules.disko    

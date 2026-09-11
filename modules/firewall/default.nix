@@ -1,10 +1,9 @@
-{flakeRoot, lib, inputs, pkgs, config, infra, vmname, ...}:
+{flakeRoot, lib, inputs, pkgs, config, deploy, vmname, ...}:
 
 /* Configures the firewall of the vm */
 
 let 
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
-    deploy = infra.deploy.systems.${vmname};
     public_interface = "enp1s0";
     allInterfaces = config.networking.interfaces;
 
