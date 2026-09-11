@@ -54,7 +54,7 @@ let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
 
     processLdap =
         env: ldap:
-        let secret = {inherit (ldap) filename owner reload mode;};
+        let secret = {inherit (ldap) filename owner mode;};
         in mkSharedSecret env ldaphosts "openldap" secret // mkProxy env "ldap.${domain}" 636 ldaphosts "tcp"; 
     processS3 = 
         env: access:

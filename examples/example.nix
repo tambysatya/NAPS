@@ -22,6 +22,7 @@
         "pg-main".is = "postgres";
         "nc-main".is = "nextcloud";
         "hydra-main".is = "hydra";
+        "log-main".is = "journald-remote";
     };
     hosts = {
       cpuhost1 = {
@@ -85,6 +86,15 @@
 
         ip = "192.168.1.204";
         services = ["hydra-main"];
+      };
+      log  = {
+        host = "cpuhost1";
+        vcpu=1;
+        memory=1024;
+        ip = "192.168.1.205";
+        services = ["log-main"];
+
+        
       };
 
     };

@@ -41,6 +41,21 @@ let
                        else go (seen ++ [x]) (builtins.tail rest);
         in go [] xs;
 
+    partitionAttrs = 
+        predicate: attrs:
+        let
+            f = acc: name:
+                let val = attrs.${name};
+                    right = acc.right;
+                    wrong = acc.wrong;
+                in if predicate name val
+                   then {right = right // {${name} = val;}; inherit wrong;}
+                   else {wrong = wrong // {${name} = val;}; inherit right;};
+        in lib.foldl' f {right={}; wrong={};} (builtins.attrNames attrs);
+
+    concatMapAttrsStringsSep = 
+        sep: f: attrs: lib.concatStringsSep sep (lib.mapAttrsToList f attrs);
+
     serviceName = config: id:
         config.infra.topology.services.${id}.is;
     servicePriority = config: id:
@@ -52,6 +67,7 @@ let
         in config.infra.services.${srvname};
 
 in vars // {
+    inherit partitionAttrs concatMapAttrsStringsSep;
     inherit mergeAll pathToMountUnit;
     inherit hasDupplicate getFirstDupplicate;
     inherit serviceName servicePriority serviceTags serviceInfo;

@@ -51,6 +51,12 @@ let
                                     specialArgs = {inherit flakeRoot path; inherit (config) infra;};
                                     config = config.infra.outputs.systems.${srvuid}.config // {
                                                     imports = config.infra.outputs.systems.${srvuid}.imports;
+                                                    security.pki.certificateFiles = [
+                                                        "${path}/.secrets/git/root_ca.crt"
+                                                        "${path}/.secrets/git/intermediate_ca.crt"
+                                                    ]; #trust the root-ca
+                                                    environment.etc."root_ca.crt".text = builtins.readFile "${path}/.secrets/git/root_ca.crt";
+                                                    environment.etc."intermediate_ca.crt".text = builtins.readFile "${path}/.secrets/git/intermediate_ca.crt";
                                                     environment.systemPackages = systemPackages;
                                                     system.stateVersion = "26.05";
                                                  };

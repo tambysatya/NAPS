@@ -2,7 +2,7 @@
 
 let
     libtypes = lib.types;
-    serviceNames = ["step-ca" "openldap" "keycloak" "garage" "postgres" "nextcloud" "hydra"];
+    serviceNames = ["step-ca" "openldap" "keycloak" "garage" "postgres" "nextcloud" "hydra" "journald-remote"];
     serviceType = types.enum serviceNames;
 
     deployement = import ./deployement.nix {inherit lib inputs;};

@@ -1,4 +1,4 @@
-{flakeRoot, lib, inputs, config, ...}:
+{flakeRoot, lib, inputs, config, pkgs, ...}:
 
 /* Deploys HAProxy on each VM */
 
@@ -10,10 +10,8 @@ let
         let parts = lib.splitString "." domain;
         in "${builtins.head parts}_${lib.toString i}.${lib.concatStringsSep "." (builtins.tail parts)}";
 
-    processL4Proxy = 
-        mode: # tcp or udp
-        name:
-        {frontend, backends, extraConfig}: #TODO extraConfig is ignored at the moment
+    generateBackends = 
+        mode: name: backends:
         let sortedBackends = builtins.sort (b: b': b.env.priority >= b'.env.priority) backends; #sorted by decreasing priority
             mkBackendEntry = i: {ip, port, ...}:
             ''
@@ -21,15 +19,63 @@ let
             '';
         in 
         ''
+        backend be_${name}
+            mode ${mode}
+            ${lib.concatStringsSep "\n" (lib.imap mkBackendEntry sortedBackends)}
+        '';
+    processL4Proxy = 
+        mode: # tcp or udp
+        name:
+        {frontend, backends, extraConfig}: #TODO extraConfig is ignored at the moment
+        ''
             frontend ${name}
                 mode ${mode}
                 bind :${lib.toString frontend.port} #binds on all interfaces. The access will be managed by the firewall
                 default_backend be_${name} 
-            backend be_${name}
-                mode ${mode}
-                ${lib.concatStringsSep "\n" (lib.imap mkBackendEntry backends)}
+            ${generateBackends mode name backends}
         '';
 
+
+    generateHTTPProxy=
+        allEntries:
+        let parts = utils.partitionAttrs (_: {tls,...}: tls) allEntries;
+            tls = parts.right;
+            nontls = parts.wrong;
+
+            tlsmap = pkgs.writeText "tls.map" (mkMap (builtins.attrNames tls));
+            nontlsmap = pkgs.writeText ("nontls.map")(mkMap (builtins.attrNames nontls));
+
+
+            conf = ''
+                frontend https
+                    bind *:443
+                    mode tcp
+                    tcp-request inspect-delay 5s
+                    tcp-request content accept if {req_ssl_hello_type 1}
+                    use_backend %[req.ssl_sni,lower,map_dom(${nontlsmap},nonSNI_be)]
+                backend nonSNI_be
+                    mode tcp
+                    server nonSNI_fe 127.0.0.1:9443 check check-ssl
+
+                frontend nonSNI_fe
+                    bind :9443 ssl crt /var/lib/certs
+                    mode http
+                    use_backend %[req.hdr(host),lower,map_dom(${tlsmap},http_back)]
+                ${utils.concatMapAttrsStringsSep "\n"
+                    (name: {backends,...}: generateBackends "tcp" name backends)
+                    tls}
+                ${utils.concatMapAttrsStringsSep "\n"
+                    (name: {backends,...}: generateBackends "http" name backends)
+                    nontls}
+            '';
+        in conf;            
+
+    mkMap = vhosts:
+        lib.concatMapStringsSep "\n"
+            (name: "${name}         be_${name}")
+            vhosts;
+            
+/*
     generateHTTPProxy =
         allEntries:
         let terminatesTLS = allEntries != {} && (lib.head (builtins.attrValues allEntries)).tls; # Either we terminates TLS for everyone, or for nobody TODO
@@ -84,7 +130,7 @@ let
 
                 ${lib.concatStringsSep "\n" (map mkFrontEnd (builtins.attrNames allEntries))}
         '';
-    
+  */  
     processVM = 
         vmname: deploy:
         let tcp = deploy.proxy.tcp;
