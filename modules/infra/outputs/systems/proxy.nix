@@ -32,9 +32,10 @@ let
     generateL4Proxy = 
         vmname:
         mode: # tcp or udp
-        name:
+        port:
         {frontend, backends, extraConfig}: #TODO extraConfig is ignored at the moment
-        let bind= mkBind vmname frontend.port frontend.public ;
+        let bind= mkBind vmname port frontend.public ;
+            name = frontend.hostname;
         in ''
             frontend ${name}
                 mode ${mode}
