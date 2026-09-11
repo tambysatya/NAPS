@@ -27,9 +27,9 @@ let
     mkBind = 
         vmname: port: public:
         let deploy = config.infra.deploy.systems.${vmname};
-            localIP = if deploy.containers == [] then "127.0.0.1" else "192.168.100.1";
+            localbind = if deploy.containers == [] then "127.0.0.1:${lib.toString port}" else "192.168.100.1:${lib.toString port},127.0.0.1:${lib.toString port}";
             #containersips = map (env: utils.envIP config env) deploy.containers;
-        in if public then "0.0.0.0:${lib.toString port}" else "${localIP}:${lib.toString port}";
+        in if public then "0.0.0.0:${lib.toString port}" else "${localbind}";
     generateL4Proxy = 
         vmname:
         mode: # tcp or udp
