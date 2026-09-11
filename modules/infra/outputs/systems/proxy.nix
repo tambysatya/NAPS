@@ -54,8 +54,8 @@ let
             tls = parts.right;
             nontls = parts.wrong;
 
-            tlsmap = pkgs.writeText "tls.map" (mkMap "http" (builtins.attrNames tls));
-            nontlsmap = pkgs.writeText ("nontls.map")(mkMap "tcp" (builtins.attrNames nontls));
+            tlsmap = pkgs.writeText "tls.map" (mkMap "http" 443 (builtins.attrNames tls));
+            nontlsmap = pkgs.writeText ("nontls.map")(mkMap "tcp" 443 (builtins.attrNames nontls));
 
             suffix = if public then "public" else "private";
             bind = mkBind vmname 443 public;
@@ -101,9 +101,9 @@ let
             '';
         in conf;
 
-    mkMap = mode: vhosts:
+    mkMap = mode: frontport: vhosts:
         lib.concatMapStringsSep "\n"
-            (name: "${name}         be_${name}_${mode}")
+            (name: "${name}         be_${name}_${mode}_${lib.toString frontport}")
             vhosts;
             
     processVM = 
