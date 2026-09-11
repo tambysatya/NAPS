@@ -86,7 +86,7 @@ let
                 backend http_back_${suffix}
                     http-request return status 404
             '';
-        in conf;            
+        in if allEntries != [] then conf else "";            
 
     mkMap = mode: vhosts:
         lib.concatMapStringsSep "\n"
