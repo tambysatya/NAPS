@@ -11,7 +11,7 @@ let
         in "${builtins.head parts}_${lib.toString i}.${lib.concatStringsSep "." (builtins.tail parts)}";
 
     generateBackends = 
-        mode: name: backends:
+        mode: frontport: name: backends:
         let sortedBackends = builtins.sort (b: b': b.env.priority >= b'.env.priority) backends; #sorted by decreasing priority
             mkBackendEntry = i: {ip, port, ...}:
             ''
@@ -19,7 +19,7 @@ let
             '';
         in 
         ''
-        backend be_${name}_${mode}
+        backend be_${name}_${mode}_${lib.toString frontport}
             mode ${mode}
             ${lib.concatStringsSep "\n" (lib.imap mkBackendEntry sortedBackends)}
         '';
@@ -41,7 +41,7 @@ let
                 mode ${mode}
                 bind ${bind} 
                 default_backend be_${name}_${mode}
-            ${generateBackends mode name backends}
+            ${generateBackends mode port name backends}
         '';
 
 
@@ -75,10 +75,10 @@ let
                     mode http
                     use_backend %[req.hdr(host),lower,map_dom(${tlsmap},http_back)]
                 ${utils.concatMapAttrsStringsSep "\n"
-                    (name: {backends,...}: generateBackends "http" name backends)
+                    (name: {backends,...}: generateBackends 443 "http" name backends)
                     tls}
                 ${utils.concatMapAttrsStringsSep "\n"
-                    (name: {backends,...}: generateBackends "tcp" name backends)
+                    (name: {backends,...}: generateBackends 443 "tcp" name backends)
                     nontls}
             '';
         in conf;            
