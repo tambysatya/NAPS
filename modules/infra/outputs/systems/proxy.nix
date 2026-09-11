@@ -110,11 +110,10 @@ let
         vmname: deploy:
         let tcp = deploy.proxy.tcp;
             udp = deploy.proxy.udp;
-            parts = utils.partitionAttrs (_: attr: builtins.getAttr "public" attr) deploy.proxy.http;
-            publicHTTP = parts.right;
-            privateHTTP = parts.wrong;
+            allHTTP = deploy.proxy.http;
+            publicHTTP = lib.filterAttrs (_: attr: builtins.getAttr "public" attr) allHTTP;
 
-        in if (tcp != {} || udp != {} || publicHTTP != {} || privateHTTP != {})  
+        in if (tcp != {} || udp != {} || allHTTP != {} || publicHTTP != {})  
                 then 
                 {
                     ${vmname}.config.services.haproxy = {
@@ -129,8 +128,12 @@ let
                                     (lib.mapAttrsToList (generateL4Proxy vmname "tcp") tcp)}
                                 ${lib.concatStringsSep "\n"
                                     (lib.mapAttrsToList (generateL4Proxy vmname "udp") udp)}
+
+                                # public HTTP (reverse proxies)
                                 ${if publicHTTP != {} then generateHTTPProxy vmname true publicHTTP else ""}
-                                ${if privateHTTP != {} then generateHTTPProxy vmname false privateHTTP else ""}
+
+                                # private HTTP (proxy). Every available endpoint should be there (including the services hosted locally)
+                                ${if allHTTP != {} then generateHTTPProxy vmname false allHTTP else ""}
 
                             '';
                     };
