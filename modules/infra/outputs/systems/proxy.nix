@@ -60,6 +60,21 @@ let
             suffix = if public then "public" else "private";
             bind = mkBind vmname 443 public;
 
+            # We set up a reverse proxy only if there is some services requesting it. Otherwise, we drop an error.
+            reverseProxyFront = if tlsmap == [] then 
+                ''
+                frontend nonSNI_fe_${suffix}
+                    mode http
+                    http-request return status 404
+                ''
+                else ''
+                frontend nonSNI_fe_${suffix}
+                    bind :9443 ssl crt /var/lib/certs
+                    mode http
+                    option forwardfor
+                    use_backend %[req.hdr(host),lower,map_dom(${tlsmap},http_back_${suffix})]
+                '';
+
 
             conf = ''
                 frontend https_${suffix}
@@ -72,11 +87,8 @@ let
                     mode tcp
                     server nonSNI_fe_${suffix} 127.0.0.1:9443 check check-ssl ca-file /etc/intermediate_ca.crt
 
-                frontend nonSNI_fe_${suffix}
-                    bind :9443 ssl crt /var/lib/certs
-                    mode http
-                    option forwardfor
-                    use_backend %[req.hdr(host),lower,map_dom(${tlsmap},http_back_${suffix})]
+                ${reverseProxyFront}
+
                 ${utils.concatMapAttrsStringsSep "\n"
                     (name: {backends,...}: generateBackends "http" 443 name backends)
                     tls}
@@ -84,9 +96,10 @@ let
                     (name: {backends,...}: generateBackends "tcp" 443 name backends)
                     nontls}
                 backend http_back_${suffix}
+                    mode http 
                     http-request return status 404
             '';
-        in if allEntries != [] then conf else "";            
+        in conf;
 
     mkMap = mode: vhosts:
         lib.concatMapStringsSep "\n"
