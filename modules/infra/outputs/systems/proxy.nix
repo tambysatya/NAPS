@@ -102,6 +102,7 @@ let
                 ${reverseProxyFront}
 
                 backend http_back_${suffix}
+                    # backend where the host is not found
                     mode http 
                     http-request return status 404
             '';
@@ -148,7 +149,7 @@ let
                                 ${if publicHTTP != {} then generateHTTPFrontend vmname true publicHTTP else ""}
 
                                 # private HTTP (proxy). 
-                                ${if privateHTTP != {} then generateHTTPFrontend vmname false privateHTTP else ""}
+                                ${if privateHTTP != {} then generateHTTPFrontend vmname false allHTTP else ""}
 
                                 #HTTP backends (common for public and private proxy)
                                 ${generateHTTPBackends tls nontls}
