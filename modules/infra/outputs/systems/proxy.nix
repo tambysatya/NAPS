@@ -81,7 +81,7 @@ let
                 ${utils.concatMapAttrsStringsSep "\n"
                     (name: {backends,...}: generateBackends "tcp" 443 name backends)
                     nontls}
-                backedn http_back_${suffix}
+                backend http_back_${suffix}
                     http-request return status 404
             '';
         in conf;            
