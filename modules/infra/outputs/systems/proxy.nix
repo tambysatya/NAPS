@@ -40,7 +40,7 @@ let
             frontend ${name}_${mode}_${lib.toString port}
                 mode ${mode}
                 bind ${bind} 
-                default_backend be_${name}_${mode}
+                default_backend be_${name}_${mode}_${lib.toString port}
             ${generateBackends mode port name backends}
         '';
 
@@ -75,10 +75,10 @@ let
                     mode http
                     use_backend %[req.hdr(host),lower,map_dom(${tlsmap},http_back)]
                 ${utils.concatMapAttrsStringsSep "\n"
-                    (name: {backends,...}: generateBackends 443 "http" name backends)
+                    (name: {backends,...}: generateBackends "http" 443 name backends)
                     tls}
                 ${utils.concatMapAttrsStringsSep "\n"
-                    (name: {backends,...}: generateBackends 443 "tcp" name backends)
+                    (name: {backends,...}: generateBackends "tcp" 443 name backends)
                     nontls}
             '';
         in conf;            
