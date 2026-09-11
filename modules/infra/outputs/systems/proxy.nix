@@ -19,7 +19,7 @@ let
             '';
         in 
         ''
-        backend be_${name}
+        backend be_${name}_${mode}
             mode ${mode}
             ${lib.concatStringsSep "\n" (lib.imap mkBackendEntry sortedBackends)}
         '';
@@ -37,10 +37,10 @@ let
         let bind= mkBind vmname port frontend.public ;
             name = frontend.hostname;
         in ''
-            frontend ${name}
+            frontend ${name}_${mode}_${lib.toString port}
                 mode ${mode}
-                bind ${bind} #binds on all interfaces. 
-                default_backend be_${name} 
+                bind ${bind} 
+                default_backend be_${name}_${mode}
             ${generateBackends mode name backends}
         '';
 
@@ -53,8 +53,8 @@ let
             tls = parts.right;
             nontls = parts.wrong;
 
-            tlsmap = pkgs.writeText "tls.map" (mkMap (builtins.attrNames tls));
-            nontlsmap = pkgs.writeText ("nontls.map")(mkMap (builtins.attrNames nontls));
+            tlsmap = pkgs.writeText "tls.map" (mkMap "http" (builtins.attrNames tls));
+            nontlsmap = pkgs.writeText ("nontls.map")(mkMap "tcp" (builtins.attrNames nontls));
 
             bind = mkBind vmname 443 public;
 
@@ -75,17 +75,17 @@ let
                     mode http
                     use_backend %[req.hdr(host),lower,map_dom(${tlsmap},http_back)]
                 ${utils.concatMapAttrsStringsSep "\n"
-                    (name: {backends,...}: generateBackends "tcp" name backends)
+                    (name: {backends,...}: generateBackends "http" name backends)
                     tls}
                 ${utils.concatMapAttrsStringsSep "\n"
-                    (name: {backends,...}: generateBackends "http" name backends)
+                    (name: {backends,...}: generateBackends "tcp" name backends)
                     nontls}
             '';
         in conf;            
 
-    mkMap = vhosts:
+    mkMap = mode: vhosts:
         lib.concatMapStringsSep "\n"
-            (name: "${name}         be_${name}")
+            (name: "${name}         be_${name}_${mode}")
             vhosts;
             
     processVM = 
