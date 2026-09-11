@@ -75,6 +75,7 @@ let
                 frontend nonSNI_fe_${suffix}
                     bind :9443 ssl crt /var/lib/certs
                     mode http
+                    option forwardfor
                     use_backend %[req.hdr(host),lower,map_dom(${tlsmap},http_back_${suffix})]
                 ${utils.concatMapAttrsStringsSep "\n"
                     (name: {backends,...}: generateBackends "http" 443 name backends)
