@@ -55,12 +55,12 @@ config =
             wantedBy = ["multi-agent.target"];
 
             after = [
-                "srv-meta.mount"
-                "srv-data.mount"
+                "var-lib-garage-meta.mount"
+                "var-lib-garage-data.mount"
             ];
             requires = [
-                "srv-meta.mount"
-                "srv-data.mount"
+                "var-lib-garage-meta.mount"
+                "var-lib-garage-data.mount"
             ];
 
             serviceConfig.Type = "oneshot";
