@@ -61,7 +61,7 @@ let
             bind = mkBind vmname 443 public;
 
             # We set up a reverse proxy only if there is some services requesting it. Otherwise, we drop an error.
-            reverseProxyFront = if tlsmap == [] then 
+            reverseProxyFront = if tls == {} then 
                 ''
                 frontend nonSNI_fe_${suffix}
                     mode http
