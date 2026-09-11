@@ -84,6 +84,9 @@ let
                     bind :9443 ssl crt /var/lib/certs
                     mode http
                     option forwardfor
+                    http-request set-header X-Forwarded-Proto https
+                    http-request set-header X-Forwarded-Port 443
+
                     use_backend %[req.hdr(host),lower,map_dom(${tlsmap},http_back_${suffix})]
                 '';
 
