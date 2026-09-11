@@ -43,8 +43,8 @@ config.infra.services.garage = {
         {filename = "garage-metrics.key"; inherit owner opensslSize opensslType;}
     ];
     persistent = [
-        {path="/var/lib/garage/data"; inherit owner reload; mode = "0700";}
-        {path="/var/lib/garage/meta"; inherit owner reload; mode = "0700";}
+        {path="/srv/data"; inherit owner reload; mode = "0700";}
+        {path="/srv/meta"; inherit owner reload; mode = "0700";}
     ];
     endpoints.http= [
         {hostname="s3.${domain}"; port=3900; tls = true; inherit extraConfig;}

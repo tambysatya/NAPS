@@ -55,12 +55,12 @@ config =
             wantedBy = ["multi-agent.target"];
 
             after = [
-                "var-lib-garage-meta.mount"
-                "var-lib-garage-data.mount"
+                "srv-meta.mount"
+                "srv-data.mount"
             ];
             requires = [
-                "var-lib-garage-meta.mount"
-                "var-lib-garage-data.mount"
+                "srv-meta.mount"
+                "srv-data.mount"
             ];
 
             before = ["garage.service"];
@@ -68,8 +68,8 @@ config =
 
             serviceConfig.Type = "oneshot";
             script = ''
-                chown -R garage:garage /var/lib/garage/meta
-                chown -R garage:garage /var/lib/garage/data
+                chown -R garage:garage /srv/meta
+                chown -R garage:garage /srv/data
             '';
         };
         systemd.services.garage-bootstrap = {

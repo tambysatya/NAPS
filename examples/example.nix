@@ -47,8 +47,8 @@
         vcpu = 4;
         memory = 8000;
         disks = [
-            {type="disk"; path="/dev/pvhdd/s3"; mount="/var/lib/garage/data"; fs="xfs"; options=["nofail"];}
-            {type="disk"; path="/dev/pvhdd/s3_metadatas"; mount="/var/lib/garage/meta"; fs="xfs"; options=["nofail"];}
+            {type="disk"; path="/dev/pvhdd/s3"; mount="/srv/data"; fs="xfs"; options=["nofail"];}
+            {type="disk"; path="/dev/pvhdd/s3_metadatas"; mount="/srv/meta"; fs="xfs"; options=["nofail"];}
         ];
 
         ip = "192.168.1.201";
