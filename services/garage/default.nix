@@ -65,8 +65,8 @@ config =
 
             serviceConfig.Type = "oneshot";
             script = ''
-                chown -R garage:garage /srv/meta
-                chown -R garage:garage /srv/data
+                chown -R garage:garage /var/lib/garage/meta
+                chown -R garage:garage /var/lib/garage/data
             '';
         };
         systemd.services.garage-bootstrap = {
