@@ -17,6 +17,8 @@ config =
             package = pkgs.garage_2; 
             settings = 
             {
+                data_dir = "/srv/data";
+                metadata_dir = "/srv/meta";
                 rpc_bind_addr = "[::]:3901";
                 rpc_secret_file = "/var/lib/secrets/garage-rpc.key";
                 replication_factor = 1;
