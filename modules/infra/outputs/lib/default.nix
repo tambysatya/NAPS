@@ -1,6 +1,6 @@
 {flakeRoot, lib, inputs,...}:
 
-let utils = import "${flakeRoot}/lib" {inherit lib inputs;};
+let utils = import "${flakeRoot}/modules/infra/deploy/lib.nix" {inherit lib inputs flakeRoot;};
 
 in utils // {
 
