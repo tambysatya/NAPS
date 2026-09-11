@@ -46,7 +46,17 @@ let
         '';
 
 
-    generateHTTPProxy=
+    generateHTTPBackends =  # Generates all the backends. Accessibility is handled by maps
+        tls: nontls:
+        ''
+            ${utils.concatMapAttrsStringsSep "\n"
+                (name: {backends,...}: generateBackends "http" 443 name backends)
+                tls}
+            ${utils.concatMapAttrsStringsSep "\n"
+                (name: {backends,...}: generateBackends "tcp" 443 name backends)
+                nontls}
+        '';
+    generateHTTPFrontend=
         vmname:
         public:
         allEntries:
@@ -56,6 +66,8 @@ let
 
             tlsmap = pkgs.writeText "tls.map" (mkMap "http" 443 (builtins.attrNames tls));
             nontlsmap = pkgs.writeText ("nontls.map")(mkMap "tcp" 443 (builtins.attrNames nontls));
+
+            # if private, the maps should also include the backends that are publics
 
             suffix = if public then "public" else "private";
             bind = mkBind vmname 443 public;
@@ -89,12 +101,6 @@ let
 
                 ${reverseProxyFront}
 
-                ${utils.concatMapAttrsStringsSep "\n"
-                    (name: {backends,...}: generateBackends "http" 443 name backends)
-                    tls}
-                ${utils.concatMapAttrsStringsSep "\n"
-                    (name: {backends,...}: generateBackends "tcp" 443 name backends)
-                    nontls}
                 backend http_back_${suffix}
                     mode http 
                     http-request return status 404
@@ -111,9 +117,18 @@ let
         let tcp = deploy.proxy.tcp;
             udp = deploy.proxy.udp;
             allHTTP = deploy.proxy.http;
-            publicHTTP = lib.filterAttrs (_: attr: builtins.getAttr "public" attr) allHTTP;
 
-        in if (tcp != {} || udp != {} || allHTTP != {} || publicHTTP != {})  
+            # splitting the http entries between "public" and "private"
+            publicp = utils.partitionAttrs (_: attr: builtins.getAttr "public" attr) allHTTP;
+            publicHTTP = publicp.right;
+            privateHTTP = publicp.wrong;
+
+            # splitting the https backends between TLS terminated and non-tls terminated
+            tlsp = utils.partitionAttrs (_: attr: builtins.getAttr "tls" attr) allHTTP;
+            tls = tlsp.right;
+            nontls = tlsp.wrong;
+
+        in if (tcp != {} || udp != {} || privateHTTP != {} || publicHTTP != {})  
                 then 
                 {
                     ${vmname}.config.services.haproxy = {
@@ -130,10 +145,13 @@ let
                                     (lib.mapAttrsToList (generateL4Proxy vmname "udp") udp)}
 
                                 # public HTTP (reverse proxies)
-                                ${if publicHTTP != {} then generateHTTPProxy vmname true publicHTTP else ""}
+                                ${if publicHTTP != {} then generateHTTPFrontend vmname true publicHTTP else ""}
 
-                                # private HTTP (proxy). Every available endpoint should be there (including the services hosted locally)
-                                ${if allHTTP != {} then generateHTTPProxy vmname false allHTTP else ""}
+                                # private HTTP (proxy). 
+                                ${if privateHTTP != {} then generateHTTPFrontend vmname false privateHTTP else ""}
+
+                                #HTTP backends (common for public and private proxy)
+                                ${generateHTTPBackends tls nontls}
 
                             '';
                     };
