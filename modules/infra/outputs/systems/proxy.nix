@@ -141,8 +141,11 @@ let
                                     ssl-server-verify none
                                 defaults
                                     timeout connect 5s
-                                    timeout client 30s
-                                    timeout server 30s
+
+                                    # connections are handled by the kernels
+                                    timeout client 0
+                                    timeout server 0
+                                    option tcpka
                                 ${lib.concatStringsSep "\n"
                                     (lib.mapAttrsToList (generateL4Proxy vmname "tcp") tcp)}
                                 ${lib.concatStringsSep "\n"
