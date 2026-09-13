@@ -47,7 +47,7 @@ let
                     address = topo.gateway;
                     interface = iface;
                 };
-                #nameservers = config.infra.topology.dns; # TODO useful ?
+                nameservers = config.infra.topology.dns; # TODO useful ?
                 hosts = mkHosts deploy;
                 interfaces.${iface}.ipv4 = {
                     addresses = [
@@ -90,6 +90,7 @@ let
                     firewall.enable = false; #No firewall on the containers
                     useHostResolvConf = lib.mkForce false;
                     defaultGateway = hostDefaultAddress;
+                    nameservers = config.infra.topology.dns; # TODO useful ?
                     interfaces.eth0.ipv4.addresses = [ #eth0 is the default interface of containers
                         {address = deploy.ip; prefixLength = 24;}
                     ];
