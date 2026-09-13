@@ -22,7 +22,9 @@ let
           "$KEY_PATH" \
           --force
 
-        cat "$CRT_PATH" "$KEY_PATH" > ${vars.pemdir}/${hostname}.pem
+        ${if owner == "haproxy" then 
+            ''cat "$CRT_PATH" "$KEY_PATH" > ${vars.pemdir}/${hostname}.pem''
+          else ""}
 
         new_hash=$(${pkgs.coreutils}/bin/sha256sum "$CRT_PATH" | cut -d' ' -f1)
 
