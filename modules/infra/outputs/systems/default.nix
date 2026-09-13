@@ -41,6 +41,7 @@ in
                ./network.nix
                ./proxy.nix
                ./links.nix # services dependency
+               ./logs.nix
               ];
     #infra.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.infra.deploy.systems);
     infra.outputs.systems = 

@@ -27,9 +27,13 @@ let
     hostDeployementEnv = # get the hosting deployement environment
         env: {inherit (env) priority tags; type="vm"; host=envHost env;};
 
+    mkVMEnv = vmname: {type="vm"; host=vmname;};
+    mkCTEnv = vmname: ctname: {type="container"; host={container=ctname; vm=vmname;};};
+
 in {
     inherit ssl_root ssl_crt_path ssl_key_path pemdir;
     inherit s3_key s3_key_id db_key;
     inherit directory_id;
     inherit envUID envHost hostDeployementEnv;
+    inherit mkVMEnv mkCTEnv;
 }

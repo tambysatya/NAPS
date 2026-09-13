@@ -88,7 +88,7 @@ Migration:
 - config: use deploy.<name>.reverseProxy and deploy.<name>.proxy to handle clearly both directions of the proxy and resolves conflicts ?
 - instead of working in domain (local.fr) create a subdomain like (naps.local.fr) to ensure no clash with existing installation
 - params the ip address of the containers private network (actually its forced to be 192.168.100.0/24) 
-- have a different interface per container + open firewall on containers
+- integrate full chain in the certificates and only pass root_ca.crt (not intermediate_ca.crt)
 
 ### IDEAS
 
@@ -101,6 +101,7 @@ CHECKS:
 - each mountpoint is declared by one disk
 - Two services does not request the same repository
 - checks if the partitions exist on the KVM hosts 
+- centralizeLogs cannot be enabled if journald-remote is not deployed
 
 
 EXPERIMENTS:

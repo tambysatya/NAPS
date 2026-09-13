@@ -8,7 +8,7 @@ let
     processVM =
         vmname: {ip, services, containers, ...}:
         let
-            mkEnv = name: {type="container"; host={container=name; vm=vmname;};};
+            mkEnv = name: utils.mkCTEnv vmname name;
             ctconfs = lib.imap 
                         (i: name:
                         let env = mkEnv name;
@@ -22,7 +22,7 @@ let
                         containers;
             vmconf = {
                         ${vmname} = {
-                            env = {type="vm"; host=vmname;};
+                            env = utils.mkVMEnv vmname;
                             inherit ip;
                         };
                      };
