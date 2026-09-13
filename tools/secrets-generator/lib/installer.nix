@@ -86,6 +86,7 @@ let
 
     mkInstaller = vmsecrets:
     ''
+        set -euo pipefail
         mkdir -p ${installdir}
         ${lib.concatMapStringsSep "\n" installSecret vmsecrets}
     '';
