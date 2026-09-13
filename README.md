@@ -96,6 +96,7 @@ CHECKS:
 - each disk is mounted on ONE mountpoint
 - each mountpoint is declared by one disk
 - Two services does not request the same repository
+- checks if the partitions exist on the KVM hosts 
 
 
 EXPERIMENTS:

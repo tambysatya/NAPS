@@ -4,7 +4,7 @@ let
 
     domain = config.infra.topology.domain;
     owner = "hydra";
-    reload = ["hydra.service"];
+    reload = ["hydra.service" "hydra-init.service"];
     endpoints = {
         http = [
             {
