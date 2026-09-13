@@ -20,7 +20,7 @@
     };
 	};
 
-  outputs = inputs@{nixpkgs, terranix, ...}:
+  outputs = inputs@{nixpkgs, self, terranix, ...}:
 
 let
     system = "x86_64-linux";
@@ -220,6 +220,10 @@ let
                                     (nixos-generator args)
                                     ({iso = compileIso args;})
                                 ];
+
+          hydraJobs = {
+            inherit (self) checks terranix packages;
+          };
           #terranixConfigurations = terranix.lib.terranixConfiguration (terranix-generator ./example.nix);
 
     #        terranix.lib.terranixConfiguration {inherit system; 
