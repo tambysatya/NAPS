@@ -37,7 +37,7 @@ let
         in ''
             ${installFile crt owner owner "0400"} 
             ${installFile key owner owner "0400"} 
-            ${if owner == "haproxy" then peminstall else ""}
+            ${peminstall}
         '';
 
     mkPgPass = 
