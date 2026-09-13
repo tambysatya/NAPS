@@ -2,7 +2,7 @@
 let
     domain = config.infra.topology.domain;
     hostname = "journald.${domain}";
-    owner = "root";
+    owner = "systemd-journal-remote";
     reload = ["systemd-journal-remote.service"];
     endpoints = {
         tcp = [ #journald use mTLS internally

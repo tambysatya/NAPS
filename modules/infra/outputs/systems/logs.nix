@@ -13,7 +13,7 @@ let
         type = "sslCertificate";
         content = {
             hostname = loggingCertName vmname;
-            owner = "root";
+            owner = "systemd-journal-upload";
             reload = ["systemd-journal-upload.service"];
         };
         recipients = [(getEnv vmname)];
@@ -26,7 +26,7 @@ let
                 settings.Upload = {
                     ServerCertificateFile = "/var/lib/secrets/${loggingCertName vmname}.crt";
                     ServerKeyFile = "/var/lib/secrets/${loggingCertName vmname}.key";
-                    TrustedCertificateFile = "/etc/intermediate_ca.crt";
+                    TrustedCertificateFile = "/etc/root_ca.crt";
                     URL = "https://journald.${domain}";
                 };
             };

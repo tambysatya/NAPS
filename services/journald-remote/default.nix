@@ -10,7 +10,7 @@ in {
             Remote = {
                 ServerCertificateFile = "/var/lib/secrets/${domain}.crt";
                 ServerKeyFile = "/var/lib/secrets/${domain}.key";
-                TrustedCertificateFile = "/etc/intermediate_ca.key";
+                TrustedCertificateFile = "/etc/root_ca.key";
             };
             
         };
