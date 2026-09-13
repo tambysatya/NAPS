@@ -64,4 +64,9 @@ config.systemd.services.hydra-init-passwords = {
       RemainAfterExit = true;
     };
 };
+config.nix.settings.allowed-uris = [ # to evaluate flakes inputs outside the nix-store  (see https://wiki.nixos.org/wiki/Hydra)
+      "github:"
+      "git+https://github.com/"
+      "git+ssh://github.com/"
+    ];
 }
