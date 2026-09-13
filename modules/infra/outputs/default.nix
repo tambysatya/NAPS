@@ -59,6 +59,7 @@ let
                                                     environment.etc."intermediate_ca.crt".text = builtins.readFile "${path}/.secrets/git/intermediate_ca.crt";
                                                     environment.systemPackages = systemPackages;
                                                     system.stateVersion = "26.05";
+                                                    nix.settings.experimental-features = ["nix-command" "flakes"]; #enable flakes
                                                  };
                                 };
                              })
