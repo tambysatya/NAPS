@@ -28,5 +28,8 @@ infra.services.hydra ={
     store.passwords = [
         {filename = "hydra-admin-pass.key"; owner="hydra"; opensslType = "base64"; opensslSize=64;}
     ];
+    persistent = [
+        {path = "/nix"; owner="root"; reload=[]; mode="755";}
+    ];
 };
 }

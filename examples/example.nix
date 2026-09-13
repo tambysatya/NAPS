@@ -86,6 +86,11 @@
 
         ip = "192.168.1.204";
         services = ["hydra-main"];
+        disks = [
+            {type="disk"; path="/dev/ssd/hydra"; mount="/nix"; fs="xfs"; options=["noatime"];}
+        ];
+
+
       };
       /*
       log  = {
