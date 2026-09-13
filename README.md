@@ -90,6 +90,10 @@ Migration:
 - params the ip address of the containers private network (actually its forced to be 192.168.100.0/24) 
 - have a different interface per container + open firewall on containers
 
+### IDEAS
+
+- add a "why" option in the persistent directory declaration in register to add a message describing why the repository is useful whenever the user does not declare it. E.G "/nix: used for hydra to cache builds. Should be consequent enough to handle multiple versions of the same project"
+
 
 CHECKS:
 - check that each disk is declared once
