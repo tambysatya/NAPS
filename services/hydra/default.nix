@@ -32,11 +32,7 @@ config.services.hydra = {
     hydraURL = hostname;
     dbi = "dbi:Pg:dbname=hydra;host=postgres.${domain};user=hydra;sslmode=require";
     notificationSender = "hydra@${domain}";
-    /*
-    extraEnv = {
-        PGPASSFILE = lib.mkForce "/var/lib/secrets/db-hydra.key.pgpass";
-    };
-    */
+    useSubstitutes = true;
 };
 config.systemd.services.hydra-init.preStart = lib.mkAfter ''
   install -m 0600 -o hydra -g hydra \
