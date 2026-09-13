@@ -2,7 +2,7 @@
 	"root": "/etc/root_ca.crt",
 	"federatedRoots": null,
 	"crt": "/etc/intermediate_ca.crt",
-	"key": "/run/secrets/intermediate_ca_key",
+	"key": "/var/lib/secrets/intermediate_ca_key",
 	"address": ":443",
 	"insecureAddress": "",
 	"dnsNames": [
@@ -24,13 +24,13 @@
 				"key": {
 					"use": "sig",
 					"kty": "EC",
-					"kid": "B2qDQ--i60gHcKDlbitsywOFZW9Ic_REwk14H-MUaSw",
+					"kid": "2iVeOHRsA_bd7pvgQdefDU6VCjwKhcAuYk8oPCqkQsM",
 					"crv": "P-256",
 					"alg": "ES256",
-					"x": "D4zpAWcxW9JUjgpuORxKKKuylqPFuYlGpY_XE5Gy-lU",
-					"y": "EFtKv1zpUQhxFMVZirCfAu06HkzvjVex5IU2SBUOtaY"
+					"x": "rLlwN_eHPSx2FK_gDPuk4ltldj0xBQcFq3SmNrTnbF4",
+					"y": "SYRMCnOpnPKqV6CUF8YVI_sA2zI8fs0yHHcSse4-ahU"
 				},
-				"encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoiTmJpeXpZcVVJY2tLR3RjT2UzamFtZyJ9.0yTBL_b8Y5nax9IN05lnsGFNsriX-7OxCxMWLGkDtIseKbOhFzagSQ.5MVrZW8KQIRskrWJ.b3g1-JNVFFMY49KIAOPxXoFbnlPngYs74VAspoEFV7fm90gPof7RiNPeLuKAJRqSYC7PlhfwjoM_HJKGDE8wabsx674RfJdebYpfVf6NnqHZRUJ9YNOUo5HSK-4gpfqYXdGIIVFK3dDn3J_RJTdf1LQbIeBywjdtAX0xRl8VNG_knjRHrYYUa_h_OVlCKPOoUVNv0SVCPBON7Z2_2TzihUWAl2EkeZ-7G5KqNnzJwhFiJRAv0BDEbDWiocISA-bCXE1U-3FY5wIGi3uPhM3T0w_Mxu7s9KXqPenS47nP79b2AvI1pilbRuM3s05gRjyqTh2D3PaUiOPix_G8T-k.cEwrbO4twQMhXcqWz_zw3Q"
+				"encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoiV0N1SGpLQ2VDRUpIWDhGWXdtaGhnQSJ9.JtWLs88BFb6X0ZMB9jIK1J2-vr_VAXpADhTtjwDmI6DUnSVT7M_7GA.3n_JjuEavh_7A7q3.cTb2y4wmnD7FE67icPixMOMpfdpweO_PXnOgP4AKucWigTovB96IDy5EjH-qJe4lNjZL-dttz6BFpAm7S09-AFqtamZ17e1A09FOhcwlaH5nwpGIGUsORyj3DaPdtOvl_XPqMyquYOzS8nJObB6PCez0iWs4SqDR74_5tmQO5DXtleQMnq1gj0FY3e9HaMoJ-0s0JsKnQrXEFP7be0RxVA4Ea_nYTMq1NUei7qBiuxQxf7qPaOyYL8vk6-33_MUBG8fjPqHfF5RNPT5pB0ScnRPQ6Yjjs-lZzhL9RuRYDcmFxVHkVG3ZPTSjoGenn9q7Up90I0O-5QQ8raq2NKE.MQOyJ_6tfKDFq4bqe-CMCg"
 			}
 		]
 	},
