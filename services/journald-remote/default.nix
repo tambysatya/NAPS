@@ -14,7 +14,7 @@ in {
                 TrustedCertificateFile = "/etc/root_ca.crt";
                 SplitMode = "none";
             };
-            
         };
+        output = "/var/log/journal/remote.journal";
     };
 }
