@@ -25,7 +25,7 @@ let
             config.users = utils.mergeAll [
                                 (utils.mergeAll (lib.mapAttrsToList mkUser deploy.users))
                                 (if isVM && centralizesLogsP && hostsJournaldSink == []
-                                    then mkUser "service-journal-upload" config.infra.deploy.users."systemd-journal-upload" else {})
+                                    then mkUser "systemd-journal-upload" config.infra.deploy.users."systemd-journal-upload" else {})
                            ];
         };
 
