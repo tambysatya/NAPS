@@ -67,6 +67,8 @@ let
             tlsmap = pkgs.writeText "tls.map" (mkMap "http" 443 (builtins.attrNames tls));
             nontlsmap = pkgs.writeText ("nontls.map")(mkMap "tcp" 443 (builtins.attrNames nontls));
 
+            tlscrt = pkgs.writeText ("tls.crt") (mkCrtList tls);
+
             # if private, the maps should also include the backends that are publics
 
             suffix = if public then "public" else "private";
@@ -81,7 +83,7 @@ let
                 ''
                 else ''
                 frontend nonSNI_fe_${suffix}
-                    bind :9443 ssl crt /var/lib/certs
+                    bind :9443 ssl crt-list ${tlscrt}  /var/lib/certs
                     mode http
                     option forwardfor
                     http-request set-header X-Forwarded-Proto https
@@ -115,6 +117,14 @@ let
         lib.concatMapStringsSep "\n"
             (name: "${name}         be_${name}_${mode}_${lib.toString frontport}")
             vhosts;
+    mkCrtList = tlsEntries:
+        utils.concatMapAttrsStringsSep "\n"
+            (vhost: {extraConfig,...}:
+             let options = "[${extraConfig.frontend.bind}]";
+             in "/var/lib/certs/${vhost}.pem ${if options == "[]" then "" else options} ${vhost}") 
+            tlsEntries;
+        
+        
             
     processVM = 
         vmname: deploy:
