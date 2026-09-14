@@ -12,9 +12,7 @@ in {
                 ServerCertificateFile = "/var/lib/secrets/${domain}.crt";
                 ServerKeyFile = "/var/lib/secrets/${domain}.key";
                 TrustedCertificateFile = "/etc/root_ca.crt";
-                SplitMode = "none";
             };
         };
-        output = "/var/log/journal/remote.journal";
     };
 }
