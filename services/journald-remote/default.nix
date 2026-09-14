@@ -15,4 +15,9 @@ in {
             };
         };
     };
+    systemd.services.systemd-journal-remote.serviceConfig = {
+        ReadOnlyPath = [
+            "/etc/root_ca.crt"
+        ];
+    };
 }
