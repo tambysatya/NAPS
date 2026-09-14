@@ -118,11 +118,14 @@ let
             (name: "${name}         be_${name}_${mode}_${lib.toString frontport}")
             vhosts;
     mkCrtList = tlsEntries:
-        utils.concatMapAttrsStringsSep "\n"
-            (vhost: {extraConfig,...}:
-             let options = "[${extraConfig.frontend.bind}]";
-             in "/var/lib/certs/${vhost}.pem ${if options == "[]" then "" else options} ${vhost}") 
-            tlsEntries + "\n";
+        let 
+            str = utils.concatMapAttrsStringsSep "\n"
+                (vhost: {extraConfig,...}:
+                 let options = "[${extraConfig.frontend.bind}]";
+                 in "/var/lib/certs/${vhost}.pem ${if options == "[]" then "" else options} ${vhost}") 
+                tlsEntries;
+        in ''${str}
+           '';
         
         
             
