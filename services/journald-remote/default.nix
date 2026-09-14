@@ -4,6 +4,7 @@ let domain = "journald.${topology.domain}";
     
 
 in {
+    networking.firewall.allowedTCPPorts = [19532];
     services.journald.remote  = {
         enable = true;
         settings = {
