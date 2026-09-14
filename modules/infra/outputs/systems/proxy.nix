@@ -83,7 +83,7 @@ let
                 ''
                 else ''
                 frontend nonSNI_fe_${suffix}
-                    bind :9443 ssl crt-list ${tlscrt}  /var/lib/certs
+                    bind :9443 ssl crt-list ${tlscrt}
                     mode http
                     option forwardfor
                     http-request set-header X-Forwarded-Proto https
