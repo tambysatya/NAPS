@@ -5,10 +5,16 @@ let
     owner = "systemd-journal-remote";
     reload = ["systemd-journal-remote.service"];
     endpoints = {
-        tcp = [ #journald use mTLS internally
+        http= [ #journald use mTLS internally
             {
                 inherit hostname;
                 port = 19532;
+                extraConfig = {
+                    frontend  = {
+                        bind = "verify required ca-file /etc/root_ca.crt";
+                    };
+                };
+                tls = true;
             }
         ];
     };

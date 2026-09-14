@@ -10,6 +10,7 @@ let
     opensslSize = 32;
     opensslType = "hex";
     
+    /*
     extraConfig = {
         virtualHosts."s3.${domain}".extraConfig = 
             ''
@@ -31,7 +32,7 @@ let
             '';
             clientMaxBodySize = "100G";
     };
-
+    */
 
 in {
 
@@ -47,7 +48,7 @@ config.infra.services.garage = {
         {path="/srv/meta"; inherit owner reload; mode = "0700";}
     ];
     endpoints.http= [
-        {hostname="s3.${domain}"; port=3900; tls = true; inherit extraConfig;}
+        {hostname="s3.${domain}"; port=3900; tls = true;}
         {hostname="s3-admin.${domain}";port=3903; tls = true;}
     ];
 };

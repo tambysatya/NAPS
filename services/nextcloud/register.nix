@@ -6,6 +6,7 @@ let
     hostname = "nextcloud.${topology.domain}";
     owner = "nextcloud";
     reload = ["phpfpm.service" "nextcloud-setup.service"];
+    /*
     extraConfig = {
         virtualHosts.${hostname}.extraConfig = 
             ''
@@ -27,7 +28,7 @@ let
             '';
         clientMaxBodySize = "100G";
     };
-
+    */
 
 
 
@@ -35,7 +36,6 @@ let
                    hostname = hostname;
                    port = 80; 
                    tls = true;
-                   inherit extraConfig;
                  }];
 in {
 

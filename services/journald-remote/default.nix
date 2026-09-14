@@ -11,7 +11,6 @@ in {
             Remote = {
                 ServerCertificateFile = "/var/lib/secrets/${domain}.crt";
                 ServerKeyFile = "/var/lib/secrets/${domain}.key";
-                #TrustedCertificateFile = "/etc/root_ca.crt";
             };
         };
     };

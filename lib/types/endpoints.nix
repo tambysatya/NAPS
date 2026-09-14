@@ -9,6 +9,30 @@ let
 
 in
 rec {
+
+
+    proxyExtraConfig = types.submodule {
+        options = {
+            frontend = lib.mkOption {
+                description = "Frontend options";
+                type = types.submodule {
+                    options = {
+                        bind = lib.mkOption {
+                            description = "Appened to the bind line";
+                            type = types.str;
+                            default = "";
+                        };
+                    };
+                };
+
+            };
+            backend = lib.mkOption {
+                description = "Backend options";
+                type = types.attrs;
+                default = {};
+            };
+        };
+    };
     
     httpEndpoint = types.submodule {
         options = {
@@ -20,8 +44,7 @@ rec {
             };
             extraConfig = lib.mkOption {
                 description = "Extra attrset transfered to the proxy configuration";
-                type = types.attrs;
-                default = {};
+                type = proxyExtraConfig;
             };
         };
     };
@@ -30,8 +53,7 @@ rec {
             inherit (types) hostname port;
             extraConfig = lib.mkOption {
                 description = "Extra attrset transfered to the proxy configuration";
-                type = types.attrs;
-                default = {};
+                type = proxyExtraConfig;
             };
         };
     };
