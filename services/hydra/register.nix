@@ -23,7 +23,7 @@ let
 in { 
 
 infra.services.hydra ={
-    users = [{name=owner; uid=10007;}];
+    users."hydra" = {service ="hydra"; uid=10007;};
     inherit links endpoints;
     store.passwords = [
         {filename = "hydra-admin-pass.key"; owner="hydra"; opensslType = "base64"; opensslSize=64;}

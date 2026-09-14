@@ -9,7 +9,7 @@ let
 in {
 
 infra.services.postgres = {
-    users = [{name = "postgres"; uid=10005;}];
+    users.postgres = {service = "postgresql"; uid=10005;};
     store.sslCertificates = [
         {inherit hostname owner reload;}
     ];

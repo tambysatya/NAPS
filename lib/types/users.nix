@@ -6,8 +6,8 @@ in
 
     user = types.submodule {
         options = {
-            name = lib.mkOption {
-                description = "Username. A group will be created with the same name";
+            service = lib.mkOption {
+                description = "Service requesting this user";
                 type = types.str;
             };
             uid = lib.mkOption {

@@ -12,7 +12,7 @@ let
 in
 {
 infra.services.step-ca = {
-    users = [{name="step-ca"; uid=10006;}];
+    users.step-ca = {service="step-ca"; uid=10006;};
     endpoints.http = [
         {inherit hostname port; tls=false;}
     ];

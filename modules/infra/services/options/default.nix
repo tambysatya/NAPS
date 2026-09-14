@@ -6,8 +6,8 @@ let libtypes = lib.types;
     service = types.submodule {
             options = {
                 users = lib.mkOption {
-                    description = "List of service users";
-                    type = types.listOf types.user;
+                    description = "Attrset of service users";
+                    type = types.attrsOf types.user;
                 };
                 persistent = lib.mkOption {
                     description = "Persistent directories, managed by the service. The infrastructure must explicitely declare a persistent storage for each of them";

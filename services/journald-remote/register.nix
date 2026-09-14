@@ -15,10 +15,10 @@ let
     ssl = {inherit hostname owner reload;};
 in {
 infra.services.journald-remote = {
-    users = [
-        {name=owner; uid=10008;}
-        {name="systemd-journal-upload"; uid=10009;} #clients
-    ];
+    users = {
+        "systemd-journal-remote" = {service ="systemd-journal-remote"; uid=10008;};
+        "systemd-journal-upload" = {service ="systemd-journal-upload"; uid=10009;}; #clients
+    };
     store.sslCertificates = [ssl];
     inherit endpoints;
 };

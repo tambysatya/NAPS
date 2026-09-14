@@ -112,8 +112,8 @@ let
                 type = types.str;
             };
             users = lib.mkOption {
-                description = "List of service users to be created";
-                type = types.listOf types.user;
+                description = "Attrset of service users to be created";
+                type = types.attrsOf types.user;
                 default = [];
             };
             secrets = lib.mkOption {

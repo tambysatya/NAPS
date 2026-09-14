@@ -4,21 +4,21 @@ let
 
     utils = import ../../deploy/lib.nix {inherit inputs lib flakeRoot;};
 
-    mkUser = {name, uid}:
+    mkUser = user: {service, uid}:
         {
-            users.${name} = {
+            users.${user} = {
                 uid = lib.mkForce uid;
-                group = name;
+                group = user;
                 isSystemUser = true;
             };
-            groups.${name} = {
+            groups.${user} = {
                 gid = lib.mkForce uid;
             };
         };
     processUsers = 
         name: deploy:
         {
-            config.users = utils.mergeAll (map mkUser deploy.users);
+            config.users = utils.mergeAll (lib.mapAttrsToList mkUser deploy.users);
         };
 
     mkRoot = vmname: _: {

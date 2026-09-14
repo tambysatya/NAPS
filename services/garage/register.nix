@@ -36,7 +36,7 @@ let
 in {
 
 config.infra.services.garage = {
-    users = [{name = "garage"; uid=10001;}];
+    users."garage" = {service = "garage"; uid=10001;};
     store.passwords = [
         {filename = "garage-rpc.key"; inherit owner opensslSize opensslType;}
         {filename = "garage-admin.key"; inherit owner opensslSize opensslType;}
