@@ -4,13 +4,15 @@ let domain = "journald.${topology.domain}";
     
 
 in {
-    networking.firewall.allowedTCPPorts = [19532];
+    #networking.firewall.allowedTCPPorts = [19532];
     services.journald.remote  = {
         enable = true;
+        listen = "http";
         settings = {
             Remote = {
                 ServerCertificateFile = "/var/lib/secrets/${domain}.crt";
                 ServerKeyFile = "/var/lib/secrets/${domain}.key";
+                ListenHttp = "127.0.0.1:19532";
             };
         };
     };
