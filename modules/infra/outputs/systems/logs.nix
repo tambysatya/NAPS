@@ -27,7 +27,7 @@ let
                     ServerCertificateFile = "/var/lib/secrets/${loggingCertName vmname}.crt";
                     ServerKeyFile = "/var/lib/secrets/${loggingCertName vmname}.key";
                     TrustedCertificateFile = "/etc/root_ca.crt";
-                    URL = "https://journald.${domain}";
+                    URL = "https://journald.${domain}:443";
                 };
             };
         };
