@@ -92,15 +92,13 @@
 
 
       };
-      /*
-      log  = {
+      logs  = {
         host = "cpuhost1";
         vcpu=1;
         memory=1024;
         ip = "192.168.1.205";
         services = ["log-main"];
       };
-      */
 
     };
   };

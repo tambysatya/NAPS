@@ -24,6 +24,7 @@ let
 
 
 in {
+    infra.deploy.users = users;
     infra.deploy.systems =
         utils.mergeAll 
             (map processService (builtins.attrValues config.infra.services)

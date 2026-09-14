@@ -2,7 +2,7 @@
 
 let
     utils = import ./lib {inherit lib inputs flakeRoot;};
-    mkUser = {name, uid}:
+    mkUser = name: {service, uid}:
         {
             users.${name} = {
                inherit uid;
@@ -31,6 +31,6 @@ in {
                             name = "deploy-flake";
                             path = path;
         };
-        users = utils.mergeAll (map mkUser config.infra.deploy.users);
+        users = utils.mergeAll (lib.mapAttrsToList mkUser config.infra.deploy.users);
     };
 }

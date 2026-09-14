@@ -8,10 +8,12 @@ let libtypes = lib.types;
                 users = lib.mkOption {
                     description = "Attrset of service users";
                     type = types.attrsOf types.user;
+                    default ={};
                 };
                 persistent = lib.mkOption {
                     description = "Persistent directories, managed by the service. The infrastructure must explicitely declare a persistent storage for each of them";
                     type = types.listOf types.volume;
+                    default = [];
                 };
                 endpoints = lib.mkOption {
                     description = "Various endpoints exposed by the service";

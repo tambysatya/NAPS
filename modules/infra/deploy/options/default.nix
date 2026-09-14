@@ -114,7 +114,7 @@ let
             users = lib.mkOption {
                 description = "Attrset of service users to be created";
                 type = types.attrsOf types.user;
-                default = [];
+                default = {};
             };
             secrets = lib.mkOption {
                 description = "All secrets files.";
@@ -278,8 +278,8 @@ in
     options.infra.deploy.users = lib.mkOption {
         internal = true;
         description = "UserID mappings";
-        type = types.listOf types.user;
-        default = [];
+        type = types.attrsOf types.user;
+        default = {};
     };
 
 }

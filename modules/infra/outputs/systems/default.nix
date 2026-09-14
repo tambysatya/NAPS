@@ -15,10 +15,18 @@ let
                 gid = lib.mkForce uid;
             };
         };
-    processUsers = 
-        name: deploy:
-        {
-            config.users = utils.mergeAll (lib.mapAttrsToList mkUser deploy.users);
+    processUsers =  # Adds the users declared by the VM + systemd-journal-upload if the VM sends its logs
+        vmname: deploy:
+        let isVM = builtins.hasAttr vmname config.infra.topology.vms;
+            vmconf = config.infra.topology.vms.${vmname};
+            centralizesLogsP = vmconf.centralizeLogs;
+            hostsJournaldSink = lib.filter (uid: utils.serviceName config uid == "journald-remote") (vmconf.containers ++ vmconf.services);
+        in {
+            config.users = utils.mergeAll [
+                                (utils.mergeAll (lib.mapAttrsToList mkUser deploy.users))
+                                (if isVM && centralizesLogsP && hostsJournaldSink == []
+                                    then mkUser "service-journal-upload" config.infra.deploy.users."systemd-journal-upload" else {})
+                           ];
         };
 
     mkRoot = vmname: _: {
