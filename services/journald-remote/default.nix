@@ -19,6 +19,7 @@ in {
         ReadOnlyPaths = [
             "/etc/root_ca.crt"
             "/etc/static/root_ca.crt"
+            "/var/lib/secrets"
         ];
     };
 }
