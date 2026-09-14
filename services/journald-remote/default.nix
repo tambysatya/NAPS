@@ -12,7 +12,6 @@ in {
             Remote = {
                 ServerCertificateFile = "/var/lib/secrets/${domain}.crt";
                 ServerKeyFile = "/var/lib/secrets/${domain}.key";
-                ListenHttp = "127.0.0.1:19532";
             };
         };
     };
