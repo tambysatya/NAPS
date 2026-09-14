@@ -11,15 +11,8 @@ in {
             Remote = {
                 ServerCertificateFile = "/var/lib/secrets/${domain}.crt";
                 ServerKeyFile = "/var/lib/secrets/${domain}.key";
-                TrustedCertificateFile = "/etc/root_ca.crt";
+                #TrustedCertificateFile = "/etc/root_ca.crt";
             };
         };
-    };
-    systemd.services.systemd-journal-remote.serviceConfig = {
-        ReadOnlyPaths = [
-            "/etc/root_ca.crt"
-            "/etc/static/root_ca.crt"
-            "/var/lib/secrets"
-        ];
     };
 }
