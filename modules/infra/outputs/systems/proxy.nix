@@ -122,7 +122,7 @@ let
             (vhost: {extraConfig,...}:
              let options = "[${extraConfig.frontend.bind}]";
              in "/var/lib/certs/${vhost}.pem ${if options == "[]" then "" else options} ${vhost}") 
-            tlsEntries + "\\n";
+            tlsEntries + "\n";
         
         
             
