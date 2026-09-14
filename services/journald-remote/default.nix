@@ -16,7 +16,7 @@ in {
         };
     };
     systemd.services.systemd-journal-remote.serviceConfig = {
-        ReadOnlyPath = [
+        ReadOnlyPaths = [
             "/etc/root_ca.crt"
             "/etc/static/root_ca.crt"
         ];
