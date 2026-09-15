@@ -36,8 +36,6 @@ config.services.hydra = {
     useSubstitutes = true;
     extraConfig = ''
       store_uri = file:///var/lib/hydra/cache?secret-key=${secretkeypath}
-      binary_cache_secret_key_file = ${secretkeypath}
-      binary_cache_dir = /var/lib/hydra/cache
     '';
 };
 config.systemd.services.hydra-init.preStart = lib.mkAfter ''
