@@ -1,9 +1,10 @@
-{flakeRoot, inputs, config, lib, pkgs, topology, path, ... }:
+{flakeRoot, inputs, config, lib, pkgs, topology, path, vmname, deploy, ... }:
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
     domain = topology.domain;
     hostname = "git.${domain}";
 in {
+networking.firewall.allowedTCPPorts = [80];
 services.forgejo = {
     enable = true;
     database = {
@@ -16,7 +17,7 @@ services.forgejo = {
         database.SSL_MODE = lib.mkForce "verify-full";
         server = {
             DOMAIN= hostname;
-            HTTP_ADDR = "0.0.0.0";
+            HTTP_ADDR = if deploy.env.type == "container" then "0.0.0.0" else "127.0.0.1"; #listens everywhere if located within a container
             HTTP_PORT = 80;
             PROTOCOL = "http";
             SSH_PORT = 5022;

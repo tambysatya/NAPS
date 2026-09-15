@@ -48,7 +48,12 @@ let
                             (srvuid: {
                                 ${srvuid} = {
                                     autoStart = true;
-                                    specialArgs = {inherit flakeRoot path; inherit (config.infra) topology;};
+                                    specialArgs = {
+                                        inherit flakeRoot path; 
+                                        inherit (config.infra) topology services;
+                                        deploy = config.infra.deploy.systems.${srvuid};
+                                        
+                                    };
                                     config = config.infra.outputs.systems.${srvuid}.config // {
                                                     imports = config.infra.outputs.systems.${srvuid}.imports;
                                                     security.pki.certificateFiles = [

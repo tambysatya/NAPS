@@ -1,4 +1,4 @@
-{flakeRoot, lib, inputs, pkgs, config, topology, services, ...}:
+{flakeRoot, lib, inputs, pkgs, config, topology, services, deploy, ...}:
 
 let 
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
@@ -23,7 +23,7 @@ config =
                 rpc_secret_file = "/var/lib/secrets/garage-rpc.key";
                 replication_factor = 1;
                 s3_api = {
-                    api_bind_addr = "127.0.0.1:3900"; # localhost because not encrypted
+                    api_bind_addr = if deploy.env.type == "container" then "0.0.0.0:3900" else "127.0.0.1:3900"; # localhost because not encrypted
                     s3_region = "garage";
                     root_domain = "s3.${topology.domain}";
                 };
