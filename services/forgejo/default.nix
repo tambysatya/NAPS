@@ -22,6 +22,7 @@ services.forgejo = {
             PROTOCOL = "http";
             SSH_PORT = 5022;
             COOKIE_SECURE = false; #TODO ?
+            ROOT_URL⁼"https://${hostname}/";
         };
 
         storage = {
