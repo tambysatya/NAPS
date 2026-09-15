@@ -41,7 +41,14 @@ config.services.hydra = {
 config.services.darkhttpd = {
     enable = true;
     rootDir = "/var/lib/hydra/cache";
-    port = 8080;
+};
+config.systemd.services.darkhttpd = {
+    serviceConfig = {
+        ExecStart = [
+            "" #standard darkhttpd package seems to use a malformed --addr
+            "${lib.getExe pkgs.darkhttpd} /var/lib/hydra/cache --port 8080 --addr 127.0.0.1 --no-server-id"
+        ];
+    };
 };
 
 config.systemd.services.hydra-init.preStart = lib.mkAfter ''
