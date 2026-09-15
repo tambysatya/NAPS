@@ -41,7 +41,6 @@ config.services.hydra = {
 config.services.darkhttpd = {
     enable = true;
     rootDir = "/var/lib/hydra/cache";
-    address = "all";
     port = 8080;
 };
 
