@@ -28,7 +28,6 @@ services.forgejo = {
             SERVE_DIRECT = false;
             MINIO_ENDPOINT = "s3.${domain}";
             MINIO_ACCESS_KEY_ID = builtins.readFile "${path}/.secrets/git/s3-forgejo.id";
-            MINIO_SECRET_ACCESS_KEY = "/var/lib/secrets/s3-forgejo.key";
             MINIO_BUCKET = "forgejo";
             MINIO_BUCKET_LOOKUP = "auto";
             MINIO_LOCATION = "garage";
@@ -38,7 +37,9 @@ services.forgejo = {
         };
     };
     secrets = {
-
+        storage = {
+            MINIO_SECRET_ACCESS_KEY = "/var/lib/secrets/s3-forgejo.key";
+        };
     };
 };
 }
