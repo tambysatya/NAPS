@@ -41,9 +41,10 @@ config.services.hydra = {
 config.services.darkhttpd = {
     enable = true;
     rootDir = "/var/lib/hydra/cache";
-    address = "127.0.0.1";
+    address = "all";
     port = 8080;
 };
+
 config.systemd.services.hydra-init.preStart = lib.mkAfter ''
   install -m 0600 -o hydra -g hydra \
     /var/lib/secrets/db-hydra.key.pgpass \
