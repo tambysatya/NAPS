@@ -44,4 +44,26 @@ services.forgejo = {
         };
     };
 };
+
+systemd.services."forgejo-init-password" = {
+   description = "Configure Forgejo admin password"; 
+   after = ["forgejo.service"];
+   requires = ["forgejo.service"];
+   wantedBy = ["multi-user.target"];
+
+   serviceConfig = {
+        Type = "oneshot";
+        User = "forgejo";
+   };
+
+   script = ''
+        PASSWORD=$(cat /var/lib/secrets/forgejo-admin.key)
+        if ${lib.getExe pkgs.forgejo} admin user list -w /var/lib/forgejo | grep -qE '(^|[[:space:]])admin([[:space:]]|$)'; then
+            ${lib.getExe pkgs.forgejo} admin user change-password --username admin --password $PASSWORD -w /var/lib/forgejo
+        else
+            ${lib.getExe pkgs.forgejo} admin user create --username admin --password $PASSWORD --email "admin@${hostname} --admin -w /var/lib/forgejo
+        fi
+   '';
+};
 }
+

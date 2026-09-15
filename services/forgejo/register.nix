@@ -3,7 +3,7 @@ let
  
     topology= config.infra.topology;
     hostname = "git.${topology.domain}";
-    reload = ["forgejo.service" "forgejo-dump.service"];
+    reload = ["forgejo.service" "forgejo-dump.service" "forgejo-init-password.service"];
     owner = "forgejo";
 
 in
