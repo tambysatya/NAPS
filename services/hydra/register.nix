@@ -12,6 +12,11 @@ let
                 port = 3000;
                 tls = true;
             }
+            {
+                hostname = "cache.${domain}";
+                port = 8080;
+                tls = true;
+            }
         ];
     };
     links  = {

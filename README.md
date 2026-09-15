@@ -99,6 +99,7 @@ CHECKS:
 - Two services does not request the same repository
 - checks if the partitions exist on the KVM hosts 
 - centralizeLogs cannot be enabled if journald-remote is not deployed
+- Two services are not listening simultaneously on the same port (at least on the same system)
 
 
 EXPERIMENTS:
