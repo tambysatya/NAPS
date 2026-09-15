@@ -3,6 +3,7 @@ let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
     domain = topology.domain;
     hostname = "git.${domain}";
+    adminName = "forgejoadmin";
 in {
 networking.firewall.allowedTCPPorts = lib.optionals (deploy.env.type == "container") [80];
 services.forgejo = {
@@ -58,10 +59,10 @@ systemd.services."forgejo-init-password" = {
 
    script = ''
         PASSWORD=$(cat /var/lib/secrets/forgejo-admin.key)
-        if ${lib.getExe pkgs.forgejo} admin user list -w /var/lib/forgejo | grep -qE '(^|[[:space:]])admin([[:space:]]|$)'; then
-            ${lib.getExe pkgs.forgejo} admin user change-password --username admin --password $PASSWORD -w /var/lib/forgejo
+        if ${lib.getExe pkgs.forgejo} admin user list -w /var/lib/forgejo | grep -qE '(^|[[:space:]])${adminName}([[:space:]]|$)'; then
+            ${lib.getExe pkgs.forgejo} admin user change-password --username ${adminName} --password $PASSWORD -w /var/lib/forgejo
         else
-            ${lib.getExe pkgs.forgejo} admin user create --username admin --password $PASSWORD --email "admin@${hostname}" --admin -w /var/lib/forgejo
+            ${lib.getExe pkgs.forgejo} admin user create --username ${adminName} --password $PASSWORD --email "admin@${hostname}" --admin -w /var/lib/forgejo
         fi
    '';
 };
