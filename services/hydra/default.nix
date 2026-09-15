@@ -51,7 +51,7 @@ config.systemd.services.hydra-init.preStart = lib.mkAfter ''
     /var/lib/secrets/db-hydra.key.pgpass \
     /var/lib/hydra/pgpass-queue-runner
 
-  chown -R /var/lib/hydra/cache
+  chown -R hydra-queue-runner:hydra /var/lib/hydra/cache
 
 '';
 config.systemd.services.hydra-init-passwords = {
