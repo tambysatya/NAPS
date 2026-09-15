@@ -61,7 +61,7 @@ systemd.services."forgejo-init-password" = {
         if ${lib.getExe pkgs.forgejo} admin user list -w /var/lib/forgejo | grep -qE '(^|[[:space:]])admin([[:space:]]|$)'; then
             ${lib.getExe pkgs.forgejo} admin user change-password --username admin --password $PASSWORD -w /var/lib/forgejo
         else
-            ${lib.getExe pkgs.forgejo} admin user create --username admin --password $PASSWORD --email "admin@${hostname} --admin -w /var/lib/forgejo
+            ${lib.getExe pkgs.forgejo} admin user create --username admin --password $PASSWORD --email "admin@${hostname}" --admin -w /var/lib/forgejo
         fi
    '';
 };
