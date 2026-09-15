@@ -75,8 +75,8 @@ let
     installNixStore =
         _:
         ''
-            [[ -f "$1"/hydra-cache.key" ]] && ${installFile "hydra-cache.key" "hydra" "hydra" "0440"}
-            [[ -f "$1"/hydra-cache.pub" ]] && ${installFile "hydra-cache.pub" "root" "root" "0444"}
+            [[ -f "$1/hydra-cache.key" ]] && ${installFile "hydra-cache.key" "hydra" "hydra" "0440"}
+            [[ -f "$1/hydra-cache.pub" ]] && ${installFile "hydra-cache.pub" "root" "root" "0444"}
         '';
 
     installSecret = 
