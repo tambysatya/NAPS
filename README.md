@@ -85,7 +85,8 @@ Migration:
 - config: use deploy.<name>.reverseProxy and deploy.<name>.proxy to handle clearly both directions of the proxy and resolves conflicts ?
 - instead of working in domain (local.fr) create a subdomain like (naps.local.fr) to ensure no clash with existing installation
 - params the ip address of the containers private network (actually its forced to be 192.168.100.0/24) 
-- integrate full chain in the certificates and only pass root_ca.crt (not intermediate_ca.crt)
+- integrate full chain in the certificates and only pass root_ca.crt (not intermediate_ca.crt) (WIP)
+- deploy: being able to deploy new machines withotu destroying the others 
 
 ### IDEAS
 

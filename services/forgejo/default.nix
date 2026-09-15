@@ -10,7 +10,7 @@ services.forgejo = {
         type = "postgres";
         createDatabase = false;
         host = "postgres.${domain}";
-        passwordFile = "/var/lib/db-forgejo.key";
+        passwordFile = "/var/lib/secrets/db-forgejo.key";
     };
     settings = {
         server = {
