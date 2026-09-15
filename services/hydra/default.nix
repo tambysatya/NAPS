@@ -50,6 +50,9 @@ config.systemd.services.hydra-init.preStart = lib.mkAfter ''
   install -m 0600 -o hydra-queue-runner -g hydra \
     /var/lib/secrets/db-hydra.key.pgpass \
     /var/lib/hydra/pgpass-queue-runner
+
+  chown -R /var/lib/hydra/cache
+
 '';
 config.systemd.services.hydra-init-passwords = {
     description = "Initializes hydra admin password";
