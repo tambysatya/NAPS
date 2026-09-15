@@ -18,7 +18,7 @@ services.forgejo = {
         server = {
             DOMAIN= hostname;
             HTTP_ADDR = if deploy.env.type == "container" then "0.0.0.0" else "127.0.0.1"; #listens everywhere if located within a container
-            HTTP_PORT = 80;
+            HTTP_PORT = 5080;
             PROTOCOL = "http";
             SSH_PORT = 5022;
             COOKIE_SECURE = false; #TODO ?
