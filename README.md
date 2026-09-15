@@ -87,7 +87,9 @@ Migration:
 - params the ip address of the containers private network (actually its forced to be 192.168.100.0/24) 
 - integrate full chain in the certificates and only pass root_ca.crt (not intermediate_ca.crt) (WIP)
 - deploy: being able to deploy new machines withotu destroying the others 
-- containers: BRIDGE all the interfaces for the vm to allow haproxy to listen simultaneously for all containers
+- containers: BRIDGE all the interfaces for the vm to allow haproxy to listen simultaneously for all containers ?TODO
+- containers: BLOCK routing between two containers (is it possible ? probably in netfilter)
+- LISTENING: servers should listen on 127.0.0.1 if they are running natively; but on 0.0.0.0 if they are run within a container
 
 ### IDEAS
 
