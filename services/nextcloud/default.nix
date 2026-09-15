@@ -1,4 +1,4 @@
-{flakeRoot, inputs, config, lib, pkgs, topology, path, ... }:
+{flakeRoot, inputs, config, lib, pkgs, topology, path, deploy, ... }:
 
 # https://danubedata.ro/blog/nextcloud-s3-compatible-primary-storage-2026
 
@@ -10,7 +10,7 @@ in {
 
     config = 
     {
-        networking.firewall.allowedTCPPorts = [443 80];
+        networking.firewall.allowedTCPPorts = lib.optionals (deploy.env.type == "container") [443 80];
         services.nextcloud = {
             enable = true;	
             #https = true; /*IMPORTANT IF HTTPS*/

@@ -4,7 +4,7 @@ let
     domain = topology.domain;
     hostname = "git.${domain}";
 in {
-networking.firewall.allowedTCPPorts = [80];
+networking.firewall.allowedTCPPorts = lib.optionals (deploy.env.type == "container") [80];
 services.forgejo = {
     enable = true;
     database = {
