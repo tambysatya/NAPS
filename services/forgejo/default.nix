@@ -32,7 +32,7 @@ services.forgejo = {
             MINIO_BUCKET = "forgejo";
             MINIO_BUCKET_LOOKUP = "auto";
             MINIO_LOCATION = "garage";
-            MINIO_USE_SSL = false;
+            MINIO_USE_SSL = true;
             MINIO_INSECURE_SKIP_VERIFY = false;
             MINIO_CHECKSUM_ALGORITHM = "md5";
         };
