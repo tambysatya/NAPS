@@ -30,7 +30,7 @@ infra.services.hydra ={
     ];
     persistent = [
         {path = "/nix"; owner="root"; reload=[]; mode="755";}
-        {path = "/var/lib/hydra/cache"; owner="hydra"; reload=reload; mode="755";}
+        {path = "/var/lib/hydra/cache"; owner="hydra-queue-runner:hydra"; reload=reload; mode="755";}
     ];
 };
 }
