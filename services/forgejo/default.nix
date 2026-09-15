@@ -10,9 +10,9 @@ services.forgejo = {
         type = "postgres";
         createDatabase = false;
         host = "postgres.${domain}";
-        password = "/var/lib/db-forgejo.key";
+        passwordFile = "/var/lib/db-forgejo.key";
     };
-    setting = {
+    settings = {
         server = {
             DOMAIN= hostname;
             HTTP_ADDR = "0.0.0.0";
