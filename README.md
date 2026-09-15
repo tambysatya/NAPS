@@ -36,7 +36,6 @@ Main module: config.infra
 
 # TODO
 
-- custom service config should be decided in "infra.services" in order to avoid infinite recursion
 
 - step-renew increase the refresh rate
 - step-renew: use a service user instead of root
@@ -49,9 +48,9 @@ Main module: config.infra
 
 
 - TODO tests (config works + secrets exists + secrets are properly encrypted + no clash between users)
-- logging
 
 
+- hydra: use S3 cache ?
 
 - users: some usersID are set by their own service. Now we FORCE it to a new value (our) but not sure if this is a good approach TODO
 
@@ -60,8 +59,6 @@ Main module: config.infra
 
 Deployement:
 - curent refactor involved deployement options (like priority), but VMs may also have tags (like testing, backup) that is applied to their services
-- priority should be a number. Max priority is the primary service.
-- domains names are generated according to the priority. Eg the primary service is "postgres.local" and the first fallback "postgres-01.local". Testing services should be in a dedicated zone testing.local (eg postgres.testing.local, postgres-01.testing.local)
 
 -TODO: add flakes templates for users
 

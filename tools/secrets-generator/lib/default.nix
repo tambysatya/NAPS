@@ -93,6 +93,17 @@ let
             (lib.concatMapStringsSep "\n" (basic.give "ca-password.key") recipients)
         ];
 
+    processNixStore = 
+        recipients:
+        # The hydra PUBLIC key is transmitted to all systems (allowing them to use the hydra cache as a substituter)
+        let deployements = lib.concatMap (srv: builtins.attrValues srv.deployements) (builtins.attrValues infra.services); 
+            allSystems = lib.unique deployements;
+        in ''
+            nix-store --generate-binary-cache-key hydra ${plain}/hydra-cache.key ${plain}/hydra-cache.pub
+            ${lib.concatMapStringsSep "\n" (basic.give "hydra-cache.key") recipients}
+            ${lib.concatMapStringsSep "\n" (basic.give "hydra-cache.pub") allSystems}
+        '';
+
     processSecret = 
         {type, content, recipients, ...}:
         {
@@ -103,7 +114,9 @@ let
              "s3" = processS3Access recipients content;
              "sslCertificate" = processSSLCert recipients content;
              "step-ca" = processStep recipients; # always generated first
+             "nix-store" = processNixStore recipients;
         }.${type};
+
 
 
 

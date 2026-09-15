@@ -52,7 +52,11 @@ let
         ++  map (processRevProxy deployements) revproxies
         ++  (if srvname == "step-ca"
                 then [(processSecret deployements "step-ca" null)] 
+                else [])
+        ++  (if srvname == "hydra"
+                then [(processSecret deployements "nix-store" null)] 
                 else []);
+
 
     deployedServices = lib.filterAttrs (_: {deployements,...}: deployements != {}) config.infra.services;
     allSecrets= lib.unique (lib.concatLists (lib.mapAttrsToList serviceSecrets deployedServices));

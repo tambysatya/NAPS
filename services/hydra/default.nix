@@ -4,6 +4,7 @@ let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
     domain = topology.domain;
     hostname = "hydra.${domain}";
+    secretkeypath = "/var/lib/secrets/hydra-cache.key";
     /* 
     sudo -u hydra env \
           PGPASSFILE=/var/lib/hydra/pgpass \
@@ -33,6 +34,11 @@ config.services.hydra = {
     dbi = "dbi:Pg:dbname=hydra;host=postgres.${domain};user=hydra;sslmode=require";
     notificationSender = "hydra@${domain}";
     useSubstitutes = true;
+    extraConfig = ''
+      store_uri = file:///var/lib/hydra/cache?secret-key=${secretkeypath}
+      binary_cache_secret_key_file = ${secretkeypath}
+      binary_cache_dir = /var/lib/hydra/cache
+    '';
 };
 config.systemd.services.hydra-init.preStart = lib.mkAfter ''
   install -m 0600 -o hydra -g hydra \

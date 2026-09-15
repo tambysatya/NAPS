@@ -71,6 +71,13 @@ let
             ${installFile "ca-password.key" "step-ca" "step-ca" "0400"}
             ${installFile "intermediate_ca_key" "step-ca" "step-ca" "0400"}
         '';
+    
+    installNixStore =
+        _:
+        ''
+            [[ -f "$1"/hydra-cache.key" ]] && ${installFile "hydra-cache.key" "hydra" "hydra" "0440"}
+            [[ -f "$1"/hydra-cache.pub" ]] && ${installFile "hydra-cache.pub" "root" "root" "0444"}
+        '';
 
     installSecret = 
         {type,content,...}:
@@ -82,6 +89,7 @@ let
             "postgres" = installDB;
             "s3" = installS3;
             "step-ca" = installStep;
+            "nix-store" = installNixStore;
         }.${type} content;
 
     mkInstaller = vmsecrets:

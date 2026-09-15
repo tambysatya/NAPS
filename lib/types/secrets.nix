@@ -8,7 +8,16 @@ let
     types = libtypes // filestypes // networktypes // envtypes;
 in  with types; 
 rec {
-
+    secretType = types.enum [
+        "plain"  # random generated string stored in /nix/store (world readable)
+        "password"  # random generated string shipped by the provisioning server
+        "ldapssha"  # random generated string shipped to the server + hashed and shipped to the LDAP servers
+        "sslCertificate" # TLS certificate
+        "postgres" # random generated string shipped to the server + the POSTGRES servers
+        "s3" # random generated key-pair shipped to the server and the S3 servers
+        "step-ca" # TLS certificate authority
+        "nix-store" # nix-store binary-cache keypair
+    ];
     opensslSize = lib.mkOption {
         description = "Length of the string to be generated using openssl rand";
         type = types.ints.positive;
@@ -34,8 +43,6 @@ rec {
                 inherit hostname owner reload;
             };
     };
-
-    secretType = types.enum ["plain" "password" "ldapssha" "sslCertificate" "postgres" "s3" "step-ca"];
 
     secret = types.submodule {
         options = {

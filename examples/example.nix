@@ -88,6 +88,7 @@
         services = ["hydra-main"];
         disks = [
             {type="disk"; path="/dev/ssd/hydra"; mount="/nix"; fs="xfs"; options=["noatime"];}
+            {type="disk"; path="/dev/pvhdd/hydra"; mount="/var/lib/hydra/cache"; fs="xfs"; options=["noatime"];}
         ];
 
 
