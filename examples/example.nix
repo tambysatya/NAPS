@@ -20,9 +20,10 @@
         "ldap-main".is = "openldap";
         "s3-main".is = "garage";
         "pg-main".is = "postgres";
-        "nc-main".is = "nextcloud";
         "hydra-main".is = "hydra";
         "log-main".is = "journald-remote";
+        "nc-main".is = "nextcloud";
+        "git-main".is = "forgejo";
     };
     hosts = {
       cpuhost1 = {
@@ -73,10 +74,11 @@
 
         ip = "192.168.1.203";
         #services = ["nc-main"]; 
-        containers = ["nc-main"]; 
+        containers = ["nc-main" "git-main"]; 
         disks = [
             {type="qcow"; path="persistent"; fs="ext4"; shared=true;}
             {type="qcow"; path="test"; mount="/srv/persistent"; fs="ext4"; shared=false;}
+            {type="disk"; path="/dev/ssd/forgejo"; mount="/var/lib/forgejo"; fs="xfs"; shared=false;}
         ];
       };
       build = {

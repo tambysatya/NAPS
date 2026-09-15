@@ -4,8 +4,9 @@ let
     libtypes = lib.types;
     serviceNames = [
         "step-ca" "openldap" "keycloak" "garage" "postgres" "nextcloud"
-        "hydra" # building farm
         "journald-remote"
+        "hydra" # building farm
+        "forgejo" # git forge
     ];
     serviceType = types.enum serviceNames;
 
