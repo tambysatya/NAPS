@@ -13,6 +13,7 @@ services.forgejo = {
         passwordFile = "/var/lib/secrets/db-forgejo.key";
     };
     settings = {
+        database.SSL_MODE = lib.mkForce "verify-full";
         server = {
             DOMAIN= hostname;
             HTTP_ADDR = "0.0.0.0";
@@ -20,6 +21,20 @@ services.forgejo = {
             PROTOCOL = "http";
             SSH_PORT = 5022;
             COOKIE_SECURE = false; #TODO ?
+        };
+
+        storage = {
+            STORAGE_TYPE = "minio";
+            SERVE_DIRECT = false;
+            MINIO_ENDPOINT = "s3.${domain}";
+            MINIO_ACCESS_KEY_ID = builtins.readFile "${path}/.secrets/git/s3-forgejo.id";
+            MINIO_SECRET_ACCESS_KEY = "/var/lib/secrets/s3-forgejo.key";
+            MINIO_BUCKET = "forgejo";
+            MINIO_BUCKET_LOOKUP = "auto";
+            MINIO_LOCATION = "garage";
+            MINIO_USE_SSL = false;
+            MINIO_INSECURE_SKIP_VERIFY = false;
+            MINIO_CHECKSUM_ALGORITHM = "md5";
         };
     };
     secrets = {

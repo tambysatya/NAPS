@@ -17,6 +17,9 @@ infra.services.forgejo = {
         postgres = [
             {database = "forgejo"; inherit owner reload;}
         ];
+        s3 = [
+            {bucket = "forgejo"; inherit owner reload;}
+        ];
     };
     endpoints = {
         http = [{

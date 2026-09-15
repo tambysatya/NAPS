@@ -73,9 +73,14 @@ let
                         enableIPv6 = true;
                     };
                     interfaces."ve-${ctname}" = { #manually config the interface of the host;
-                        ipv4.addresses = [
-                            {address = hostDefaultAddress; prefixLength = 24;} 
-                        ];
+                        ipv4 = {
+                            addresses = [
+                                {address = hostDefaultAddress; prefixLength = 24;} 
+                            ];
+                            routes = [
+                                {address = deploy.ip; prefixLength=32;}
+                            ];
+                        };
                     };
                 };
                 containers.${ctname} = {
