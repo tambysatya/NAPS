@@ -83,8 +83,9 @@ let
                 cp "$1/hydra-ssh" "$TGT"/id_ed25519
                 cp "$1/hydra-ssh.pub" "$TGT"/id_ed25519.pub
 
-                chown hydra:hydra "$TGT"/id_ed25519
-                chown hydra:hydra "$TGT"/id_ed25519.pub
+                ssh-keyscan -H github.com > "$TGT" #adding the github pubkey
+
+                chown -R hydra:hydra "$TGT"
 
             fi
         '';
