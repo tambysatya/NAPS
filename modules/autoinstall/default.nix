@@ -35,18 +35,17 @@ let
                 tar -xvf /tmp/"$TOKEN".tar.gz -C /tmp
                 nix run /etc/nixos#install-secrets-"$HOST" /tmp
 
-                exit 0
-                
+            #    
 
-				mkdir -p /mnt/var/lib/step-ca/certs/
-				chmod 0755 /mnt/var/lib/step-ca/
-				chmod 0755 /mnt/var/lib/step-ca/certs
+			#	mkdir -p /mnt/var/lib/step-ca/certs/
+			#	chmod 0755 /mnt/var/lib/step-ca/
+			#	chmod 0755 /mnt/var/lib/step-ca/certs
 
-				echo "Installing $HOST..."
-				${config.system.build.nixos-install}/bin/nixos-install --flake "/etc/nixos#$HOST"
+			#	echo "Installing $HOST..."
+			#	${config.system.build.nixos-install}/bin/nixos-install --flake "/etc/nixos#$HOST"
 
-				
-				systemctl --no-block reboot
+			#	
+			#	systemctl --no-block reboot
 				'';
 		};
 in {
