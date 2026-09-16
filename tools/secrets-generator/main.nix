@@ -21,5 +21,9 @@ let
     mkInstaller = vmsecrets: pkgs.writeShellApplication {
             name = "install-secrets";
             text = gen.mkInstaller vmsecrets;
+            runtimeInputs = [
+                pkgs.age
+                pkgs.openssh
+            ];
            };
 }
