@@ -34,6 +34,8 @@ let
 				curl --cacert /etc/nixos/.secrets/git/root_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$TOKEN.tar.gz" > /tmp/"$TOKEN".tar.gz
                 tar -xvf /tmp/"$TOKEN".tar.gz -C /tmp
                 nix run /etc/nixos#install-secrets-"$HOST" /tmp
+
+                exit 0
                 
 
 				mkdir -p /mnt/var/lib/step-ca/certs/
