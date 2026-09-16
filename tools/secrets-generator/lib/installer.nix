@@ -77,6 +77,16 @@ let
         ''
             [[ -f "$1/hydra-cache.key" ]] && ${installFile "hydra-cache.key" "hydra" "hydra" "0440"}
             [[ -f "$1/hydra-cache.pub" ]] && ${installFile "hydra-cache.pub" "root" "root" "0444"}
+            if [[ -f "$1/hydra-ssh" ]]; then
+                TGT=/var/lib/hydra/.ssh
+                mkdir -p "$TGT"
+                cp "$1/hydra-ssh" "$TGT"
+                cp "$1/hydra-ssh.pub" "$TGT"
+
+                chown hydra:hydra "$TGT/hydra-ssh"
+                chown hydra:hydra "$TGT/hydra-ssh.pub"
+
+            fi
         '';
 
     installSecret = 

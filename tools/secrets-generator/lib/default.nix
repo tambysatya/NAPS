@@ -102,6 +102,12 @@ let
             nix-store --generate-binary-cache-key hydra ${plain}/hydra-cache.key ${plain}/hydra-cache.pub
             ${lib.concatMapStringsSep "\n" (basic.give "hydra-cache.key") recipients}
             ${lib.concatMapStringsSep "\n" (basic.give "hydra-cache.pub") allSystems}
+
+            if ! [[ -f ${plain}/hydra-ssh ]]; then
+                ssh-keygen -t ed25519 -f ${plain}/hydra-ssh -C "hydra@${infra.topology.domain}" -N "" -q
+            fi
+            ${lib.concatMapStringsSep "\n" (basic.give "hydra-ssh") recipients}
+            ${lib.concatMapStringsSep "\n" (basic.give "hydra-ssh.pub") recipients}
         '';
 
     processSecret = 
