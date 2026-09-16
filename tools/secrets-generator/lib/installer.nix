@@ -78,7 +78,7 @@ let
             [[ -f "$1/hydra-cache.key" ]] && ${installFile "hydra-cache.key" "hydra" "hydra" "0440"}
             [[ -f "$1/hydra-cache.pub" ]] && ${installFile "hydra-cache.pub" "root" "root" "0444"}
             if [[ -f "$1/hydra-ssh" ]]; then
-                TGT=/var/lib/hydra/.ssh
+                TGT=/mnt/var/lib/hydra/.ssh
                 mkdir -p "$TGT"
                 cp "$1/hydra-ssh" "$TGT"/id_ed25519
                 cp "$1/hydra-ssh.pub" "$TGT"/id_ed25519.pub
