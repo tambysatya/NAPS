@@ -80,11 +80,11 @@ let
             if [[ -f "$1/hydra-ssh" ]]; then
                 TGT=/var/lib/hydra/.ssh
                 mkdir -p "$TGT"
-                cp "$1/hydra-ssh" "$TGT"
-                cp "$1/hydra-ssh.pub" "$TGT"
+                cp "$1/hydra-ssh" "$TGT"/id_ed25519
+                cp "$1/hydra-ssh.pub" "$TGT"/id_ed25519.pub
 
-                chown hydra:hydra "$TGT/hydra-ssh"
-                chown hydra:hydra "$TGT/hydra-ssh.pub"
+                chown hydra:hydra "$TGT"/id_ed25519
+                chown hydra:hydra "$TGT"/id_ed25519.pub
 
             fi
         '';
