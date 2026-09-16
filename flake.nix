@@ -35,14 +35,19 @@ let
         in (import ./lib/terranix {inherit lib inputs; inherit (conf) infra registry; }).generator;
 
     compileModule = # A SINGLE FUNCTION TO RULE THEM ALL
-        {inventory, extraArgs ? {path = "${inputs.self.outPath}/.secrets";}}:
+        {inventory,
+         extraArgs ? {
+            path = "${inputs.self.outPath}/.secrets";
+         },
+         extraModulesPaths ? [] # extra modules that are imported (typically: services). Must includes two files: register.nix and default.nix
+        }:
            (lib.evalModules {
-               specialArgs = {inherit inputs lib pkgs flakeRoot;} // extraArgs;
+               specialArgs = {inherit inputs lib pkgs flakeRoot extraModulesPaths;} // extraArgs;
                modules = [
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/infra
                   inventory
-                ];
+                ] ++ map (path: "${path}/register.nix") extraModulesPaths;
            });
     compileConfig = args: (compileModule args).config;
 
@@ -50,7 +55,7 @@ let
     compileInfra = args: (compileConfig args).infra;
     compileRegistry = args: (compileConfig args).registry;
 
-    nixos-generator = args@{inventory, extraArgs}: 
+    nixos-generator = args@{inventory, extraArgs, ...}: 
         let infra = compileInfra args; 
             vmconfs = lib.filterAttrs 
                             (name: value: infra.deploy.systems.${name}.env.type == "vm")
@@ -220,7 +225,9 @@ let
                                     (nixos-generator args)
                                     ({iso = compileIso args;})
                                 ];
-
+          nixosModules = {
+            infra.services = ./modules/infra/services;
+          };
           hydraJobs = {
             inherit (self) checks terranix packages;
           };

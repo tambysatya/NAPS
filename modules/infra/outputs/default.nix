@@ -1,4 +1,4 @@
-{flakeRoot, lib, inputs, pkgs, config, path, ...}:
+{flakeRoot, lib, inputs, pkgs, config, path, extraModulesPaths, ...}:
 
 let
 
@@ -49,7 +49,7 @@ let
                                 ${srvuid} = {
                                     autoStart = true;
                                     specialArgs = {
-                                        inherit flakeRoot path; 
+                                        inherit flakeRoot path extraModulesPaths; 
                                         inherit (config.infra) topology services;
                                         deploy = config.infra.deploy.systems.${srvuid};
                                         
