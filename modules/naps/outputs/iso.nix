@@ -21,6 +21,7 @@ in {
             #"console=tty1"
             "console=ttyS0,115200"
         ];
+        system.stateVersion = "26.05";
         nix.settings.experimental-features = ["nix-command" "flakes"]; #enable flakes
         environment.systemPackages = [pkgs.dmidecode 
                                       inputs.disko.packages.${pkgs.system}.disko];
