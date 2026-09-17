@@ -33,6 +33,7 @@ config =
                     admin_token_file = "/var/lib/secrets/garage-admin.key";
                     metrics_token_file =  "/var/lib/secrets/garage-metrics.key";
                 };
+                metadata_auto_snapshot_interval = "6hours"; #TODO
             };
         };
         users.users.garage = {
