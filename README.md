@@ -96,6 +96,7 @@ Migration:
 - LISTENING: servers should listen on 127.0.0.1 if they are running natively; but on 0.0.0.0 if they are run within a container
 - FIREWALL: ports should be oppened only if the service runs within a container (and firewall should be handled by the service)
 - iso: use different iso names (otherwise tofu does not upload it)
+- step: use a single-use token instead of a certificate ?
 
 
 ### IDEAS
