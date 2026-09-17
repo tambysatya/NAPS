@@ -1,4 +1,4 @@
-{inputs, lib, infra,  ...}:
+{inputs, lib, naps,  ...}:
 
 /* Called by the modules to register services properties*/
 

@@ -17,8 +17,8 @@ in
 /*
 	environment.etc."root_ca.crt".text = builtins.readFile "${path}/.secrets/git/root_ca.crt";
 	security.pki.certificateFiles = [
-                                       "${infra.flakePath}/${vars.git}/root_ca.crt"
-                                       "${infra.flakePath}/${vars.git}/intermediate_ca.crt"
+                                       "${naps.flakePath}/${vars.git}/root_ca.crt"
+                                       "${naps.flakePath}/${vars.git}/intermediate_ca.crt"
                                     ]; #trust the root-ca
 
 */

@@ -1,7 +1,7 @@
 {lib, inputs, pkgs, config, ...}:
 
 let 
-    hostname = "auth.${config.infra.topology.domain}";
+    hostname = "auth.${config.naps.topology.domain}";
     port = 8000;
 
     owner="root";
@@ -10,7 +10,7 @@ let
 in 
 {
 
-infra.services.keycloak = {
+naps.services.keycloak = {
     users.keycloak = {service ="keycloak"; uid=10002;};
     store = {
         plain = [

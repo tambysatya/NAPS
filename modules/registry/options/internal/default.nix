@@ -7,7 +7,7 @@ in {
     internal = types.submodule {
         options = {
             crypto = lib.mkOption {
-                description = "Secrets dispatch over the infrastructure";
+                description = "Secrets dispatch over the napsstructure";
                 type = crypto.crypto;
             };
         };

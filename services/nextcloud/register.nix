@@ -2,7 +2,7 @@
 
 let
  
-    topology= config.infra.topology;
+    topology= config.naps.topology;
     hostname = "nextcloud.${topology.domain}";
     owner = "nextcloud";
     reload = ["phpfpm.service" "nextcloud-setup.service"];
@@ -39,7 +39,7 @@ let
                  }];
 in {
 
-infra.services.nextcloud = {
+naps.services.nextcloud = {
     users.nextcloud = {service="nextcloud"; uid=10003;};
     store = {
         passwords = [

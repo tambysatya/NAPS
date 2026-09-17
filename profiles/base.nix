@@ -12,8 +12,8 @@ in {
                                         "${path}/.secrets/git/root_ca.crt"
                                         "${path}/.secrets/git/intermediate_ca.crt"
                                     ]; #trust the root-ca
-	#environment.etc."root_ca.crt".text = builtins.readFile "${infra.flakePath}/${vars.git}/root_ca.crt";
-	#environment.etc."intermediate_ca.crt".text = builtins.readFile "${infra.flakePath}/${vars.git}/intermediate_ca.crt";
+	#environment.etc."root_ca.crt".text = builtins.readFile "${naps.flakePath}/${vars.git}/root_ca.crt";
+	#environment.etc."intermediate_ca.crt".text = builtins.readFile "${naps.flakePath}/${vars.git}/intermediate_ca.crt";
 	programs.vim = {
 		enable = true;
 		defaultEditor = true;

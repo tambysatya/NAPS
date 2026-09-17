@@ -1,10 +1,10 @@
-{lib, config, inputs, pkgs, infra, registry, vmname, vmconf,...}:
+{lib, config, inputs, pkgs, naps, registry, vmname, vmconf,...}:
 
 /* Bare metal service managment */
 
 let 
-    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs;};
-    comp = import "${inputs.self.outPath}/lib/compiler" {inherit lib inputs pkgs registry infra vmname;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib naps registry inputs;};
+    comp = import "${inputs.self.outPath}/lib/compiler" {inherit lib inputs pkgs registry naps vmname;};
 
     processEndpoints = servicename: reg:
         let

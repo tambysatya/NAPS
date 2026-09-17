@@ -2,13 +2,13 @@
 
 let
 
-    topology = config.infra.topology;
+    topology = config.naps.topology;
     hostname = "postgres.${topology.domain}";
     owner = "postgres";
     reload = ["postgresql.service"];
 in {
 
-infra.services.postgres = {
+naps.services.postgres = {
     users.postgres = {service = "postgresql"; uid=10005;};
     store.sslCertificates = [
         {inherit hostname owner reload;}

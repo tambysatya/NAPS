@@ -1,14 +1,14 @@
 {inputs, config, lib, pkgs,...}:
 let
  
-    topology= config.infra.topology;
+    topology= config.naps.topology;
     hostname = "git.${topology.domain}";
     reload = ["forgejo.service" "forgejo-dump.service" "forgejo-init-password.service"];
     owner = "forgejo";
 
 in
 {
-infra.services.forgejo = {
+naps.services.forgejo = {
     users.forgejo = {service="forgejo"; uid=10010;};
     store.passwords = [
         {filename = "forgejo-admin.key"; opensslType = "base64"; opensslSize=64; inherit owner;}

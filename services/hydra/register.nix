@@ -2,7 +2,7 @@
 
 let
 
-    domain = config.infra.topology.domain;
+    domain = config.naps.topology.domain;
     owner = "hydra";
     reload = ["hydra.service" "hydra-init.service"];
     endpoints = {
@@ -27,7 +27,7 @@ let
 
 in { 
 
-infra.services.hydra ={
+naps.services.hydra ={
     users."hydra" = {service ="hydra"; uid=10007;};
     inherit links endpoints;
     store.passwords = [

@@ -1,7 +1,7 @@
 {path, ...}:
 {
-  #imports = [inputs.small-lab.nixosModules.infra];
-  config.infra.topology = {
+  #imports = [inputs.small-lab.nixosModules.naps];
+  config.naps.topology = {
 /*
     flakePath = path;
     secretsPath = ".secrets";

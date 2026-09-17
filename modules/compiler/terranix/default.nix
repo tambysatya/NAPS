@@ -1,9 +1,9 @@
-{inputs, lib, config, pkgs, infra, registry,...}:
+{inputs, lib, config, pkgs, naps, registry,...}:
 
     /*Generates a terranix configuration from the registry*/
 let
     hostlib = import "${inputs.self.outPath}/lib/terranix/hosts.nix" {inherit lib inputs;};
-    vmlib = import "${inputs.self.outPath}/lib/terranix/vms.nix" {inherit lib inputs infra registry;};
+    vmlib = import "${inputs.self.outPath}/lib/terranix/vms.nix" {inherit lib inputs naps registry;};
 in {
 config = lib.mkMerge [
         {
@@ -11,7 +11,7 @@ config = lib.mkMerge [
             source = "dmacvicar/libvirt";
           };
         }
-        (hostlib.generateHosts infra)
-        (vmlib.generateVMDomains infra)
+        (hostlib.generateHosts naps)
+        (vmlib.generateVMDomains naps)
     ];
 }

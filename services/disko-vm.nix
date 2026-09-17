@@ -1,5 +1,5 @@
 /* Disk partitionning */
-{lib, inputs, config, infra, registry, vmname, vmconf,...}:
+{lib, inputs, config, naps, registry, vmname, vmconf,...}:
 let
     root = {
         type = "disk";

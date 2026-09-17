@@ -1,0 +1,36 @@
+{lib, inputs, flakeRoot, pkgs, config, path, ...}:
+
+let
+    utils = import ./lib {inherit lib inputs flakeRoot;};
+    mkUser = name: {service, uid}:
+        {
+            users.${name} = {
+               inherit uid;
+               group = name;
+               isSystemUser = true;
+            };
+            groups.${name} = {
+                gid = uid;
+            };
+        };
+
+in {
+
+    naps.outputs.iso = {
+        boot.kernelParams = [
+            #"console=tty1"
+            "console=ttyS0,115200"
+        ];
+        nix.settings.experimental-features = ["nix-command" "flakes"]; #enable flakes
+        environment.systemPackages = [pkgs.dmidecode 
+                                      inputs.disko.packages.${pkgs.system}.disko];
+
+
+        networking.hostName = "bootstrap-vm";
+        environment.etc."nixos".source = builtins.path {
+                            name = "deploy-flake";
+                            path = path;
+        };
+        users = utils.mergeAll (lib.mapAttrsToList mkUser config.naps.deploy.users);
+    };
+}

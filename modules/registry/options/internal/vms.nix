@@ -1,9 +1,9 @@
 {inputs, lib,...}:
 
 let 
-    infratypes = import "${inputs.self.outPath}/lib/infra/types.nix" {inherit lib;};
+    napstypes = import "${inputs.self.outPath}/lib/naps/types.nix" {inherit lib;};
     regtypes = import "${inputs.self.outPath}/lib/registry/types" {inherit lib;};
-    types = lib.types // infratypes // regtypes;;
+    types = lib.types // napstypes // regtypes;;
 
     attachedVolume = types.submodule {
         options = {
@@ -65,7 +65,7 @@ let
             };
             service = lib.mkOption {
                 description = "Name of the service requesting this resource";
-                type = infratypes.serviceType;
+                type = napstypes.serviceType;
             };
         };
     };

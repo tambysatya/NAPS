@@ -1,11 +1,11 @@
 {lib, config, inputs,...}:
 let
 
-    infra = config.infra;
+    naps = config.naps;
     utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
-    infratypes = import "${inputs.self.outPath}/lib/infra/types.nix" {inherit lib;};
-    modules = lib.map (name: "${inputs.self.outPath}/services/${name}/register.nix") infratypes.serviceNames;
-    #modules = lib.map (name: "${inputs.self.outPath}/services/${name}/register.nix") (lib.unique (services ++ containers)); #enables only the services activated by the infra
+    napstypes = import "${inputs.self.outPath}/lib/naps/types.nix" {inherit lib;};
+    modules = lib.map (name: "${inputs.self.outPath}/services/${name}/register.nix") napstypes.serviceNames;
+    #modules = lib.map (name: "${inputs.self.outPath}/services/${name}/register.nix") (lib.unique (services ++ containers)); #enables only the services activated by the naps
 
 
     processDirs = 
@@ -104,6 +104,6 @@ in
 
 {
 imports = [./options]++ modules;    
-#config.registry.services = lib.mkMerge (lib.mapAttrsToList compileVMsHosts infra.vms);
-#config.registry.vms = lib.mkMerge (lib.mapAttrsToList compileVMsFiles infra.vms);
+#config.registry.services = lib.mkMerge (lib.mapAttrsToList compileVMsHosts naps.vms);
+#config.registry.vms = lib.mkMerge (lib.mapAttrsToList compileVMsFiles naps.vms);
 }

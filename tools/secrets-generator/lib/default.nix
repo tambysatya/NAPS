@@ -1,10 +1,10 @@
-{flakeRoot, lib,inputs, pkgs, infra, path, ...}:
+{flakeRoot, lib,inputs, pkgs, naps, path, ...}:
 
 let
     types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
     ssl = import ./ssl.nix {inherit lib inputs pkgs;};
     basic = import ./basic.nix {inherit lib inputs pkgs path;};
-    install = import ./installer.nix {inherit lib inputs pkgs flakeRoot infra;};
+    install = import ./installer.nix {inherit lib inputs pkgs flakeRoot naps;};
 
     plain = ".secrets/plain";
     dstPath = filename: "${plain}/${filename}";
@@ -96,7 +96,7 @@ let
     processNixStore = 
         recipients:
         # The hydra PUBLIC key is transmitted to all systems (allowing them to use the hydra cache as a substituter)
-        let deployements = lib.concatMap (srv: builtins.attrValues srv.deployements) (builtins.attrValues infra.services); 
+        let deployements = lib.concatMap (srv: builtins.attrValues srv.deployements) (builtins.attrValues naps.services); 
             allSystems = lib.unique deployements;
         in ''
             nix-store --generate-binary-cache-key hydra ${plain}/hydra-cache.key ${plain}/hydra-cache.pub
@@ -104,7 +104,7 @@ let
             ${lib.concatMapStringsSep "\n" (basic.give "hydra-cache.pub") allSystems}
 
             if ! [[ -f ${plain}/hydra-ssh ]]; then
-                ssh-keygen -t ed25519 -f ${plain}/hydra-ssh -C "hydra@${infra.topology.domain}" -N "" -q
+                ssh-keygen -t ed25519 -f ${plain}/hydra-ssh -C "hydra@${naps.topology.domain}" -N "" -q
             fi
             ${lib.concatMapStringsSep "\n" (basic.give "hydra-ssh") recipients}
             ${lib.concatMapStringsSep "\n" (basic.give "hydra-ssh.pub") recipients}
@@ -131,16 +131,16 @@ in {
         ''
             mkdir -p ${plain}
             mkdir -p .secrets/provisioner/
-            ${lib.concatMapStringsSep "\n" basic.generateIdentity infra.secrets.allEnvs}
-            ${ssl.generateCA infra.topology.domain}
-            ${lib.concatMapStringsSep "\n" processSecret infra.secrets.allSecrets}
-            ${lib.concatMapStringsSep "\n" basic.ship (builtins.attrNames infra.topology.vms)}
+            ${lib.concatMapStringsSep "\n" basic.generateIdentity naps.secrets.allEnvs}
+            ${ssl.generateCA naps.topology.domain}
+            ${lib.concatMapStringsSep "\n" processSecret naps.secrets.allSecrets}
+            ${lib.concatMapStringsSep "\n" basic.ship (builtins.attrNames naps.topology.vms)}
 
             # Generate a certificate for the provisioning server
-            ${ssl.gen_ssl_certificate infra.topology.provisionerAddr}
+            ${ssl.gen_ssl_certificate naps.topology.provisionerAddr}
             mkdir -p .secrets/provisioner/ssl
-            cp .secrets/plain/${infra.topology.provisionerAddr}.crt .secrets/provisioner/ssl
-            cp .secrets/plain/${infra.topology.provisionerAddr}.key .secrets/provisioner/ssl
+            cp .secrets/plain/${naps.topology.provisionerAddr}.crt .secrets/provisioner/ssl
+            cp .secrets/plain/${naps.topology.provisionerAddr}.key .secrets/provisioner/ssl
 
 
             # Generate the terranix configuration
@@ -150,7 +150,7 @@ in {
             rm terraform.tf.json.tmp
 
             #Replace the tokens with their value
-            ${lib.concatMapStringsSep "\n" (basic.applyToken "terraform.tf.json") (builtins.attrNames infra.topology.vms)}
+            ${lib.concatMapStringsSep "\n" (basic.applyToken "terraform.tf.json") (builtins.attrNames naps.topology.vms)}
         '';
 
     inherit (install) mkInstaller;

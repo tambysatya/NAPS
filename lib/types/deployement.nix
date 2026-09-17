@@ -3,7 +3,7 @@ let
     types = lib.types;
     vmname = types.str;
 in rec {
-    deployementTag = types.enum ["test"]; #TODO check if there is only one primary across the infrastructure
+    deployementTag = types.enum ["test"]; #TODO check if there is only one primary across the napsstructure
 
 
     container = types.submodule  {

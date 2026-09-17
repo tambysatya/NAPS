@@ -1,11 +1,11 @@
 /* Volumes processing: generation of systemd-mount services  and volumes initializations*/
 
 
-{inputs, lib, pkgs, infra, registry, ...}:
+{inputs, lib, pkgs, naps, registry, ...}:
 let
 
     utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
-    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib pkgs infra registry;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib pkgs naps registry;};
 
     compileVolumes = vmname:
         let

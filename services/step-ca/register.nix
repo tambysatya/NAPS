@@ -1,7 +1,7 @@
 {lib, inputs, config,...}:
 
 let 
-    topology = config.infra.topology;
+    topology = config.naps.topology;
     secrets = {
         names = ["ca-password.key"  "intermediate_ca_key"];
         owner = "step-ca";
@@ -11,7 +11,7 @@ let
     port = 8443;
 in
 {
-infra.services.step-ca = {
+naps.services.step-ca = {
     users.step-ca = {service="step-ca"; uid=10006;};
     endpoints.http = [
         {inherit hostname port; tls=false;}

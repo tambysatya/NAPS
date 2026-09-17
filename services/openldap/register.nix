@@ -2,13 +2,13 @@
 
 let 
 
-    topology = config.infra.topology;
+    topology = config.naps.topology;
     hostname = "openldap.${topology.domain}";
     owner = "openldap";
     reload = ["openldap.service"];
 in {
 
-infra.services.openldap = {
+naps.services.openldap = {
     users.openldap = {service="openldap"; uid=10004;};
     endpoints.tcp = [
         {inherit hostname; port=389;}

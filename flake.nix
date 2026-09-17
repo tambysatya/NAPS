@@ -32,7 +32,7 @@ let
 
     terranix-generator_fun = args:
         let conf = compileModule args;
-        in (import ./lib/terranix {inherit lib inputs; inherit (conf) infra registry; }).generator;
+        in (import ./lib/terranix {inherit lib inputs; inherit (conf) naps registry; }).generator;
 
     compileModule = # A SINGLE FUNCTION TO RULE THEM ALL
         {inventory,
@@ -45,30 +45,30 @@ let
                specialArgs = {inherit inputs lib pkgs flakeRoot extraModulesPaths;} // extraArgs;
                modules = [
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
-                  ./modules/infra
+                  ./modules/naps
                   inventory
                 ] ++ map (path: "${path}/register.nix") extraModulesPaths;
            });
     compileConfig = args: (compileModule args).config;
 
     compileAssertions = args: (compileModule args).assertions;
-    compileInfra = args: (compileConfig args).infra;
+    compileInfra = args: (compileConfig args).naps;
     compileRegistry = args: (compileConfig args).registry;
 
     nixos-generator = args@{inventory, extraArgs, ...}: 
-        let infra = compileInfra args; 
+        let naps = compileInfra args; 
             vmconfs = lib.filterAttrs 
-                            (name: value: infra.deploy.systems.${name}.env.type == "vm")
-                            infra.outputs.systems;
+                            (name: value: naps.deploy.systems.${name}.env.type == "vm")
+                            naps.outputs.systems;
             configs = lib.mapAttrs
                             (vmname: vmconf:
                                 lib.nixosSystem {
                                     inherit system; 
                                     specialArgs = {
                                         inherit inputs flakeRoot vmname;
-                                        inherit (infra) topology;
-                                        deploy = infra.deploy.systems.${vmname};
-                                        services = infra.services;
+                                        inherit (naps) topology;
+                                        deploy = naps.deploy.systems.${vmname};
+                                        services = naps.services;
                                     } // extraArgs;
                                     modules = [
                                         inputs.disko.nixosModules.disko    
@@ -83,9 +83,9 @@ let
 
         compileGenSecrets = 
             args:
-                let infra = compileInfra args;
+                let naps = compileInfra args;
                     script =(import tools/secrets-generator/main.nix 
-                                {inherit inputs lib pkgs infra flakeRoot; inherit (args.extraArgs) path;}).generator;
+                                {inherit inputs lib pkgs naps flakeRoot; inherit (args.extraArgs) path;}).generator;
                 in {
                     packages.${system}.gen-secrets = script;
                     apps.${system}.gen-secrets = {
@@ -97,11 +97,11 @@ let
 
         compileInstallSecrets = 
             args:
-            let infra = compileInfra args;
+            let naps = compileInfra args;
                 build = 
                     name: secrets: 
                     let script =(import tools/secrets-generator/main.nix 
-                                {inherit inputs lib pkgs infra flakeRoot; inherit (args.extraArgs) path;}).mkInstaller secrets;
+                                {inherit inputs lib pkgs naps flakeRoot; inherit (args.extraArgs) path;}).mkInstaller secrets;
                     in {
                         packages.${system}."install-secrets-${name}" = script;
                         apps.${system}."install-secrets-${name}" = {
@@ -110,7 +110,7 @@ let
                             meta.description = "Install secrets for ${name}";
                         };
                     };
-            in utils.mergeAll (lib.mapAttrsToList build infra.secrets.perVM);
+            in utils.mergeAll (lib.mapAttrsToList build naps.secrets.perVM);
                
 
 
@@ -119,11 +119,11 @@ let
                 let conf = compileConfig args;
                     script =(import tools/visualization/main.nix 
                                 {inherit inputs lib pkgs;
-                                 inherit (conf) infra registry;}).main;
+                                 inherit (conf) naps registry;}).main;
                 in {
                     packages.${system}.visualization = script;
                     apps.${system}.visualization = {
-                        meta.description = "Visualize your infrastructure using graphviz";
+                        meta.description = "Visualize your napsstructure using graphviz";
                         type = "app";
                         program = lib.getExe script;
                     };
@@ -140,7 +140,7 @@ let
                 in terranix.lib.terranixConfiguration {
                             inherit system;
                             modules = [
-                               conf.infra.outputs.domains
+                               conf.naps.outputs.domains
                             ];
                             extraArgs = {inherit inputs lib;};
                         };
@@ -150,11 +150,11 @@ let
         compileIso = 
             args:
                 let
-                    infra = compileInfra args;
+                    naps = compileInfra args;
                 in
                 lib.nixosSystem {
                     inherit system;
-                    specialArgs = {inherit inputs lib; inherit (infra) deploy;} // args.extraArgs;
+                    specialArgs = {inherit inputs lib; inherit (naps) deploy;} // args.extraArgs;
                     modules = [
                         "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
                         ./profiles/iso.nix
@@ -162,14 +162,14 @@ let
                 };
          */       
          compileIso = args:
-            let infra = compileInfra args;
+            let naps = compileInfra args;
             in lib.nixosSystem {
                 inherit system;
                 specialArgs = {inherit inputs lib flakeRoot;} // args.extraArgs;
                 modules = [
                         "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
                         ./modules/autoinstall
-                        infra.outputs.iso
+                        naps.outputs.iso
                 ];
             };
          gen-config-checks =
@@ -207,9 +207,9 @@ let
           };
 
 
-          infra = compileInfra args;
+          naps = compileInfra args;
           #registry = compileRegistry args;
-          #infra = gen-infra args;
+          #naps = gen-naps args;
           #registry = gen-registry args;
           terranix = compileTerranix args;
           #nixosConfigurations = compileNixos args // {iso = compileIso args;};
@@ -226,7 +226,7 @@ let
                                     ({iso = compileIso args;})
                                 ];
           nixosModules = {
-            infra.services = ./modules/infra/services;
+            naps.services = ./modules/naps/services;
           };
           hydraJobs = {
             inherit (self) checks terranix packages;
@@ -234,7 +234,7 @@ let
           #terranixConfigurations = terranix.lib.terranixConfiguration (terranix-generator ./example.nix);
 
     #        terranix.lib.terranixConfiguration {inherit system; 
-    #                                            modules = [{config = (terranix-generator infra-config.infra);}];};
+    #                                            modules = [{config = (terranix-generator naps-config.naps);}];};
     #
       }
 

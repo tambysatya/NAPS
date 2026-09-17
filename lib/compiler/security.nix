@@ -1,18 +1,18 @@
-{inputs, lib, infra, vmname,  ...}:
+{inputs, lib, naps, vmname,  ...}:
     
 
 /* Basic security management: Secrets, TLS certificates and reverse proxys */
 
 let 
 
-    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra inputs;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib naps inputs;};
     # Generate the sops options for an attrset of secrets (same owner, same reloadUnit
     generateSecret = 
       secret:
           lib.mkMerge 
             (lib.map
                 (name:
-                      let secretFile = "${infra.flakePath}/${vars.enc}/${vmname}-${name}.enc";
+                      let secretFile = "${naps.flakePath}/${vars.enc}/${vmname}-${name}.enc";
                       in {
 
                         sops.age.keyFile = "/var/lib/sops-nix/key.txt";
@@ -51,8 +51,8 @@ let
            {
                 services.step-renew = {
                     enable = true;
-                    caURL = "${infra.caURL}:${lib.toString infra.caPort}";
-                    caFingerprint = builtins.readFile "${infra.flakePath}/${vars.git}/fingerprint";
+                    caURL = "${naps.caURL}:${lib.toString naps.caPort}";
+                    caFingerprint = builtins.readFile "${naps.flakePath}/${vars.git}/fingerprint";
                     certs."${certname}" = {inherit (sslcert) owner reload;};
                 };
            }];

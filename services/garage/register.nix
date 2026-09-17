@@ -1,7 +1,7 @@
 {lib, inputs, config, pkgs, ...}:
 
 let 
-    topology = config.infra.topology;
+    topology = config.naps.topology;
     domain = topology.domain;
 
     owner = "garage";
@@ -36,7 +36,7 @@ let
 
 in {
 
-config.infra.services.garage = {
+config.naps.services.garage = {
     users."garage" = {service = "garage"; uid=10001;};
     store.passwords = [
         {filename = "garage-rpc.key"; inherit owner opensslSize opensslType;}

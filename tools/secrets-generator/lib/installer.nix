@@ -1,10 +1,10 @@
-{flakeRoot, lib, inputs, infra, pkgs, ...}:
+{flakeRoot, lib, inputs, naps, pkgs, ...}:
 
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
     installdir = "/mnt/var/lib/secrets";
     pemdir = "/mnt/var/lib/certs";
-    domain = infra.topology.domain;
+    domain = naps.topology.domain;
 
     installFile = 
         filename: owner: group: mode:

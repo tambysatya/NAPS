@@ -1,9 +1,9 @@
-{inputs, lib, infra, pkgs,...}:
+{inputs, lib, naps, pkgs,...}:
 
 let
     utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
     
-    domain = infra.topology.domain;
+    domain = naps.topology.domain;
     clean = str: lib.replaceStrings ["/" "-"] ["_" "_"] str;
     ageUID = env: clean (utils.envUID env);
     generateServiceDeployement =
@@ -30,8 +30,8 @@ let
         links@{s3, postgres,...}:
         env:
         let uid = utils.envUID env;
-            s3hosts = infra.deploy.endpoints.http."s3.${domain}";
-            pghosts = infra.deploy.endpoints.tcp."postgres.${domain}";
+            s3hosts = naps.deploy.endpoints.http."s3.${domain}";
+            pghosts = naps.deploy.endpoints.tcp."postgres.${domain}";
 
             connect' = tgtname: tgt: tcp@{port,...}:  "${uid}_${clean srvname}_${lib.toString port} -> ${ageUID tgt.env}_${tgtname}";
             connect = tgtname: tgt: lib.concatMapStringsSep "\n" (connect' tgtname tgt) endpoints.tcp;

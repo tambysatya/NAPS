@@ -1,11 +1,11 @@
 /* Compilations steps that are performed on all backends (containers or native) */
 
 
-{lib, config, inputs, pkgs, infra, registry, vmname, vmconf, ...}:
+{lib, config, inputs, pkgs, naps, registry, vmname, vmconf, ...}:
 let 
     utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;}; 
-    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs;};
-    comp = import "${inputs.self.outPath}/lib/compiler" {inherit lib inputs pkgs registry infra vmname;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib naps registry inputs;};
+    comp = import "${inputs.self.outPath}/lib/compiler" {inherit lib inputs pkgs registry naps vmname;};
 
     generateUsers = 
         vmconf@{services, containers, ...}:

@@ -15,7 +15,7 @@ in
     };
     options.registry.internal = lib.mkOption {
         internal = true;
-        description = "Internal representation of the infrastructure, with multiple views";
+        description = "Internal representation of the napsstructure, with multiple views";
         type = internal.internal;
     };
 

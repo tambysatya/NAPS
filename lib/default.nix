@@ -57,14 +57,14 @@ let
         sep: f: attrs: lib.concatStringsSep sep (lib.mapAttrsToList f attrs);
 
     serviceName = config: id:
-        config.infra.topology.services.${id}.is;
+        config.naps.topology.services.${id}.is;
     servicePriority = config: id:
-        config.infra.topology.services.${id}.priority;
+        config.naps.topology.services.${id}.priority;
     serviceTags = config: id:
-        config.infra.topology.services.${id}.tags;
+        config.naps.topology.services.${id}.tags;
     serviceInfo = config: id:
         let srvname = serviceName config id;
-        in config.infra.services.${srvname};
+        in config.naps.services.${srvname};
 
 in vars // {
     inherit partitionAttrs concatMapAttrsStringsSep;

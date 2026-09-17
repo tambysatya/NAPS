@@ -1,4 +1,4 @@
-{lib, config, inputs,pkgs, infra, registry, vmname, vmconf, ...}:
+{lib, config, inputs,pkgs, naps, registry, vmname, vmconf, ...}:
 
 /* Deployement of services behind a container */
 
@@ -6,8 +6,8 @@
 
 let
 
-    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs pkgs;};
-    comp = import "${inputs.self.outPath}/lib/compiler" {inherit lib inputs pkgs registry infra vmname;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib naps registry inputs pkgs;};
+    comp = import "${inputs.self.outPath}/lib/compiler" {inherit lib inputs pkgs registry naps vmname;};
 
     initialize-host = {
           networking.nat = {
@@ -35,7 +35,7 @@ let
                    };
                    ct-registry = registry // {vms.${ct-name} = {attachedVolumes = {}; persistentDirectories = {};}; };
                in {
-                    specialArgs = {inherit inputs infra; registry=ct-registry; vmname=ct-name; vmconf=ct-conf;}; #TODO
+                    specialArgs = {inherit inputs naps; registry=ct-registry; vmname=ct-name; vmconf=ct-conf;}; #TODO
                     autoStart = true;
                     privateNetwork = true;
                     hostAddress = host-addr;
@@ -81,7 +81,7 @@ let
                             hostName = ct-name;
                             useHostResolvConf = lib.mkForce false;
                             #services.resolved.enable = false;
-                            nameservers= infra.dns;
+                            nameservers= naps.dns;
 
                             # Manually config the interface of the container
                             defaultGateway = host-addr;
@@ -96,7 +96,7 @@ let
 
            };
            systemd.services."container@${servicename}" = {
-                serviceConfig.TimeoutStartSec = lib.mkForce "5min"; #To avoid premature halting if the infra-deps are not satisfied immediately
+                serviceConfig.TimeoutStartSec = lib.mkForce "5min"; #To avoid premature halting if the naps-deps are not satisfied immediately
            };
         };
 

@@ -1,8 +1,8 @@
-{flakeRoot, inputs, lib, infra, pkgs, path, ...}:
+{flakeRoot, inputs, lib, naps, pkgs, path, ...}:
 
 let
 
-    gen = import ./lib {inherit flakeRoot inputs lib pkgs infra path;};
+    gen = import ./lib {inherit flakeRoot inputs lib pkgs naps path;};
 
     in
 {
