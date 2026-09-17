@@ -2,13 +2,7 @@
 
 let
     libtypes = lib.types;
-    serviceNames = [
-        "step-ca" "openldap" "keycloak" "garage" "postgres" "nextcloud"
-        "journald-remote"
-        "hydra" # building farm
-        "forgejo" # git forge
-    ];
-    serviceType = types.enum serviceNames;
+    serviceType = types.str;
 
     deployement = import ./deployement.nix {inherit lib inputs;};
     files = import ./files.nix {inherit lib inputs;};
@@ -25,8 +19,4 @@ let
 
 
 in
-types // rec {
-    inherit serviceNames serviceType;
-
-
-}
+types

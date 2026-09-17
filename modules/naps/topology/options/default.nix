@@ -10,7 +10,7 @@ let
         options = {
             is = lib.mkOption {
                 description = "Name of the service";
-                type = types.serviceType;
+                type = types.str;
             };
             priority = lib.mkOption {
                 description = "Max priority is the primary service";

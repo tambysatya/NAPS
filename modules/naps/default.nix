@@ -13,7 +13,7 @@ in {
              ./secrets # Summary of the secrets (for the secrets-generator)
              ./volumes # Summary of the storage allocation (for the migration procedure)
              ./deploy # Summary of the requirements (per vm and per container)
-             ./outputs] ++ serviceModules;
+             ./outputs];
 
 /*  
   config.assertions = lib.mapAttrsToList

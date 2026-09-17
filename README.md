@@ -54,6 +54,8 @@ Main module: config.infra
 
 - users: some usersID are set by their own service. Now we FORCE it to a new value (our) but not sure if this is a good approach TODO
 
+- Services: maybe services/default.nix should contain the registration and servicse/config.nix the content ?? 
+
 
 
 

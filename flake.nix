@@ -34,6 +34,17 @@ let
         let conf = compileModule args;
         in (import ./lib/terranix {inherit lib inputs; inherit (conf) naps registry; }).generator;
 
+    services = [
+        ./services/forgejo/register.nix
+        ./services/garage/register.nix
+        ./services/hydra/register.nix
+        ./services/journald-remote/register.nix
+        ./services/keycloak/register.nix
+        ./services/nextcloud/register.nix
+        ./services/openldap/register.nix
+        ./services/postgres/register.nix
+        ./services/step-ca/register.nix
+    ];
     compileModule = # A SINGLE FUNCTION TO RULE THEM ALL
         {
          extraArgs ? {
@@ -46,7 +57,7 @@ let
                modules = [
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/naps
-                ] ++ modules;
+                ] ++ modules ++ services;
            });
     compileConfig = args: (compileModule args).config;
 
