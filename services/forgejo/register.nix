@@ -9,6 +9,7 @@ let
 in
 {
 naps.services.forgejo = {
+    path = ./.;
     users.forgejo = {service="forgejo"; uid=10010;};
     store.passwords = [
         {filename = "forgejo-admin.key"; opensslType = "base64"; opensslSize=64; inherit owner;}

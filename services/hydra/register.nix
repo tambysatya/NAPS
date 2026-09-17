@@ -28,6 +28,7 @@ let
 in { 
 
 naps.services.hydra ={
+    path = ./.;
     users."hydra" = {service ="hydra"; uid=10007;};
     inherit links endpoints;
     store.passwords = [

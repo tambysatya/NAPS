@@ -12,6 +12,7 @@ let
 in
 {
 naps.services.step-ca = {
+    path = ./.;
     users.step-ca = {service="step-ca"; uid=10006;};
     endpoints.http = [
         {inherit hostname port; tls=false;}

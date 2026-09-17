@@ -5,6 +5,11 @@ let libtypes = lib.types;
     types = libtypes // napstypes;
     service = types.submodule {
             options = {
+                path = lib.mkOption {
+                    description = "Path to the configuration file";
+                    type = types.path;
+                    example = "./default.nix";
+                };
                 users = lib.mkOption {
                     description = "Attrset of service users";
                     type = types.attrsOf types.user;

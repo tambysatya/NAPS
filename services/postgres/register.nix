@@ -9,6 +9,7 @@ let
 in {
 
 naps.services.postgres = {
+    path = ./.;
     users.postgres = {service = "postgresql"; uid=10005;};
     store.sslCertificates = [
         {inherit hostname owner reload;}

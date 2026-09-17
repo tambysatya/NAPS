@@ -1,4 +1,4 @@
-{flakeRoot, lib, inputs, pkgs, config, path, extraModulesPaths, ...}:
+{flakeRoot, lib, inputs, pkgs, config, path, ...}:
 
 let
 
@@ -34,16 +34,11 @@ let
     };
 
     addServices =
-        srvname: {deployements,...}:
+        srvname: {path, deployements,...}:
         let
-            extraServicesNames = utils.mergeAll 
-                                    (map (path: let name = lib.last (lib.splitString "/" path);
-                                                in {${name} = path;})
-                                         extraModulesPaths);
-            srvpath = if builtins.hasAttr srvname extraServicesNames then extraServicesNames.${srvname} else "${flakeRoot}/services/${srvname}";
             addServiceToDeployement = env:
             {
-                ${utils.envUID env}.imports = [srvpath];
+                ${utils.envUID env}.imports = [path];
             };
         in utils.mergeAll (
                 map addServiceToDeployement (builtins.attrValues deployements)

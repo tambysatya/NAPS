@@ -37,6 +37,7 @@ let
 in {
 
 config.naps.services.garage = {
+    path = ./.;
     users."garage" = {service = "garage"; uid=10001;};
     store.passwords = [
         {filename = "garage-rpc.key"; inherit owner opensslSize opensslType;}

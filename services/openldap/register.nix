@@ -9,6 +9,7 @@ let
 in {
 
 naps.services.openldap = {
+    path = ./.;
     users.openldap = {service="openldap"; uid=10004;};
     endpoints.tcp = [
         {inherit hostname; port=389;}

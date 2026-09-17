@@ -21,6 +21,7 @@ let
     #ssl = {inherit hostname owner reload;};
 in {
 naps.services.journald-remote = {
+    path = ./.;
     users = {
         "systemd-journal-remote" = {service ="systemd-journal-remote"; uid=10008;};
         "systemd-journal-upload" = {service ="systemd-journal-upload"; uid=10009;}; #clients

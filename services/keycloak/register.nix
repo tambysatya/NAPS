@@ -11,6 +11,7 @@ in
 {
 
 naps.services.keycloak = {
+    path = ./.;
     users.keycloak = {service ="keycloak"; uid=10002;};
     store = {
         plain = [

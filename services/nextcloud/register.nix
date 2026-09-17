@@ -40,6 +40,7 @@ let
 in {
 
 naps.services.nextcloud = {
+    path = ./.;
     users.nextcloud = {service="nextcloud"; uid=10003;};
     store = {
         passwords = [
