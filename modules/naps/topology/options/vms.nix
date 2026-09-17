@@ -12,6 +12,11 @@ in
               type = types.str;
               description = "The host where the the VM will be created";
             };
+            bridge = lib.mkOption {
+              type = types.str;
+              description = "Network bridge on which the VM will be attached";
+              default = "br0";
+            };
             vcpu = lib.mkOption {
               type = types.ints.unsigned;
               description = "The number of vCPUS allocated to the VM";

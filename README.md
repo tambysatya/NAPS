@@ -56,6 +56,8 @@ Main module: config.infra
 
 - Services: maybe services/default.nix should contain the registration and servicse/config.nix the content ?? 
 
+- GARAGE: adjust the snapshot interval
+
 
 
 

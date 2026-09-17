@@ -38,7 +38,7 @@ let
                 devices = {
                   interfaces = [
                     {
-                      source.bridge.bridge= "br0";
+                      source.bridge.bridge= vmconf.bridge;
                       model.type = "virtio";
                     }
                   ];
