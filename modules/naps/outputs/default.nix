@@ -1,4 +1,4 @@
-{flakeRoot, lib, inputs, pkgs, config, path, extraModulesPaths, ...}:
+{flakeRoot, lib, inputs, pkgs, config, path, ...}:
 
 let
 
@@ -49,7 +49,7 @@ let
                                 ${srvuid} = {
                                     autoStart = true;
                                     specialArgs = {
-                                        inherit flakeRoot path extraModulesPaths; 
+                                        inherit flakeRoot path; 
                                         inherit (config.naps) topology services;
                                         deploy = config.naps.deploy.systems.${srvuid};
                                         

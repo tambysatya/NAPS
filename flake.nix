@@ -35,19 +35,18 @@ let
         in (import ./lib/terranix {inherit lib inputs; inherit (conf) naps registry; }).generator;
 
     compileModule = # A SINGLE FUNCTION TO RULE THEM ALL
-        {inventory,
+        {
          extraArgs ? {
             path = "${inputs.self.outPath}/.secrets";
          },
-         extraModulesPaths ? [] # extra modules that are imported (typically: services). Must includes two files: register.nix and default.nix
+         modules # extra modules that are imported (typically: services). Must includes two files: register.nix and default.nix
         }:
            (lib.evalModules {
-               specialArgs = {inherit inputs lib pkgs flakeRoot extraModulesPaths;} // extraArgs;
+               specialArgs = {inherit inputs lib pkgs flakeRoot;} // extraArgs;
                modules = [
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/naps
-                  inventory
-                ] ++ map (path: "${path}/register.nix") extraModulesPaths;
+                ] ++ modules;
            });
     compileConfig = args: (compileModule args).config;
 
@@ -55,7 +54,7 @@ let
     compileInfra = args: (compileConfig args).naps;
     compileRegistry = args: (compileConfig args).registry;
 
-    nixos-generator = args@{inventory, extraArgs, ...}: 
+    nixos-generator = args@{extraArgs, ...}: 
         let naps = compileInfra args; 
             vmconfs = lib.filterAttrs 
                             (name: value: naps.deploy.systems.${name}.env.type == "vm")
@@ -184,7 +183,7 @@ let
 
         
         #args = {file=./examples/example.nix; flake-path=inputs.self.outPath;};
-        args = {inventory = ./examples/example.nix; extraArgs = {path=flakeRoot;};};
+        args = {modules = [./examples/example.nix]; extraArgs = {path=flakeRoot;};};
 
 
         exposeApps = 
