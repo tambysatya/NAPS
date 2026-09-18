@@ -29,6 +29,7 @@ in {
 
         networking.hostName = "bootstrap-vm";
         networking.interfaces.enp1s0.useDHCP = false;
+        networking.nameservers = config.naps.topology.dns;
         environment.etc."nixos".source = builtins.path {
                             name = "deploy-flake";
                             path = path;
