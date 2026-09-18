@@ -11,7 +11,7 @@
     domain = "local.fr";
     vmSubnet = "192.168.1.0/24";
     dns = ["8.8.8.8" "8.8.4.4"];
-    gateway = "172.31.1.1";
+    gateway = "192.168.1.1"; #default gateway
     rootSSHPublicKeys = [
     ];
     services = {
@@ -99,8 +99,12 @@
         host = "cpuhost1";
         vcpu=1;
         memory=1024;
-        ip = "192.168.1.205";
+        ip = "192.168.2.205";
         services = ["log-main"];
+
+        #you can override default network settings
+        gateway = "192.168.2.1";
+        bridge = "br0"; 
       };
 
     };

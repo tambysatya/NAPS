@@ -1,4 +1,4 @@
-{flakeRoot, lib, inputs, ...}:
+{flakeRoot, lib, inputs, config, ...}:
 let 
     libtypes = lib.types;
     mytypes = import "${flakeRoot}/lib/types" {inherit lib inputs;};
@@ -16,6 +16,11 @@ in
               type = types.str;
               description = "Network bridge on which the VM will be attached";
               default = "br0";
+            };
+            gateway = lib.mkOption {
+              type = types.str;
+              description = "Gateway of the VM";
+              default = config.naps.topology.gateway;
             };
             vcpu = lib.mkOption {
               type = types.ints.unsigned;

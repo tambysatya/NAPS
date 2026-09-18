@@ -1,8 +1,8 @@
-{flakeRoot, inputs, lib, ... }:
+{flakeRoot, inputs, lib, config, ... }:
 
 let
     libtypes = lib.types;
-    vmtypes = import ./vms.nix {inherit flakeRoot lib inputs;};
+    vmtypes = import ./vms.nix {inherit flakeRoot lib inputs config;};
     mytypes = import "${flakeRoot}/lib/types" { inherit lib inputs;};
     types = libtypes // vmtypes // mytypes;
      /* Options definitions */
