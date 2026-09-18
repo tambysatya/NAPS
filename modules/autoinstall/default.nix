@@ -4,12 +4,9 @@
 
 
 let 
-    installer = pkgs.writeShellApplication {
-			name = "autoinstall";
+    setip = pkgs.writeShellApplication {
+			name = "set-ip";
 			runtimeInputs = with pkgs; [
-						git nix util-linux nixos-install-tools
-						inputs.disko.packages.${pkgs.system}.disko
-						curl gzip gnutar
                         iproute2
 					];
 			text = ''
@@ -27,7 +24,20 @@ let
                 ${pkgs.iproute2}/bin/ip link set "$IFACE" up
                 ${pkgs.iproute2}/bin/ip route add default via "$GW" dev "$IFACE"
 
+				'';
+		};
+    installer = pkgs.writeShellApplication {
+			name = "autoinstall";
+			runtimeInputs = with pkgs; [
+						git nix util-linux nixos-install-tools
+						inputs.disko.packages.${pkgs.system}.disko
+						curl gzip gnutar
+                        iproute2
+					];
+			text = ''
+				#!${pkgs.bash}/bin/bash
 
+				set -euo pipefail
 				echo "Downloading the secrets"
 				set -x
 				curl --cacert /etc/nixos/.secrets/git/root_ca.crt "https://${naps.topology.provisionerHost}:8080/$TOKEN.tar.gz" > /tmp/"$TOKEN".tar.gz
@@ -62,10 +72,20 @@ let
 				'';
 		};
 in {
-	systemd.services.autoinstall = {
+	systemd.services.setip = {
 		wantedBy = ["multi-user.target"];
 		after = ["network-pre.target"];
-		before= ["network.target"];
+		requires = ["network-pre.target"];
+		serviceConfig = {
+			User = "root";
+			Type = "oneshot";
+			ExecStart = "${installer}/bin/autoinstall";
+		};
+	};
+	systemd.services.autoinstall = {
+		wantedBy = ["multi-user.target"];
+		after = ["network-online.target" "setip.service"];
+		requires = ["network.target" "setip.service"];
 		serviceConfig = {
 			User = "root";
 			Type = "oneshot";
