@@ -56,7 +56,7 @@ in {
                     ${lib.concatStringsSep "\n" 
                         (lib.imap
                          (i: ip:
-                          "     server provisioner_${lib.toString i} ${ip}:443 check ${if i ==1 then "" else "backup"}")
+                          "     server provisioner_${lib.toString i} ${ip}:8080 check ${if i ==1 then "" else "backup"}")
                          provisionersAddrs)}
 
             '';
