@@ -44,7 +44,7 @@ let
                 firewall.enable = true;
                 domain = domain;
                 defaultGateway = {
-                    address = topo.gateway;
+                    address = config.naps.topology.vms.${vmname}.gateway;
                     interface = iface;
                 };
                 nameservers = config.naps.topology.dns; # TODO useful ?

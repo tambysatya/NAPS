@@ -156,26 +156,12 @@ let
                         };
         compileNixos =
             args: nixos-generator args;
-        /*
-        compileIso = 
-            args:
-                let
-                    naps = compileInfra args;
-                in
-                lib.nixosSystem {
-                    inherit system;
-                    specialArgs = {inherit inputs lib; inherit (naps) deploy;} // args.extraArgs;
-                    modules = [
-                        "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-                        ./profiles/iso.nix
-                    ];
-                };
-         */       
+
          compileIso = args:
             let naps = compileInfra args;
             in lib.nixosSystem {
                 inherit system;
-                specialArgs = {inherit inputs lib flakeRoot;} // args.extraArgs;
+                specialArgs = {inherit inputs lib flakeRoot naps;} // args.extraArgs;
                 modules = [
                         "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
                         ./modules/autoinstall

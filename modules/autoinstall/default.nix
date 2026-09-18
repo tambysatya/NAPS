@@ -1,4 +1,4 @@
-{inputs, config, lib, pkgs, path, ...}:
+{inputs, config, lib, pkgs, path, naps, ...}:
 
 /* Reads product_serial to identify which flakes to be deployed */
 
@@ -17,7 +17,16 @@ let
 
 
 				HOST=$(cat /sys/class/dmi/id/product_serial)
+				IP=$(cat /sys/class/dmi/id/product_uuid)
+				GW=$(cat /sys/class/dmi/id/product_vendor)
 				TOKEN=$(cat /sys/class/dmi/id/chassis_serial)
+
+                echo "Configuring the network"
+                IFACE="enp1s0"
+                ip addr add "$IP" dev "$IFACE"
+                ip link set "$IFACE" up
+                ip route add default via "$GW" dev "$IFACE"
+
 				echo "Deploying $HOST configuration"
 
 				echo "Partitioning...."
@@ -31,7 +40,7 @@ let
 
 				echo "Downloading the secrets"
 				set -x
-				curl --cacert /etc/nixos/.secrets/git/root_ca.crt "https://${config.naps.topology.provisionerAddr}:8080/$TOKEN.tar.gz" > /tmp/"$TOKEN".tar.gz
+				curl --cacert /etc/nixos/.secrets/git/root_ca.crt "https://${naps.topology.provisionerAddr}:8080/$TOKEN.tar.gz" > /tmp/"$TOKEN".tar.gz
                 tar -xvf /tmp/"$TOKEN".tar.gz -C /tmp
                 nix run /etc/nixos#install-secrets-"$HOST" /tmp
 
