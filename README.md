@@ -25,6 +25,10 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 
 - During the first phase, the compiler summarizes the resources requirements of each services over the infrastructure
 - During the second phase, the resources are allocated, e.g. reverse proxys / pNAT rules are built (depending on the type of endpoint), users and secrets are created (if the services is runned inside a container)...
+- 
+## Warning:
+
+Some passwords (e.g. the keycloak initial password) are necessarily world readable. This means that the password will live in `/nix/store`. Moreover, if the flake is evaluated purely, the password must be part of the git (this is why `gen-secrets` puts it in .secrets/git). Therefore, some passwords **must** be changed (i) fast (ii) before any commit. 
 
 ## Code Architecture:
 
