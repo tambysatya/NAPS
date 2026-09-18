@@ -1,15 +1,10 @@
 {lib, inputs, pkgs, path,...}:
 let
     utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
-    generateIdentity = env: ''mkdir -p .secrets/perVM/${utils.envHost env}'';
-#    generateIdentity = 
-#        env:
-#        if env.type == "vm" then ''
-#            mkdir -p ".secrets/perVM/${utils.envUID env}"
-#        ''
-#        else ''
-#            mkdir -p ".secrets/perVM/${env.host.vm}/${env.host.container}"
-#        '';
+    generateIdentity = env: ''
+        mkdir -p .secrets/perVM/${utils.envHost env}
+        echo ${utils.envHost env} > .secrets/perVM/${utils.envHost env}/FLAKE #writes the flake name
+    '';
     give = filename: env: 
         let filepath = ".secrets/plain/${filename}";
            # target = if env.type == "vm"

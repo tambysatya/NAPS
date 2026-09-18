@@ -16,7 +16,6 @@ let
 				set -euo pipefail
 
 
-				HOST=$(cat /sys/class/dmi/id/product_serial)
 				IP=$(cat /sys/class/dmi/id/board_serial)
 				GW=$(cat /sys/class/dmi/id/bios_vendor)
 				TOKEN=$(cat /sys/class/dmi/id/chassis_serial)
@@ -27,7 +26,6 @@ let
                 ip link set "$IFACE" up
                 ip route add default via "$GW" dev "$IFACE"
 
-				echo "Deploying $HOST configuration"
 
 				echo "Partitioning...."
 
@@ -42,6 +40,9 @@ let
 				set -x
 				curl --cacert /etc/nixos/.secrets/git/root_ca.crt "https://${naps.topology.provisionerAddr}:8080/$TOKEN.tar.gz" > /tmp/"$TOKEN".tar.gz
                 tar -xvf /tmp/"$TOKEN".tar.gz -C /tmp
+
+				HOST=$(cat /tmp/FLAKE)
+				echo "Deploying $HOST configuration"
                 nix run /etc/nixos#install-secrets-"$HOST" /tmp
 
                 
