@@ -64,8 +64,8 @@ let
 in {
 	systemd.services.autoinstall = {
 		wantedBy = ["multi-user.target"];
-		after = ["network-online.target"];
-		wants = ["network-online.target"];
+		after = ["network-pre.target"];
+		before= ["network.target"];
 		serviceConfig = {
 			User = "root";
 			Type = "oneshot";
