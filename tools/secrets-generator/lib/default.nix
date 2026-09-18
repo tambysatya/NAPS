@@ -137,10 +137,10 @@ in {
             ${lib.concatMapStringsSep "\n" basic.ship (builtins.attrNames naps.topology.vms)}
 
             # Generate a certificate for the provisioning server
-            ${ssl.gen_ssl_certificate naps.topology.provisionerAddr}
+            ${ssl.gen_ssl_certificate naps.topology.provisionerHost}
             mkdir -p .secrets/provisioner/ssl
-            cp .secrets/plain/${naps.topology.provisionerAddr}.crt .secrets/provisioner/ssl
-            cp .secrets/plain/${naps.topology.provisionerAddr}.key .secrets/provisioner/ssl
+            cp .secrets/plain/${naps.topology.provisionerHost}.crt .secrets/provisioner/ssl
+            cp .secrets/plain/${naps.topology.provisionerHost}.key .secrets/provisioner/ssl
 
 
             # Generate the terranix configuration

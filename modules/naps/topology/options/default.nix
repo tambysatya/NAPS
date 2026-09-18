@@ -27,10 +27,16 @@ let
 
     topology = types.submodule {
         options = {
-            provisionerAddr = lib.mkOption {
+            provisionerHost = lib.mkOption {
                 description = "Address of the provisioning server. It will be used to reach the secrets.";
                 type = types.str;
                 example = "provisioner.local";
+                default = "provisioner.${config.naps.topology.domain}";
+            };
+            provisionerAddr = lib.mkOption {
+                description = "Default Address of the provisioning server. It will be used to reach the secrets.";
+                type = types.str;
+                example = "192.168.1.200";
             };
             domain = lib.mkOption {
                 description = "Domain of the napsstructure";

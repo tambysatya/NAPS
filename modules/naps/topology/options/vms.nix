@@ -22,6 +22,13 @@ in
               description = "Gateway of the VM";
               default = config.naps.topology.gateway;
             };
+            provisionerAddr = lib.mkOption {
+                description = "Address of the provisioning server. It will be used to reach the secrets.";
+                type = types.str;
+                example = "192.168.1.200";
+              default = config.naps.topology.provisionerAddr;
+            };
+            
             vcpu = lib.mkOption {
               type = types.ints.unsigned;
               description = "The number of vCPUS allocated to the VM";
