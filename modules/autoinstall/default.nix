@@ -28,6 +28,14 @@ let
                 ${pkgs.iproute2}/bin/ip route add default via "$GW" dev "$IFACE"
 
 
+				echo "Downloading the secrets"
+				set -x
+				curl --cacert /etc/nixos/.secrets/git/root_ca.crt "https://${naps.topology.provisionerAddr}:8080/$TOKEN.tar.gz" > /tmp/"$TOKEN".tar.gz
+                tar -xvf /tmp/"$TOKEN".tar.gz -C /tmp
+
+				HOST=$(cat /tmp/FLAKE)
+
+
 				echo "Partitioning...."
 
 				set -x
@@ -37,12 +45,6 @@ let
 				#disko --mode destroy,format,mount --yes-wipe-all-disks --flake "/etc/nixos#$HOST"
 				set +x
 
-				echo "Downloading the secrets"
-				set -x
-				curl --cacert /etc/nixos/.secrets/git/root_ca.crt "https://${naps.topology.provisionerAddr}:8080/$TOKEN.tar.gz" > /tmp/"$TOKEN".tar.gz
-                tar -xvf /tmp/"$TOKEN".tar.gz -C /tmp
-
-				HOST=$(cat /tmp/FLAKE)
 				echo "Deploying $HOST configuration"
                 nix run /etc/nixos#install-secrets-"$HOST" /tmp
 
