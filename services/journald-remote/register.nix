@@ -26,7 +26,9 @@ naps.services.journald-remote = {
         "systemd-journal-remote" = {service ="systemd-journal-remote"; uid=10008;};
         "systemd-journal-upload" = {service ="systemd-journal-upload"; uid=10009;}; #clients
     };
-    #store.sslCertificates = [ssl];
+    persistent = [
+        {path = "/var/log/journal/remote"; shared=false; inherit owner reload;}
+    ];
     inherit endpoints;
 };
 }
