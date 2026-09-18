@@ -15,7 +15,7 @@ let
                   {smbios = {
                     system = {entry = [{name = "serial"; value = vmname;}];};
                     bios = {entry = [{name = "serial"; value = vmconf.ip;}];};
-                    processor = {entry = [{name = "serial"; value = vmconf.gateway;}];};
+                    base_board = {entry = [{name = "serial"; value = vmconf.gateway;}];};
                     #chassis = {entry = [{name = "serial"; value = token;}];}; #need to be added purely (maybe using an app)
                     chassis = {entry = [{name = "serial"; value = "${lib.toUpper vmname}_TOKEN";}];};  # TO REPLACE WITH SED
                     };
