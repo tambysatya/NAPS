@@ -17,7 +17,7 @@ let
 
 
 				HOST=$(cat /sys/class/dmi/id/product_serial)
-				IP=$(cat /sys/class/dmi/id/product_uuid)
+				IP=$(cat /sys/class/dmi/id/chassis_vendor)
 				GW=$(cat /sys/class/dmi/id/product_vendor)
 				TOKEN=$(cat /sys/class/dmi/id/chassis_serial)
 
