@@ -16,7 +16,7 @@ let
 				set -euo pipefail
 
 
-				IP=$(cat /sys/class/dmi/id/board_serial)
+				IP=$(cat /sys/class/dmi/id/product_serial)
 				GW=$(cat /sys/class/dmi/id/bios_vendor)
 				TOKEN=$(cat /sys/class/dmi/id/chassis_serial)
 
