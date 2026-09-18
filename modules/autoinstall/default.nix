@@ -5,7 +5,7 @@
 
 let 
     setip = pkgs.writeShellApplication {
-			name = "set-ip";
+			name = "setip";
 			runtimeInputs = with pkgs; [
                         iproute2
 					];
@@ -16,7 +16,6 @@ let
 
 				IP=$(cat /sys/class/dmi/id/product_serial)
 				GW=$(cat /sys/class/dmi/id/bios_vendor)
-				TOKEN=$(cat /sys/class/dmi/id/chassis_serial)
 
                 echo "Configuring the network"
                 IFACE="enp1s0"
@@ -39,6 +38,7 @@ let
 
 				set -euo pipefail
 				echo "Downloading the secrets"
+				TOKEN=$(cat /sys/class/dmi/id/chassis_serial)
 				set -x
 				curl --cacert /etc/nixos/.secrets/git/root_ca.crt "https://${naps.topology.provisionerHost}:8080/$TOKEN.tar.gz" > /tmp/"$TOKEN".tar.gz
                 tar -xvf /tmp/"$TOKEN".tar.gz -C /tmp
@@ -79,7 +79,7 @@ in {
 		serviceConfig = {
 			User = "root";
 			Type = "oneshot";
-			ExecStart = "${installer}/bin/autoinstall";
+			ExecStart = "${setip}/bin/setip";
 		};
 	};
 	systemd.services.autoinstall = {
