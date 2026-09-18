@@ -14,6 +14,7 @@ let
             };
         };
 
+    provisionersAddrs = lib.unique (map (builtins.getAttr "provisionerAddr") (builtins.attrValues config.naps.topology.vms));
 in {
 
     naps.outputs.iso = {
@@ -35,5 +36,32 @@ in {
                             path = path;
         };
         users = utils.mergeAll (lib.mapAttrsToList mkUser config.naps.deploy.users);
+
+        networking.hosts = {"127.0.0.1" = ["${config.naps.topology.provisionerHost}"];};
+        services.haproxy = {
+            enable = true;
+            config = ''
+                defaults
+                    timeout connect 5s
+                    # connections are handled by the kernels
+                    timeout client 30s
+                    timeout server 30s
+                frontend fe_provisioner
+                    bind :443
+                    mode tcp
+                    use_backend be_provisioner
+
+                backend be_provisioner
+                    mode tcp
+                    ${lib.concatStringsSep "\n" 
+                        (lib.imap
+                         (i: ip:
+                          "     server provisioner_${lib.toString i} ${ip}:443 check ${if i ==1 then "" else "backup"}")
+                         provisionersAddrs)}
+
+            '';
+        };
+
+
     };
 }
