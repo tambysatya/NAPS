@@ -16,7 +16,6 @@ let
                     system = {
                         entry = [
                             {name = "serial"; value = vmname;}
-                            {name = "name"; value = vmconf.gateway;}
                         ];};
                     #chassis = {entry = [{name = "serial"; value = token;}];}; #need to be added purely (maybe using an app)
                     chassis = {
@@ -27,6 +26,11 @@ let
                     board = {
                         entry = [
                             {name = "serial"; value = vmconf.ip;}
+                        ];
+                    }; 
+                    bios = {
+                        entry = [
+                            {name = "vendor"; value = vmconf.gateway;}
                         ];
                     }; 
                     };
