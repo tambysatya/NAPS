@@ -10,6 +10,7 @@ let
 						git nix util-linux nixos-install-tools
 						inputs.disko.packages.${pkgs.system}.disko
 						curl gzip gnutar
+                        iproute2
 					];
 			text = ''
 				#!${pkgs.bash}/bin/bash
@@ -22,9 +23,9 @@ let
 
                 echo "Configuring the network"
                 IFACE="enp1s0"
-                ip addr add "$IP" dev "$IFACE"
-                ip link set "$IFACE" up
-                ip route add default via "$GW" dev "$IFACE"
+                ${pkgs.iproute2}/bin/ip addr add "$IP" dev "$IFACE"
+                ${pkgs.iproute2}/bin/ip link set "$IFACE" up
+                ${pkgs.iproute2}/bin/ip route add default via "$GW" dev "$IFACE"
 
 
 				echo "Partitioning...."
