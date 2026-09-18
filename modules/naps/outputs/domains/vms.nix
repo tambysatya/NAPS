@@ -16,15 +16,19 @@ let
                     system = {
                         entry = [
                             {name = "serial"; value = vmname;}
-                            {name = "vendor"; value = vmconf.gateway;}
+                            {name = "name"; value = vmconf.gateway;}
                         ];};
                     #chassis = {entry = [{name = "serial"; value = token;}];}; #need to be added purely (maybe using an app)
                     chassis = {
                         entry = [
                             {name = "serial"; value = "${lib.toUpper vmname}_TOKEN";}
-                            {name = "vendor"; value = vmconf.ip;}
                         ];
                     };  # TO REPLACE WITH SED
+                    board = {
+                        entry = [
+                            {name = "serial"; value = vmconf.ip;}
+                        ];
+                    }; 
                     };
                   }
                 ];

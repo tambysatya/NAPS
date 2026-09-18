@@ -17,8 +17,8 @@ let
 
 
 				HOST=$(cat /sys/class/dmi/id/product_serial)
-				IP=$(cat /sys/class/dmi/id/chassis_vendor)
-				GW=$(cat /sys/class/dmi/id/product_vendor)
+				IP=$(cat /sys/class/dmi/id/board_serial)
+				GW=$(cat /sys/class/dmi/id/product_name)
 				TOKEN=$(cat /sys/class/dmi/id/chassis_serial)
 
                 echo "Configuring the network"
