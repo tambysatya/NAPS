@@ -23,7 +23,7 @@ let
 
                 echo "Configuring the network"
                 IFACE="enp1s0"
-                ${pkgs.iproute2}/bin/ip addr add "$IP" dev "$IFACE"
+                ${pkgs.iproute2}/bin/ip addr add "$IP/24" dev "$IFACE"
                 ${pkgs.iproute2}/bin/ip link set "$IFACE" up
                 ${pkgs.iproute2}/bin/ip route add default via "$GW" dev "$IFACE"
 
