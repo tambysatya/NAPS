@@ -1,8 +1,8 @@
 {
-	"root": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/certs/root_ca.crt",
+	"root": "/etc/root_ca.crt",
 	"federatedRoots": null,
-	"crt": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/certs/intermediate_ca.crt",
-	"key": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/secrets/intermediate_ca_key",
+	"crt": "/etc/intermediate_ca.crt",
+	"key": "/var/lib/secrets/intermediate_ca_key",
 	"address": ":443",
 	"insecureAddress": "",
 	"dnsNames": [
@@ -13,7 +13,7 @@
 	},
 	"db": {
 		"type": "badgerv2",
-		"dataSource": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/db",
+		"dataSource": "/var/lib/step-ca/db",
 		"badgerFileLoadingMode": ""
 	},
 	"authority": {
@@ -24,13 +24,13 @@
 				"key": {
 					"use": "sig",
 					"kty": "EC",
-					"kid": "6LL6WQo0O2h4w0XWw4AUdkf_NIYj3rBUgVoahPNOosg",
+					"kid": "oTJ08osB9FVw3ARHixDDtBLErBpLe4yMbxn63t9Qzmg",
 					"crv": "P-256",
 					"alg": "ES256",
-					"x": "Dm4pucYYKJlUIYC_xvqR-S4oDssRCyD_1xwUHUZFwzo",
-					"y": "yTWTR2hXJbZTyT-R4XcBmpQYAdRuzY4Ba9YajQNXWaw"
+					"x": "PNhdrXC6qgdH3j1I4ML6SJJKCP_VinyYA7TMA60ID6I",
+					"y": "vBsRitweZP6BHuVw-xGHrNNZFVFP5SohIP5RDjCJIhk"
 				},
-				"encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoiLTRoSE5tRUFYZkJiWDZDdDNMRlV4ZyJ9.W12mhbdpsAtwB9tlAVzDzkIlVyKtXsHGJ1QTVJd1A1vJUC3pRY0wsw.zA_rJhhPX-ZlNBvD.oBQX8SVbQmpvbG18_Q1RIC5Wg7AVQzE9VKttf3oNuSwMJkYCaBNiA6QVMxxjSw8i_X4E4SnIZzQeBlQoWvtnUC6MUmot7mI2cm9R3XK-eJhCuYH9IOTdfGHIU0tvrLAcp2s-AtaXIgz87C8nCrrwteJJyTu0XZ_infiRV5_aYxsrNvJrDinKRvhiM2p7zK5SuZe2gGeyPoLm1KvVYjlN2D0J924YApt98FGioZYZdOk6jlLBnFBvzKKiELiQ6zbVA6jfW3G1wm4w5VNjpKY70V94bhUiFohfsf-VYDaEuzfwfeIr7wt2J8RPJhzvZPAAmnGQ78B7SGm0aQ7TmUs.u6Y0u002UmLSzJIsh00-4g"
+				"encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoib3pXMDd6ZzBBZW1EZ0dsRXg0VURaZyJ9._f857HZnwWcPG4-XtGF1oGc8m1EZA0_FFlOI805QLiPHtavUIMmlfg.LGP-KNkh48P5fXwz.HanNm5w9ZlyRLtHRDFpxBfoYQ4qBqzFIM8cSOO_C7XRmxJ-fhdA7y3q72tHa9_2jSV6S17NPhsVROzoWPgsufRRAChRtvjsQyj95l04CKbPROptLS6I8aqF92IWfZxCvfIaDV4BQghcTrXrJs-pfBk6Dt1wNGEaaX87CHX3AagKOQsHL8YAj0SW8k0I_U2rLSeT9qXtWXQYh1nNbsBMvFXupeoVaBiH2Q3GC4r6ZzRxt7JZ5W_FBeBmdPh-LiBMWwYPeFJbpQTvthVSPxjxQIgcqSaslpHF9mfqLHJ8E1PDntxUDNO9SApwh2kKMncEUJ9EQTOEa5V473k306Hk.b6KH3aGBgmDy4aLJhO2nPw"
 			}
 		]
 	},

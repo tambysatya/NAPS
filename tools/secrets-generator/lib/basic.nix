@@ -11,7 +11,7 @@ let
            #          then ".secrets/perVM/${env.host}/${filename}"
            #          else ".secrets/perVM/${env.host.vm}/${env.host.container}/${filename}";
             target = ".secrets/perVM/${utils.envHost env}/${filename}";
-        in ''cp ${filepath} ${target}'';
+        in ''cp -r ${filepath} ${target}'';
 
     ship = 
         name:
