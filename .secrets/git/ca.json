@@ -1,8 +1,8 @@
 {
-	"root": "/etc/root_ca.crt",
+	"root": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/certs/root_ca.crt",
 	"federatedRoots": null,
-	"crt": "/etc/intermediate_ca.crt",
-	"key": "/var/lib/secrets/intermediate_ca_key",
+	"crt": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/certs/intermediate_ca.crt",
+	"key": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/secrets/intermediate_ca_key",
 	"address": ":443",
 	"insecureAddress": "",
 	"dnsNames": [
@@ -13,7 +13,7 @@
 	},
 	"db": {
 		"type": "badgerv2",
-		"dataSource": "/var/lib/step-ca/db",
+		"dataSource": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/db",
 		"badgerFileLoadingMode": ""
 	},
 	"authority": {
@@ -24,13 +24,13 @@
 				"key": {
 					"use": "sig",
 					"kty": "EC",
-					"kid": "7Ld_14TK0Wr2mJPvj97NLskvkn4eNHN2LhS7OSMBaZg",
+					"kid": "6LL6WQo0O2h4w0XWw4AUdkf_NIYj3rBUgVoahPNOosg",
 					"crv": "P-256",
 					"alg": "ES256",
-					"x": "KnsK1JxFs2I2dcJspDgaEP8O_MKRaJWhfCaXXOU1ujk",
-					"y": "JFILcxgD1Ceyman9KTlI0gBkCxGC5GBFOvyOQQq0GkE"
+					"x": "Dm4pucYYKJlUIYC_xvqR-S4oDssRCyD_1xwUHUZFwzo",
+					"y": "yTWTR2hXJbZTyT-R4XcBmpQYAdRuzY4Ba9YajQNXWaw"
 				},
-				"encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoiamdMQW1YcjJZeDFJLTVHQlhlLVVDQSJ9.NoEQf4F-FMSawYNPyKddrwe9_EPkD1w_r4N3bI_orNRR8lBpr3hC5A.vDnyKcwYyF2w826P.T2-CQPcX01Vf73uyWhDwwq4NtWH9Azzaorw5-GvH7JwdqoX3vhKdHi1WMVeEk8K5Pi5JpbxTuTB9k5LlV6meF4PPBNdQVREDoahA43KfwwMYpPGZnK9wdEU4zog16H49veBJOSjsc674m0xDgWZWfk1VVrZDWQvHlEOqCmzRG8BgNsl1J0Ggc03aWThrwm0A1YsmobSeqWY1bYruuZGCUxCFv1m4VnEfN8KsuWaNWTiZJ443hcgabs5BoLj5i3X9lujGRHfoIzat1gMlzLorsVaPTn4JLJkOVe96aWwN8E4VnBiEb1QdbRd7RyQ-6FCrsup70QGAkKdJuux8nhc.PXDs9xeMUza4rlV4s47iNQ"
+				"encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoiLTRoSE5tRUFYZkJiWDZDdDNMRlV4ZyJ9.W12mhbdpsAtwB9tlAVzDzkIlVyKtXsHGJ1QTVJd1A1vJUC3pRY0wsw.zA_rJhhPX-ZlNBvD.oBQX8SVbQmpvbG18_Q1RIC5Wg7AVQzE9VKttf3oNuSwMJkYCaBNiA6QVMxxjSw8i_X4E4SnIZzQeBlQoWvtnUC6MUmot7mI2cm9R3XK-eJhCuYH9IOTdfGHIU0tvrLAcp2s-AtaXIgz87C8nCrrwteJJyTu0XZ_infiRV5_aYxsrNvJrDinKRvhiM2p7zK5SuZe2gGeyPoLm1KvVYjlN2D0J924YApt98FGioZYZdOk6jlLBnFBvzKKiELiQ6zbVA6jfW3G1wm4w5VNjpKY70V94bhUiFohfsf-VYDaEuzfwfeIr7wt2J8RPJhzvZPAAmnGQ78B7SGm0aQ7TmUs.u6Y0u002UmLSzJIsh00-4g"
 			}
 		]
 	},

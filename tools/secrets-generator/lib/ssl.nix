@@ -58,12 +58,13 @@ let
                 if [[ -f "$TARGET_PATH/${crtname}.crt" ]]; then
                     rm "$TARGET_PATH/${crtname}.crt"
                 fi
-                ${lib.getExe pkgs.step-cli} certificate create \
-                    ${crtname} "$TARGET_PATH/${crtname}.crt.tmp" "$TARGET_PATH/${crtname}.key" \
+                ${lib.getExe pkgs.step-cli} ca certificate \
+                    --offline \
+                    --provisioner ca \
+                    --password-file "$STEPPATH/ca-password.key" \
                     --san ${crtname} \
-                    --ca "$STEPPATH/certs/intermediate_ca.crt" --ca-key "$STEPPATH/secrets/intermediate_ca_key" \
-                    --ca-password-file "$STEPPATH/ca-password.key" \
-                    --no-password --insecure
+                    ${crtname} "$TARGET_PATH/${crtname}.crt.tmp" "$TARGET_PATH/${crtname}.key" 
+
                cat "$TARGET_PATH/${crtname}.crt.tmp" "$STEPPATH/certs/intermediate_ca.crt" > "$TARGET_PATH/${crtname}.crt" #adding full-chain
                rm "$TARGET_PATH/${crtname}.crt.tmp";
             '';
