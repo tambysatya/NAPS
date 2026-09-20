@@ -1,8 +1,8 @@
 {
-	"root": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/certs/root_ca.crt",
+	"root": "/etc/root_ca.crt",
 	"federatedRoots": null,
-	"crt": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/certs/intermediate_ca.crt",
-	"key": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/secrets/intermediate_ca_key",
+	"crt": "/etc/intermediate_ca.crt",
+	"key": "/var/lib/secrets/intermediate_ca_key",
 	"address": ":443",
 	"insecureAddress": "",
 	"dnsNames": [
@@ -10,11 +10,6 @@
 	],
 	"logger": {
 		"format": "text"
-	},
-	"db": {
-		"type": "badgerv2",
-		"dataSource": "/home/sat/git/nixos/small-lab/.secrets/plain/CA/db",
-		"badgerFileLoadingMode": ""
 	},
 	"authority": {
 		"provisioners": [
@@ -24,13 +19,13 @@
 				"key": {
 					"use": "sig",
 					"kty": "EC",
-					"kid": "6LL6WQo0O2h4w0XWw4AUdkf_NIYj3rBUgVoahPNOosg",
+					"kid": "Buy6SuH6g5XKuqC5-RyvDioKkTzIsifKHqCeJbaUNvk",
 					"crv": "P-256",
 					"alg": "ES256",
-					"x": "Dm4pucYYKJlUIYC_xvqR-S4oDssRCyD_1xwUHUZFwzo",
-					"y": "yTWTR2hXJbZTyT-R4XcBmpQYAdRuzY4Ba9YajQNXWaw"
+					"x": "VvZqMtSv666Jz9N-W1O-dbSiSZnXUW0Jf7qUth68X5s",
+					"y": "pFEZK9E4W3xEopfGJH-wADJCJyzmK2KlarSZt_VRXgg"
 				},
-				"encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoiLTRoSE5tRUFYZkJiWDZDdDNMRlV4ZyJ9.W12mhbdpsAtwB9tlAVzDzkIlVyKtXsHGJ1QTVJd1A1vJUC3pRY0wsw.zA_rJhhPX-ZlNBvD.oBQX8SVbQmpvbG18_Q1RIC5Wg7AVQzE9VKttf3oNuSwMJkYCaBNiA6QVMxxjSw8i_X4E4SnIZzQeBlQoWvtnUC6MUmot7mI2cm9R3XK-eJhCuYH9IOTdfGHIU0tvrLAcp2s-AtaXIgz87C8nCrrwteJJyTu0XZ_infiRV5_aYxsrNvJrDinKRvhiM2p7zK5SuZe2gGeyPoLm1KvVYjlN2D0J924YApt98FGioZYZdOk6jlLBnFBvzKKiELiQ6zbVA6jfW3G1wm4w5VNjpKY70V94bhUiFohfsf-VYDaEuzfwfeIr7wt2J8RPJhzvZPAAmnGQ78B7SGm0aQ7TmUs.u6Y0u002UmLSzJIsh00-4g"
+				"encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoiOUZSbUE1RXZrNWVXZTdjZmo1TXRkUSJ9.Hru-2E-WSQutkDuDmj37B6Xcrwno3tjyMq8A1d1p7mpjfga96VICxQ.87oPRa7vKcej_Khv.5qB_qE2Oo3V2yfx7Jwcfeg_Nvk7vRp0mgR3NmC4PSuAI3RzzBSxyyPKLeS2zIF4Zq9pwI-ggmh0d1QmnmEMyxqX63rb-2XixMX3DiJQJ40WUe6u_S_onrh3VUUHSYl5koXiYacQ6rv29HfvF8EEdnDk-T-l3W9D7A8p93XI-7fjy0IDEuyyG8opjEEv8Rk1_hiahsBPaBawFQFMUYiIl1HNIkXo01q1jnsAqrzhO2TjYZ5ePP3X0TlX3RmE6hWWlBHPP56tg7mxCdg_osZ8C-YTFSvASROrABrAEfPZJT-tc-nfgZjKUmN49OrDgbUyT1u_6oBxov5CiuxdMw-M.kpgz7TQYcZHQMBtL1MNebA"
 			}
 		]
 	},
