@@ -26,29 +26,23 @@ let
                 --address :443 \
                 --provisioner=ca
 
+            # Patching STEPPATH
+            sed -i "s+$STEPPATH/secrets+/var/lib/secrets+" "$STEPPATH"/config/ca.json 
+            sed -i "s+$STEPPATH/certs+/etc+" "$STEPPATH"/config/ca.json 
+            sed -i "s+$STEPPATH+/var/lib/step-ca+" "$STEPPATH"/config/ca.json 
+
             ${lib.getExe pkgs.step-cli} certificate fingerprint "$STEPPATH/certs/root_ca.crt" \
                 | tr -d '\n' \
                 > "$STEPPATH/fingerprint" # step adds a \n at the end of the line
-
         fi
         mkdir -p ${git}
-
-        [[ ! -d "$STEPPATH"/db ]] && mkdir "$STEPPATH"/db  #create the database if it does not exist
         cp "$STEPPATH/fingerprint" ${git}
+        cp "$STEPPATH/config/ca.json" ${git}
         cp "$STEPPATH/certs/root_ca.crt" ${git}
         cp "$STEPPATH/certs/intermediate_ca.crt" ${git}
 
         cp "$STEPPATH/secrets/intermediate_ca_key" ${plain}
         cp "$STEPPATH/ca-password.key" ${plain}
-
-        # Patching conf
-        cp "$STEPPATH/config/ca.json" ${git}
-        sed -i "s+$STEPPATH/secrets+/var/lib/secrets+" "${git}/ca.json" 
-        sed -i "s+$STEPPATH/certs+/etc+" "${git}/ca.json" 
-        sed -i "s+$STEPPATH+/var/lib/step-ca+" "${git}/ca.json" 
-
-
-
         '';
 
 
@@ -73,8 +67,6 @@ let
 
                cat "$TARGET_PATH/${crtname}.crt.tmp" "$STEPPATH/certs/intermediate_ca.crt" > "$TARGET_PATH/${crtname}.crt" #adding full-chain
                rm "$TARGET_PATH/${crtname}.crt.tmp";
-
-
             '';
 
 

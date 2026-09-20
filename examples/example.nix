@@ -102,10 +102,6 @@
         memory=1024;
         ip = "192.168.2.205";
         services = ["log-main"];
-        disks = [
-            {type="disk"; path="/dev/pvhdd/logs"; mount="/var/log/journal/remote"; fs="xfs"; options=["nofail"];}
-        ];
-
 
         #you can override default network settings
         gateway = "192.168.2.1";

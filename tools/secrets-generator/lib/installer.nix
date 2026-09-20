@@ -70,10 +70,6 @@ let
         ''
             ${installFile "ca-password.key" "step-ca" "step-ca" "0400"}
             ${installFile "intermediate_ca_key" "step-ca" "step-ca" "0400"}
-            install -d -o step-ca -g step-ca -m 750 /var/lib/step-ca
-            mv "$1"/db /var/lib/step-ca
-            chown -R step-ca:step-ca /var/lib/step-ca/db
-            chmod -R 750 /var/lib/step-ca/db
         '';
     
     installNixStore =

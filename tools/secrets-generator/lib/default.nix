@@ -123,8 +123,6 @@ let
              "nix-store" = processNixStore recipients;
         }.${type};
 
-    ca = lib.filter ({type,...}: type == "step-ca") naps.secrets.allSecrets;
-
 
 
 
@@ -136,15 +134,6 @@ in {
             ${lib.concatMapStringsSep "\n" basic.generateIdentity naps.secrets.allEnvs}
             ${ssl.generateCA naps.topology.domain}
             ${lib.concatMapStringsSep "\n" processSecret naps.secrets.allSecrets}
-            
-            # Save the final database of step-ca
-            [[ -d .secrets/plain/db ]] && rm -R .secrets/plain/db #clean old version
-            mv .secrets/plain/CA/db .secrets/plain
-            ${lib.concatMapStringsSep "\n" (basic.give "db")
-                (lib.concatMap (builtins.getAttr "recipients") ca)}
-
-
-            # wrap everything into tokens
             ${lib.concatMapStringsSep "\n" basic.ship (builtins.attrNames naps.topology.vms)}
 
             # Generate a certificate for the provisioning server
