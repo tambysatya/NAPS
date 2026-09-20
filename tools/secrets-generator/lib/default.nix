@@ -138,8 +138,8 @@ in {
             ${lib.concatMapStringsSep "\n" processSecret naps.secrets.allSecrets}
             
             # Save the final database of step-ca
+            [[ -d .secrets/plain/db ]] && rm -R .secrets/plain/db #clean old version
             mv .secrets/plain/CA/db .secrets/plain
-            mkdir .secrets/plain/CA/db
             ${lib.concatMapStringsSep "\n" (basic.give "db")
                 (lib.concatMap (builtins.getAttr "recipients") ca)}
 

@@ -32,6 +32,8 @@ let
 
         fi
         mkdir -p ${git}
+
+        [[ ! -d "$STEPPATH"/db ]] && mkdir "$STEPPATH"/db  #create the database if it does not exist
         cp "$STEPPATH/fingerprint" ${git}
         cp "$STEPPATH/certs/root_ca.crt" ${git}
         cp "$STEPPATH/certs/intermediate_ca.crt" ${git}
