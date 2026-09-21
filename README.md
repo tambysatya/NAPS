@@ -101,6 +101,7 @@ Migration:
 - FIREWALL: ports should be oppened only if the service runs within a container (and firewall should be handled by the service)
 - iso: use different iso names (otherwise tofu does not upload it)
 - step: use a single-use token instead of a certificate ?
+- NAPS application: allows either to deploy a VM or to "update" a VM (without tofu)
 
 
 ### IDEAS
