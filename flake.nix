@@ -198,7 +198,7 @@ let
           
 
           lib = {
-            inherit compileNAPS compileRegistry compileTerranix exposeApps compileNixos compileIso;
+            inherit compileModule compileNAPS compileTerranix exposeApps compileNixos compileIso;
             inherit gen-config-checks;
             inherit utils;
           };
