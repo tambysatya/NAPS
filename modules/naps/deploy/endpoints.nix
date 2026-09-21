@@ -58,7 +58,7 @@ let
         in {
             proxy.http.${endpoint.hostname} = {
                 inherit (endpoint) extraConfig;
-                tls = if isLocal then endpoint.tls else false; # never terminates tls if the service is not hosted locally.
+                tls = if isLocal then endpoint.tls else false; # never terminates tls if the service is not hosted locally (ie on the VM or in a container).
                 public = isLocal;
                 backends = [{
                     inherit env;
