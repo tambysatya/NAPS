@@ -46,7 +46,7 @@
       identity = {
         host = "cpuhost1";
         vcpu = 4;
-        memory = 8000; Memory in MiB
+        memory = 8000; # Memory in MiB
         ip = "192.168.1.200";
         services = ["keycloak-main" "stepca-main" "ldap-main"]; 
 
