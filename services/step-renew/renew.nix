@@ -80,7 +80,8 @@ in
       wantedBy = [ "timers.target" ];
 
       timerConfig = {
-        OnCalendar = "daily";
+        #OnCalendar = "daily";
+        OnCalendar="*-*-* 00/5:00:00"; # refresh every 5 hours
         Persistent = true;
       };
 
