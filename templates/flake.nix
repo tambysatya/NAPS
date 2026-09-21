@@ -25,7 +25,7 @@ description = "Automatic generation of Terraform and NixOS configurations for a 
         hydraJobs = {
             inherit (self) checks;
         };
-        nixosConfigurations = naps.lib.compileNixos args; 
+        nixosConfigurations = naps.lib.compileNixos args // {iso = naps.lib.compileIso args}; 
         terranix = naps.lib.compileTerranix args;
 
         checks.${system} = naps.lib.gen-config-checks inputs;
