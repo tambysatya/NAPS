@@ -23,7 +23,7 @@ description = "Automatic generation of Terraform and NixOS configurations for a 
         };
     in  naps.lib.exposeApps args // {
         hydraJobs = {
-            inherit (sborf) packages;
+            inherit packages;
         };
         nixosConfigurations = naps.lib.compileNixos args; 
         terranix = naps.lib.compileTerranix args;
