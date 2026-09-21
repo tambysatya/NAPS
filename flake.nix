@@ -200,6 +200,7 @@ let
           lib = {
             inherit compileInfra compileRegistry compileTerranix exposeApps compileNixos compileIso;
             inherit gen-config-checks;
+            inherit utils;
           };
 
 
