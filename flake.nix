@@ -227,6 +227,12 @@ let
           hydraJobs = {
             inherit (self) checks terranix packages;
           };
+          templates = {
+            default = {
+                path = ./templates;
+                description = "Scheme of configurations.";
+            };
+          };
           #terranixConfigurations = terranix.lib.terranixConfiguration (terranix-generator ./example.nix);
 
     #        terranix.lib.terranixConfiguration {inherit system; 

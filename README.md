@@ -19,6 +19,12 @@ Features:
 
 see `examples/` 
 
+## Try
+
+```
+    nix flake new -t github:tambysatya/NAPS my-infra/
+```
+
 ## Compilation:
 
 Each service declares the resources it needs (secrets, endpoints, postgres bases...). The compilation is split into two phases.
