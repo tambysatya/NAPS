@@ -66,6 +66,7 @@ let
                     port = if isLocal then endpoint.port else 443;
                 }];
             };
+            sslCertificates = lib.optionals (if isLocal then endpoint.tls else false) [{inherit (endpoint) hostname; owner="haproxy"; reload=["haproxy.service"]; }];
         };
 
 

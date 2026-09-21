@@ -89,6 +89,10 @@ Migration:
 - EXTEND: put the secrets in the store of the provisioning machine ?
 
 - TODO:  the iso should use the network config of the vm it tries to install (to avoid requiring a dhcp)
+ 
+### Refactor
+
+- naps.secrets:  sslCertificates are processed both in naps.deploy.store AND in modules.naps.secrets  (for the reverseProxy) which is confusing
 
 
 ### Prio
