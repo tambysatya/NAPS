@@ -5,7 +5,7 @@ let
     hostname = "git.${domain}";
     adminName = "forgejoadmin";
 in {
-networking.firewall.allowedTCPPorts = lib.optionals (deploy.env.type == "container") [80];
+networking.firewall.allowedTCPPorts = lib.optionals (deploy.env.type == "container") [3000];
 services.forgejo = {
     enable = true;
     database = {
