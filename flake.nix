@@ -62,11 +62,11 @@ let
     compileConfig = args: (compileModule args).config;
 
     compileAssertions = args: (compileModule args).assertions;
-    compileNaps = args: (compileConfig args).naps;
+    compileNAPS = args: (compileConfig args).naps;
     compileRegistry = args: (compileConfig args).registry;
 
     nixos-generator = args@{extraArgs, ...}: 
-        let naps = compileNaps args; 
+        let naps = compileNAPS args; 
             vmconfs = lib.filterAttrs 
                             (name: value: naps.deploy.systems.${name}.env.type == "vm")
                             naps.outputs.systems;
@@ -93,7 +93,7 @@ let
 
         compileGenSecrets = 
             args:
-                let naps = compileNaps args;
+                let naps = compileNAPS args;
                     script =(import tools/secrets-generator/main.nix 
                                 {inherit inputs lib pkgs naps flakeRoot; inherit (args.extraArgs) path;}).generator;
                 in {
@@ -107,7 +107,7 @@ let
 
         compileInstallSecrets = 
             args:
-            let naps = compileNaps args;
+            let naps = compileNAPS args;
                 build = 
                     name: secrets: 
                     let script =(import tools/secrets-generator/main.nix 
@@ -158,7 +158,7 @@ let
             args: nixos-generator args;
 
          compileIso = args:
-            let naps = compileNaps args;
+            let naps = compileNAPS args;
             in lib.nixosSystem {
                 inherit system;
                 specialArgs = {inherit inputs lib flakeRoot naps;} // args.extraArgs;
@@ -198,13 +198,13 @@ let
           
 
           lib = {
-            inherit compileNaps compileRegistry compileTerranix exposeApps compileNixos compileIso;
+            inherit compileNAPS compileRegistry compileTerranix exposeApps compileNixos compileIso;
             inherit gen-config-checks;
             inherit utils;
           };
 
 
-          naps = compileNaps args;
+          naps = compileNAPS args;
           #registry = compileRegistry args;
           #naps = gen-naps args;
           #registry = gen-registry args;
