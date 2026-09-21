@@ -28,7 +28,7 @@ in {
     };
 
     certs = lib.mkOption {
-      default = {};
+      default = [];
       type = lib.types.listOf customtypes.sslCertificate;
     };
   };
