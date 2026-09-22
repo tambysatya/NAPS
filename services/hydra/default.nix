@@ -82,9 +82,19 @@ config.systemd.services.hydra-init-passwords = {
       RemainAfterExit = true;
     };
 };
-config.nix.settings.allowed-uris = [ # to evaluate flakes inputs outside the nix-store  (see https://wiki.nixos.org/wiki/Hydra)
-      "github:"
-      "git+https://github.com/"
-      "git+ssh://github.com/"
-    ];
+config.nix = {
+    settings = {
+        auto-optimise-store = true; #use hardlinks for duplicates files
+        allowed-uris = [ # to evaluate flakes inputs outside the nix-store  (see https://wiki.nixos.org/wiki/Hydra)
+              "github:"
+              "git+https://github.com/"
+              "git+ssh://github.com/"
+            ];
+    };
+    gc = {
+        automatic = true;
+        dates = "04:00"; # GC runs at 4 am
+        options = "--delete-older-than 7d";
+    };
+};
 }
