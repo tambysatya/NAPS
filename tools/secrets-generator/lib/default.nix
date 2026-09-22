@@ -108,7 +108,7 @@ let
             fi
             ${lib.concatMapStringsSep "\n" (basic.give "hydra-ssh") recipients}
             ${lib.concatMapStringsSep "\n" (basic.give "hydra-ssh.pub") recipients}
-            cp ${plain}/hydra-ssh.pub .secrets/git
+            cp ${plain}/hydra-cache.pub .secrets/git
         '';
 
     processSecret = 
