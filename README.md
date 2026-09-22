@@ -115,6 +115,7 @@ Migration:
 - NAPS application: allows either to deploy a VM or to "update" a VM (without tofu)
 - include the secret provisioner in NAPS
 - lifecycle: tofu must ignore the smbios parameters
+- nix: run garbage collector every xxx days to save space ?
 
 
 ### IDEAS

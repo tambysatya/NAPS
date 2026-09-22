@@ -50,6 +50,7 @@ let
          extraArgs ? {
             path = "${inputs.self.outPath}/.secrets";
          },
+         view ? (config: {}), # a function to extract values from the config obtained in phase 1, and passed to phase 2
          modules # extra modules that are imported (typically: services). Must includes two files: register.nix and default.nix
         }:
            (lib.evalModules {
@@ -66,7 +67,8 @@ let
     compileRegistry = args: (compileConfig args).registry;
 
     nixos-generator = args@{extraArgs, ...}: 
-        let naps = compileNAPS args; 
+        let conf = compileConfig args; 
+            naps = conf.naps;
             vmconfs = lib.filterAttrs 
                             (name: value: naps.deploy.systems.${name}.env.type == "vm")
                             naps.outputs.systems;
@@ -79,7 +81,7 @@ let
                                         inherit (naps) topology;
                                         deploy = naps.deploy.systems.${vmname};
                                         services = naps.services;
-                                    } // extraArgs;
+                                    } // extraArgs // lib.optionalAttrs (builtins.hasAttr "view" extraArgs) (extraArgs.view conf);
                                     modules = [
                                         inputs.disko.nixosModules.disko    
 
