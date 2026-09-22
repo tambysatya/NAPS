@@ -113,6 +113,7 @@ Migration:
 - S3: links: check if a bucket key exists and replace if with the new one
 - step: use a single-use token instead of a certificate ?
 - NAPS application: allows either to deploy a VM or to "update" a VM (without tofu)
+- include the secret provisioner in NAPS
 
 
 ### IDEAS
