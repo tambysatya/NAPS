@@ -83,11 +83,13 @@ let
                                         inherit (naps) topology;
                                         deploy = naps.deploy.systems.${vmname};
                                         services = naps.services;
+                                        extraArgs = extraArgs // view conf; # passing extraArgs as well (to transmit to the containers)
                                     } // extraArgs // view conf;
                                     modules = [
                                         inputs.disko.nixosModules.disko    
 
                                         ./modules/firewall
+                                        ./modules/containers
                                         vmconf
                                     ];
                                 })

@@ -49,7 +49,7 @@ let
                                 ${srvuid} = {
                                     autoStart = true;
                                     specialArgs = {
-                                        inherit flakeRoot path; 
+                                        inherit flakeRoot; 
                                         inherit (config.naps) topology services;
                                         deploy = config.naps.deploy.systems.${srvuid};
                                         
