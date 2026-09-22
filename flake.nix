@@ -50,8 +50,8 @@ let
          extraArgs ? {
             path = "${inputs.self.outPath}/.secrets";
          },
-         view ? (config: {}), # a function to extract values from the config obtained in phase 1, and passed to phase 2
-         modules # extra modules that are imported (typically: services). Must includes two files: register.nix and default.nix
+         modules, # extra modules that are imported (typically: services). Must includes two files: register.nix and default.nix
+         ...
         }:
            (lib.evalModules {
                specialArgs = {inherit inputs lib pkgs flakeRoot;} // extraArgs;
@@ -66,7 +66,9 @@ let
     compileNAPS = args: (compileConfig args).naps;
     compileRegistry = args: (compileConfig args).registry;
 
-    nixos-generator = args@{extraArgs, ...}: 
+    nixos-generator = args@{extraArgs,
+                            view ? (config: {}), # config -> attrSet : an attrSet extracted from the phase 1 and passed to the phase2 
+                            ...}: 
         let conf = compileConfig args; 
             naps = conf.naps;
             vmconfs = lib.filterAttrs 
@@ -81,7 +83,7 @@ let
                                         inherit (naps) topology;
                                         deploy = naps.deploy.systems.${vmname};
                                         services = naps.services;
-                                    } // extraArgs // lib.optionalAttrs (builtins.hasAttr "view" extraArgs) (extraArgs.view conf);
+                                    } // extraArgs // view conf;
                                     modules = [
                                         inputs.disko.nixosModules.disko    
 
