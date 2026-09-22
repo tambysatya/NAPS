@@ -6,6 +6,8 @@ let
     basic = import ./basic.nix {inherit lib inputs pkgs path;};
     install = import ./installer.nix {inherit lib inputs pkgs flakeRoot naps;};
 
+    domain = naps.topology.domain;
+
     plain = ".secrets/plain";
     dstPath = filename: "${plain}/${filename}";
     
@@ -99,7 +101,7 @@ let
         let deployements = lib.concatMap (srv: builtins.attrValues srv.deployements) (builtins.attrValues naps.services); 
             allSystems = lib.unique deployements;
         in ''
-            nix-store --generate-binary-cache-key hydra ${plain}/hydra-cache.key ${plain}/hydra-cache.pub
+            nix-store --generate-binary-cache-key cache.${domain} ${plain}/hydra-cache.key ${plain}/hydra-cache.pub
             ${lib.concatMapStringsSep "\n" (basic.give "hydra-cache.key") recipients}
             ${lib.concatMapStringsSep "\n" (basic.give "hydra-cache.pub") allSystems}
 
