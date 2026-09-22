@@ -101,7 +101,12 @@ let
         let deployements = lib.concatMap (srv: builtins.attrValues srv.deployements) (builtins.attrValues naps.services); 
             allSystems = lib.unique deployements;
         in ''
-            nix-store --generate-binary-cache-key cache.${domain} ${plain}/hydra-cache.key ${plain}/hydra-cache.pub
+
+            if ! [[ -f ${plain}/hydra-cache.key ]]; then 
+                nix-store --generate-binary-cache-key cache.${domain} ${plain}/hydra-cache.key ${plain}/hydra-cache.pub
+            else
+                 nix key convert-secret-to-public < ${plain}/hydra-cache.key > ${plain}/hydra-cache.pub
+            fi
             ${lib.concatMapStringsSep "\n" (basic.give "hydra-cache.key") recipients}
             ${lib.concatMapStringsSep "\n" (basic.give "hydra-cache.pub") allSystems}
 
