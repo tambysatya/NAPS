@@ -9,6 +9,9 @@ let
         {
              resource.libvirt_domain."${vmname}" = {
                 provider = "libvirt.${host}";
+                lifecycle.ignore_changes = [ #avoid rebooting vms if the sys_info value has changed
+                    "sys_info"
+                ];
                 autostart = true;
                 running = true; #starts the vm
                 sys_info = [
@@ -17,12 +20,11 @@ let
                         entry = [
                             {name = "serial"; value = vmconf.ip;}
                         ];};
-                    #chassis = {entry = [{name = "serial"; value = token;}];}; #need to be added purely (maybe using an app)
                     chassis = {
                         entry = [
-                            {name = "serial"; value = "${lib.toUpper vmname}_TOKEN";}
+                            {name = "serial"; value = "${lib.toUpper vmname}_TOKEN";} # TO REPLACE WITH SED
                         ];
-                    };  # TO REPLACE WITH SED
+                    };  
                     bios = {
                         entry = [
                             {name = "vendor"; value = vmconf.gateway;}

@@ -95,6 +95,12 @@ Migration:
 - naps.secrets:  sslCertificates are processed both in naps.deploy.store AND in modules.naps.secrets  (for the reverseProxy) which is confusing
 
 
+### Late game project
+
+- write a tool that deploys only the vm that have changed
+- maybe deploy a static provisioning server to give new secrets or change secrets dynamically to the vm. EG a new vm is created, requesting postgres, it could be great that postgres have a daemon listenning to the provisioning server, and updates its database (creates new key) dynamically without having to redeploy it
+
+
 ### Prio
 
 - Use UserID instead of proper user creation (for the secrets and files within the containers)
