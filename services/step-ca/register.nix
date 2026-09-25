@@ -16,7 +16,7 @@ naps.services.step-ca = {
     users.step-ca = {service="step-ca"; uid=10006;};
     assets = {
         "step-ca" = {
-            provisioner = "step-ca";
+            provider = "step-ca";
             owner = "step-ca";
             args = {};
         };

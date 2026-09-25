@@ -34,7 +34,6 @@ let
         };
 
 
-/*
     processSecret = 
         secret@{content, recipients, type}:
         let secretFiles =  utils.secretFiles secret;
@@ -59,7 +58,6 @@ let
                 }
                 else throw "deploy.storage.processSecret not implemented for env ${env.type}";
         in utils.mergeAll (map processRecipient recipients);
-*/
 /*
     processSecret = 
         secret@{content, recipients, type}:

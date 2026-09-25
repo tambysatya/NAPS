@@ -10,7 +10,7 @@ in
             options = {
                 allAssets = lib.mkOption {
                     description = "Summary of the assets dispatched across the napsstructure. Useful for automatic secret generations.";
-                    type = types.attrsOf types.assets
+                    type = types.attrsOf types.assets;
                     default = {};
                 };
                 perEnv = lib.mkOption {
