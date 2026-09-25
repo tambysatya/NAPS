@@ -1,6 +1,6 @@
 {lib, inputs,...}:
 let
-types = lib.types // import ./files.nix {inherit lib;} // import ./deployement.nix {inherit lib inputs;};
+types = lib.types // import ./files.nix {inherit lib inputs;} // import ./deployement.nix {inherit lib inputs;};
 fsType = lib.types.enum ["xfs" "ext4" "ntfs"];
 
 

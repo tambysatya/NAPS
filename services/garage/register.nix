@@ -39,11 +39,23 @@ in {
 config.naps.services.garage = {
     path = ./.;
     users."garage" = {service = "garage"; uid=10001;};
-    store.passwords = [
-        {filename = "garage-rpc.key"; inherit owner opensslSize opensslType;}
-        {filename = "garage-admin.key"; inherit owner opensslSize opensslType;}
-        {filename = "garage-metrics.key"; inherit owner opensslSize opensslType;}
-    ];
+    assets = {
+        "garage-rpc.key" = {
+            provider = "password";
+            args = {inherit opensslSize opensslType;};
+            inherit owner;
+        };
+        "garage-admin.key" = {
+            provider = "password";
+            args = {inherit opensslSize opensslType;};
+            inherit owner;
+        };
+        "garage-metrics.key" = {
+            provider = "password";
+            args = {inherit opensslSize opensslType;};
+            inherit owner;
+        };
+    };
     persistent = [
         {path="/srv/data"; inherit owner reload; mode = "0700";}
         {path="/srv/meta"; inherit owner reload; mode = "0700";}

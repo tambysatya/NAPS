@@ -6,31 +6,6 @@ let
     hostname = "nextcloud.${topology.domain}";
     owner = "nextcloud";
     reload = ["phpfpm.service" "nextcloud-setup.service"];
-    /*
-    extraConfig = {
-        virtualHosts.${hostname}.extraConfig = 
-            ''
-                proxy_request_buffering off;
-                proxy_buffering off;
-                proxy_http_version 1.1;
-                proxy_read_timeout 1h;
-                proxy_send_timeout 1h;
-                send_timeout 3600s;
-
-                keepalive_timeout 65s;
-                proxy_set_header Connection "";
-
-                client_body_timeout 3600s;
-                fastcgi_request_buffering off;
-                fastcgi_read_timeout 3600s;
-
-
-            '';
-        clientMaxBodySize = "100G";
-    };
-    */
-
-
 
     endpoints = [{
                    hostname = hostname;
@@ -42,10 +17,12 @@ in {
 naps.services.nextcloud = {
     path = ./.;
     users.nextcloud = {service="nextcloud"; uid=10003;};
-    store = {
-        passwords = [
-            {filename = "nextcloud-admin.key"; opensslType = "base64"; opensslSize=64; inherit owner ;}
-        ];
+    assets = {
+            "nextcloud-admin.key" = {
+                provider = "password";
+                args = {opensslType = "base64"; opensslSize=64;};
+                inherit owner;
+            };
     };
     links = {
         postgres = [

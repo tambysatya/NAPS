@@ -97,6 +97,8 @@ Migration:
     + currently, naps.secrets depends on naps.services => should depend on naps.deploy.systems
     + maybe use something more simple for the secrets: a type FILES just a type and an installation path + extra arguments
     + implements constructors to create serets declaration (mkS3Secrets, mkDBSecrets...)
+    + Endpoints with TLS=false implies the creation of a certificate file (TLS=false implies that the service handles TLS by itself)
+    + Same for LINKS => implies the creation of the files in both deployement systems (check if the secret exists in ./plain before creating it in the generator)
     + gen-secrets implements the generation based on the type using the extra args
     + install-secrets implements the installation based on the type using the extra args
 - NAPS application: 

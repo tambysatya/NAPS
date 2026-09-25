@@ -1,14 +1,14 @@
 {lib, inputs,...}:
 
-let 
-    libtypes = lib.types;
-    filestypes = import ./files.nix {inherit lib inputs;};
-    networktypes = import ./network.nix {inherit lib inputs;};
+let
     envtypes= import ./deployement.nix {inherit lib inputs;}; 
-    types = libtypes // filestypes // networktypes // envtypes;
-in  with types; 
+    nettypes= import ./network.nix {inherit lib inputs;}; 
+    filestypes= import ./files.nix {inherit lib inputs;}; 
+    types = lib.types // envtypes // nettypes // filestypes;
+
+in
 rec {
-    secretType = types.enum [
+    provider = types.enum [
         "plain"  # random generated string stored in /nix/store (world readable)
         "password"  # random generated string shipped by the provisioning server
         "ldapssha"  # random generated string shipped to the server + hashed and shipped to the LDAP servers
@@ -16,8 +16,10 @@ rec {
         "postgres" # random generated string shipped to the server + the POSTGRES servers
         "s3" # random generated key-pair shipped to the server and the S3 servers
         "step-ca" # TLS certificate authority
+        "ssh-keygen" # Key generation
         "nix-store" # nix-store binary-cache keypair
     ];
+
     opensslSize = lib.mkOption {
         description = "Length of the string to be generated using openssl rand";
         type = types.ints.positive;
@@ -27,49 +29,40 @@ rec {
         description = "Type of the string to be generated using openssl rand";
         type = types.enum ["base64" "hex"];
     };
-    plaintext = types.submodule { #will be world readable
-            options = {
-                inherit filename opensslSize opensslType;
-            };
-    };
-    password = types.submodule {
-            options = {
-                inherit filename owner opensslSize opensslType;
-                mode = types.filemode;
-            };
-    };
     sslCertificate = types.submodule {
             options = {
-                inherit hostname owner reload;
+                inherit (types) hostname reload;
             };
     };
 
-    secret = types.submodule {
+    assets = types.submodule {
         options = {
-            type = lib.mkOption {
-                description = "Type of the secret";
-                type = secretType;
+            provider = lib.mkOption {
+                description = "How to generate the asset";
+                type = provider;
             };
-            content = lib.mkOption {
-                description = "Content of the secret. Must match the type";
-                type = with types;
-                        #nullOr (oneOf [plaintext password sslCertificate postgresAccess s3Access ldapSSHA]);
-                        nullOr attrs; #TODO
-            };
+            /* TODO add in the deployement conf
             recipients = lib.mkOption {
                 description = "Identity names of the recipients.";
                 type = types.listOf types.deployementEnvironment;
             };
+            */
             path = lib.mkOption {
                 description = "Installation path";
                 type = types.str;
                 default = "/var/lib/secrets";
             };
+            inherit (types) owner group;
+            mode = lib.mkOption {
+                description = "Permissions of the assets. If not set, the installer sets the default permissions matching the type";
+                type = types.nullOr types.str;
+                default = null;
+            };
+            args = lib.mkOption {
+                description = "Arguments passed to the provisioner and the installer. Must match the type";
+                type = types.attrs;
+            };
         };
     };
-
-
-
-
 
 }

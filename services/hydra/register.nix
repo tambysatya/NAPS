@@ -31,9 +31,21 @@ naps.services.hydra ={
     path = ./.;
     users."hydra" = {service ="hydra"; uid=10007;};
     inherit links endpoints;
-    store.passwords = [
-        {filename = "hydra-admin-pass.key"; owner="hydra"; opensslType = "base64"; opensslSize=64;}
-    ];
+    assets = {
+        "hydra-admin-pass.key" = {
+            provider = "password";
+            owner = "hydra";
+            args = {opensslType = "base64"; opensslSize = 64;};
+        };
+        "hydra-ssh" = {
+            provider = "ssh-keygen";
+            owner = "hydra";
+        };
+        "hydra-cache" = {
+            provider = "nix-store";
+            owner = "hydra";
+        };
+    };
     persistent = [
         {path = "/nix"; owner="root"; reload=[]; mode="755";}
         {path = "/var/lib/hydra/cache"; owner="hydra-queue-runner:hydra"; reload=reload; mode="755";}

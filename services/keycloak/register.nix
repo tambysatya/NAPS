@@ -13,10 +13,12 @@ in
 naps.services.keycloak = {
     path = ./.;
     users.keycloak = {service ="keycloak"; uid=10002;};
-    store = {
-        plain = [
-            {filename="keycloak-initial-admin.key"; opensslSize = 64; opensslType = "base64";}
-        ];
+    assets= {
+            "keycloak-initial-admin.key" = {
+                provider = "password";
+                args = {opensslSize = 64; opensslType = "base64";};
+                inherit owner;
+            };
     };
     links = {
         postgres = [

@@ -11,9 +11,13 @@ in {
 naps.services.postgres = {
     path = ./.;
     users.postgres = {service = "postgresql"; uid=10005;};
-    store.sslCertificates = [
-        {inherit hostname owner reload;}
-    ];
+    assets = {
+        ${hostname} = {
+            provider = "sslCertificate";
+            args = {inherit hostname reload;};
+            inherit owner;
+        };
+    };
     endpoints.tcp = [
         {inherit hostname; port = 5432;}
     ];

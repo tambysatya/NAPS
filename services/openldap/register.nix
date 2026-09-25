@@ -15,10 +15,12 @@ naps.services.openldap = {
         {inherit hostname; port=389;}
         {inherit hostname; port=636;}
     ];
-    store = {
-        sslCertificates = [
-            {inherit hostname owner;}
-        ];
+    assets = {
+        ${hostname} = {
+            provider = "sslCertificate";
+            args = {inherit hostname reload;};
+            inherit owner;
+        };
     };
     links = {
         ldap = [

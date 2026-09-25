@@ -24,9 +24,10 @@ let libtypes = lib.types;
                     description = "Various endpoints exposed by the service";
                     type = types.endpoints;
                 };
-                store = lib.mkOption {
-                    description = "Files placed in the store (config files, strings, encrypted password)";
-                    type = types.store;
+                assets = lib.mkOption {
+                    description = "Files placed in the store (config files, strings, encrypted password). Should be of the form <filename/dirname> = {...}";
+                    type = types.attrsOf types.asset;
+                    default = {};
                 };
                 deployements = lib.mkOption {
                     description = "AttrSet of serviceuid => environment where the service is currently deployed";
