@@ -17,7 +17,7 @@ naps.services.openldap = {
     ];
     assets = {
         ${hostname} = {
-            provider = "sslCertificate";
+            provider = "tls";
             args = {inherit hostname reload;};
             inherit owner;
         };

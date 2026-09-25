@@ -13,7 +13,7 @@ naps.services.postgres = {
     users.postgres = {service = "postgresql"; uid=10005;};
     assets = {
         ${hostname} = {
-            provider = "sslCertificate";
+            provider = "tls";
             args = {inherit hostname reload;};
             inherit owner;
         };

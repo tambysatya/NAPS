@@ -12,7 +12,7 @@ rec {
         "plain"  # random generated string stored in /nix/store (world readable)
         "password"  # random generated string shipped by the provisioning server
         "ldapssha"  # random generated string shipped to the server + hashed and shipped to the LDAP servers
-        "sslCertificate" # TLS certificate
+        "tls" # TLS certificate
         "postgres" # random generated string shipped to the server + the POSTGRES servers
         "s3" # random generated key-pair shipped to the server and the S3 servers
         "step-ca" # TLS certificate authority

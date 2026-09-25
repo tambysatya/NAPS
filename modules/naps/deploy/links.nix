@@ -25,10 +25,10 @@ let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
         hostsOwner:  # service user running on the host (e.g. postgres, garage...) 
         secret:
         let uid = utils.envUID env;
-            mkHostSecret = host: {${utils.envUID host}.secrets=[(secret // {owner=hostsOwner;})];}; #replace the owner of the secret transmitted to the hosts
+            mkHostSecret = host: {${utils.envUID host}.assets=[(secret // {owner=hostsOwner;})];}; #replace the owner of the secret transmitted to the hosts
             dsts = lib.filter (name: name != uid) hosts;
         in utils.mergeAll 
-                ([{${uid}.secrets = [secret]; }] ++ map mkHostSecret dsts);
+                ([{${uid}.assets = [secret]; }] ++ map mkHostSecret dsts);
 
 
     processLdap =

@@ -45,7 +45,7 @@ let
 in {
     imports = [./options
                ./users.nix
-               ./store.nix
+               ./assets.nix
                ./links.nix 
                ./storage.nix
                ./endpoints.nix

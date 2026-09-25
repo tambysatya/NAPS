@@ -14,6 +14,13 @@ in
 naps.services.step-ca = {
     path = ./.;
     users.step-ca = {service="step-ca"; uid=10006;};
+    assets = {
+        "step-ca" = {
+            provisioner = "step-ca";
+            owner = "step-ca";
+            args = {};
+        };
+    };
     endpoints.http = [
         {inherit hostname port; tls=false;}
     ];

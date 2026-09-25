@@ -116,9 +116,9 @@ let
                 type = types.attrsOf types.user;
                 default = {};
             };
-            secrets = lib.mkOption {
-                description = "All secrets files.";
-                type = types.listOf secretFile;
+            assets = lib.mkOption {
+                description = "All assets files (including sslCertificates).";
+                type = types.listOf types.asset;
                 default = [];
             };
             sslCertificates = lib.mkOption {

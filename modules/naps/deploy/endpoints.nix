@@ -55,19 +55,33 @@ let
             backendIP = if ! isLocal then utils.envHostIP config env # the backend ip of the service points either to the container or to the host
                         else if utils.envUID env == vmname then "127.0.0.1"
                         else utils.envIP config env;
-        in {
-            proxy.http.${endpoint.hostname} = {
-                inherit (endpoint) extraConfig;
-                tls = if isLocal then endpoint.tls else false; # never terminates tls if the service is not hosted locally (ie on the VM or in a container).
-                public = isLocal;
-                backends = [{
-                    inherit env;
-                    ip = backendIP;
-                    port = if isLocal then endpoint.port else 443;
-                }];
-            };
-            sslCertificates = lib.optionals (if isLocal then endpoint.tls else false) [{inherit (endpoint) hostname; owner="haproxy"; reload=["haproxy.service"]; }];
-        };
+        in  utils.mergeAll [
+                {
+                    proxy.http.${endpoint.hostname} = {
+                        inherit (endpoint) extraConfig;
+                        tls = if isLocal then endpoint.tls else false; # never terminates tls if the service is not hosted locally (ie on the VM or in a container).
+                        public = isLocal;
+                        backends = [{
+                            inherit env;
+                            ip = backendIP;
+                            port = if isLocal then endpoint.port else 443;
+                        }];
+                    };
+                }
+                (lib.optionalAttrs (if isLocal then endpoint.tls else false) 
+                    (let cert = {inherit (endpoint) hostname; reload=["haproxy.service"]; };
+                     in {
+                        sslCertificates = [cert];
+                        assets = {
+                            ${endpoint.hostname} = {
+                                provider = "tls";
+                                args = cert;
+                                owner = "haproxy";
+                            };
+                        };
+                    })
+                )
+        ];
 
 
 in {

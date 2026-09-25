@@ -9,6 +9,7 @@ let
 in {
   imports = [./topology # Inventory of the deployement (which service on which vm on which host)
              ./services # Requirements of each available service
+             ./envs # all the deployement environments
              ./links    # Summary of the links per vm
              ./secrets # Summary of the secrets (for the secrets-generator)
              ./volumes # Summary of the storage allocation (for the migration procedure)

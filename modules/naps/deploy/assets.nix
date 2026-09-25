@@ -2,6 +2,8 @@
 
 let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
 
+
+/*
     processStore = 
         store@{passwords, sslCertificates,...}:
         env:
@@ -36,8 +38,25 @@ let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
             additionalsecrets = env: {${utils.envUID env}.secrets = stepcasecrets;};
         in
         utils.mergeAll (map (processStore store) envs ++ (if srvname == "step-ca" then map additionalsecrets envs else []));
+*/
+
+
+    processService = 
+        srvname: srv@{deployements,...}:
+        utils.mergeAll (map (processAssets srv) (builtins.attrValues deployements));
+    processAssets =
+        srv@{assets,...}: env:
+        utils.mergeAll (map (processAsset env) assets);
+
+    processAsset = env:
+        asset@{type, args, ...}:
+        [
+            {${utils.envUID env}.assets = [asset];}
+            (lib.optionnalAttr (type == "tls") {${utils.envUID env}.sslCertificates = [args];})
+        ];
 
 in
 {
-    naps.deploy.systems = utils.mergeAll (lib.mapAttrsToList processService config.naps.services);
+    # naps.deploy.systems = utils.mergeAll (lib.mapAttrsToList processService config.naps.services);
+     naps.deploy.systems = utils.mergeAll (lib.mapAttrsToList processService config.naps.services);
 }

@@ -34,6 +34,7 @@ let
         };
 
 
+/*
     processSecret = 
         secret@{content, recipients, type}:
         let secretFiles =  utils.secretFiles secret;
@@ -58,12 +59,39 @@ let
                 }
                 else throw "deploy.storage.processSecret not implemented for env ${env.type}";
         in utils.mergeAll (map processRecipient recipients);
-
+*/
+/*
+    processSecret = 
+        secret@{content, recipients, type}:
+        let secretFiles =  utils.secretFiles secret;
+            processRecipient = env:
+                if env.type == "vm" then {}
+                else if env.type == "container"{
+                    ${utils.envHost env}.storage.containers.${utils.envUID env} =
+                        utils.mergeAll 
+                            (map 
+                                (secname:
+                                 {
+                                    "/var/lib/secrets/${secname}" = {
+                                        hostPath = "/var/lib/secrets/${secname}";
+                                        # These functions implement default values if the field is not filled (secrets is an heterogeneous list)
+                                        owner = utils.secretOwner secret;
+                                        reload = utils.secretReload secret;
+                                        mode = utils.secretMode secret;
+                                        isReadOnly = true;
+                                    };
+                                 })
+                             secretFiles);
+                }
+                else throw "deploy.storage.processSecret not implemented for env ${env.type}";
+        in utils.mergeAll (map processRecipient recipients);
+        */
 in 
 {
     imports = [./options];
     naps.deploy.systems = utils.mergeAll 
                                 (lib.mapAttrsToList generateMappings config.naps.volumes.perVM
                                 ++ lib.mapAttrsToList generateBinds config.naps.volumes.perDirectory
-                                ++ map processSecret config.naps.secrets.allSecrets);
+                                ++ utils.mergeAll (lib.map (_: {}) (builtins.attrNames config.naps.deploy.systems)));
+                                #++ map processSecret config.naps.secrets.allSecrets);
 }

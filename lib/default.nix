@@ -55,6 +55,7 @@ let
 
     concatMapAttrsStringsSep = 
         sep: f: attrs: lib.concatStringsSep sep (lib.mapAttrsToList f attrs);
+    concatMapAttrsToList = f: attrs: lib.concatLists (lib.mapAttrsToList f attrs);
 
     serviceName = config: id:
         config.naps.topology.services.${id}.is;
@@ -67,7 +68,7 @@ let
         in config.naps.services.${srvname};
 
 in vars // {
-    inherit partitionAttrs concatMapAttrsStringsSep;
+    inherit partitionAttrs concatMapAttrsStringsSep concatMapAttrsToList;
     inherit mergeAll pathToMountUnit;
     inherit hasDupplicate getFirstDupplicate;
     inherit serviceName servicePriority serviceTags serviceInfo;
