@@ -95,6 +95,12 @@ Migration:
 - naps.secrets:  
     + sslCertificates are processed both in naps.deploy.store AND in modules.naps.secrets  (for the reverseProxy) which is confusing
     + currently, naps.secrets depends on naps.services => should depend on naps.deploy.systems
+    + maybe use something more simple for the secrets: just a type and an installation path + extra arguments
+    + gen-secrets implements the generation based on the type using the extra args
+    + install-secrets implements the installation based on the type using the extra args
+- NAPS application: 
+    + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets
+    + write a script that uploads the secrets to the provisioner using ssh and launch the secret provisioner automatically (based on the topology description)
 
 
 ### Late game project
@@ -120,7 +126,6 @@ Migration:
 - iso: use different iso names (otherwise tofu does not upload it)
 - S3: links: check if a bucket key exists and replace if with the new one
 - step: use a single-use token instead of a certificate ?
-- NAPS application: allows either to deploy a VM or to "update" a VM (without tofu)
 - include the secret provisioner in NAPS
 - lifecycle: tofu must ignore the smbios parameters
 - nix: run garbage collector every xxx days to save space ?
