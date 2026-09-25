@@ -60,6 +60,11 @@ rec {
                 description = "Identity names of the recipients.";
                 type = types.listOf types.deployementEnvironment;
             };
+            path = lib.mkOption {
+                description = "Installation path";
+                type = types.str;
+                default = "/var/lib/secrets";
+            };
         };
     };
 
