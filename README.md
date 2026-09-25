@@ -92,7 +92,9 @@ Migration:
  
 ### Refactor
 
-- naps.secrets:  sslCertificates are processed both in naps.deploy.store AND in modules.naps.secrets  (for the reverseProxy) which is confusing
+- naps.secrets:  
+    + sslCertificates are processed both in naps.deploy.store AND in modules.naps.secrets  (for the reverseProxy) which is confusing
+    + currently, naps.secrets depends on naps.services => should depend on naps.deploy.systems
 
 
 ### Late game project
