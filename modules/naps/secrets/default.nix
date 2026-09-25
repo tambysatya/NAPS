@@ -75,8 +75,10 @@ let
 in {
     imports = [./options];
     config.naps.secrets = { 
+        /*
         allEnvs = allEnvs;
         inherit allSecrets;
         perVM = vmSecrets;
+        */
     };
 }

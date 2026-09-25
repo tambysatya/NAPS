@@ -35,7 +35,7 @@ rec {
             };
     };
 
-    assets = types.submodule {
+    asset = types.submodule {
         options = {
             provider = lib.mkOption {
                 description = "How to generate the asset";

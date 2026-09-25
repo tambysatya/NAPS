@@ -2,8 +2,8 @@
 let
     libtypes = lib.types;
     filestypes = import ./files.nix {inherit lib inputs;};
-    secrets = import ./secrets.nix {inherit lib inputs;};
-    types = libtypes // filestypes // secrets;
+    assets = import ./assets.nix {inherit lib inputs;};
+    types = libtypes // filestypes // assets;
 in
 with types;
 rec {

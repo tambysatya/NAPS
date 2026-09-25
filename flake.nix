@@ -192,9 +192,9 @@ let
         exposeApps = 
             args:
             utils.mergeAll [
-                (compileGenSecrets args) 
-                (compileInstallSecrets args)
-                (compileVisualization args)
+               # (compileGenSecrets args) 
+               # (compileInstallSecrets args)
+               # (compileVisualization args)
             ];
 
 
