@@ -35,7 +35,7 @@ let
     loggingVMs = lib.filterAttrs (_: {centralizeLogs,...}: centralizeLogs) config.naps.topology.vms;
 
 in {
-    naps.secrets.allSecrets = lib.concatMap mkSecret (builtins.attrNames loggingVMs);
-    naps.secrets.perVM = lib.mapAttrs (vmname: _: mkSecret vmname) loggingVMs;
+    #naps.secrets.allSecrets = lib.concatMap mkSecret (builtins.attrNames loggingVMs);
+    #naps.secrets.perVM = lib.mapAttrs (vmname: _: mkSecret vmname) loggingVMs;
     naps.outputs.systems = lib.mapAttrs enableLogging loggingVMs;
 }

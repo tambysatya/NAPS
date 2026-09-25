@@ -30,8 +30,11 @@ rec {
     };
     ldapSSHA = types.submodule {
             options = {
-                inherit filename owner reload opensslSize opensslType;
-                mode = filemode;
+                olcRootDN = lib.mkOption {
+                    description = "Root DN";
+                    type = types.str;
+                };
+                inherit owner reload;
             };
     };
     links = types.submodule{

@@ -68,6 +68,8 @@ Main module: config.infra
 
 - GARAGE: adjust the snapshot interval
 
+- LDAP: use a more structured  access definition in links (currently its just a filename which is less structured than dbAccess@{database,...} or s3access@{bucket,...})
+
 
 
 
@@ -102,6 +104,8 @@ Migration:
     + install-secrets implements the installation based on the type using the extra args
     + NAPS.secrets should entirely depends from NAPS.services (and not from NAPS.deploy)
     + NAPS.secrets should defines perVMs entirely (processing Links, Endpoints,...)
+    + TODO enable logging
+    + TODO add reloads to files (and change them: eg a db access reload = postgres for the db file)
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets
     + write a script that uploads the secrets to the provisioner using ssh and launch the secret provisioner automatically (based on the topology description)

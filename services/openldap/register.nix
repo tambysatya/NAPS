@@ -24,7 +24,7 @@ naps.services.openldap = {
     };
     links = {
         ldap = [
-            {filename="ldap-admin.key"; opensslSize=64; opensslType="base64";}
+            {olcRootDN ="cn=admin"; inherit owner reload;} #TODO add the suffix
         ];
     };
 

@@ -12,9 +12,11 @@ let
 
     #naming conventions
     container_id = vmname: service: "${vmname}-${service}"; #returns the containers ID
+    s3_root = access@{bucket, ...}: "s3-${bucket}";
     s3_key_id = access@{bucket,...}: "s3-${bucket}.id";
     s3_key = access@{bucket,...}: "s3-${bucket}.key";
     db_key = access@{database, ...}: "db-${database}.key";
+    ldap_key = access@{olcRootDN,...}: "ldap-${olcRootDN}.key"; #TODO
     
     directory_id = serviceuid: path: "${serviceuid}:${path}";
     envUID = env: if builtins.isString env then env
@@ -32,7 +34,7 @@ let
 
 in {
     inherit ssl_root ssl_crt_path ssl_key_path pemdir;
-    inherit s3_key s3_key_id db_key;
+    inherit s3_root s3_key s3_key_id db_key ldap_key;
     inherit directory_id;
     inherit envUID envHost hostDeployementEnv;
     inherit mkVMEnv mkCTEnv;
