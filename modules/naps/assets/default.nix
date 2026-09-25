@@ -63,9 +63,11 @@ let
         utils.mergeAll (map (processDeployement srv) (builtins.attrValues deployements));
 
 
+    perEnv = utils.mergeAll (lib.mapAttrsToList processService config.naps.services);
+
 in {
     imports = [./options];
-    naps.assets.perEnv = utils.mergeAll (lib.mapAttrsToList processService config.naps.services);
+    naps.assets.perEnv = perEnv;
         /*
     config.naps.secrets = { 
         allEnvs = allEnvs;

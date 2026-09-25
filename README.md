@@ -107,6 +107,7 @@ Migration:
     + TODO enable logging
     + TODO do not add reloads to files: this should be handled in the installer when doing installation "in place". Certificates have reloads (for refreshing with step-renew) but not all of them
     + TODO; logging should be a service added manually: it can then declare its own secrets (mtls for instance)
+    + TODO: since the assets are now a blackbox, the user may also declare custom generators and installers to handle new types of secrets that are not handled natively in NAPS
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets
     + write a script that uploads the secrets to the provisioner using ssh and launch the secret provisioner automatically (based on the topology description)
