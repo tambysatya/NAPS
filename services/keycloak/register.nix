@@ -22,7 +22,7 @@ naps.services.keycloak = {
     };
     links = {
         postgres = [
-            {database="keycloak"; inherit owner reload;}
+            {database="keycloak"; inherit owner;}
         ];  
     };
     endpoints.http = [

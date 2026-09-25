@@ -26,10 +26,10 @@ naps.services.nextcloud = {
     };
     links = {
         postgres = [
-            {database = "nextcloud"; inherit owner reload;}
+            {database = "nextcloud"; inherit owner;}
         ];
         s3 = [
-            {bucket = "nextcloud"; inherit owner reload;}
+            {bucket = "nextcloud"; inherit owner;}
         ];
     };
     persistent = [

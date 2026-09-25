@@ -20,10 +20,10 @@ naps.services.forgejo = {
     };
     links = {
         postgres = [
-            {database = "forgejo"; inherit owner reload;}
+            {database = "forgejo"; inherit owner;}
         ];
         s3 = [
-            {bucket = "forgejo"; inherit owner reload;}
+            {bucket = "forgejo"; inherit owner;}
         ];
     };
     endpoints = {

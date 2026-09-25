@@ -13,10 +13,11 @@ rec {
         "password"  # random generated string shipped by the provisioning server
         "ldapssha"  # random generated string shipped to the server + hashed and shipped to the LDAP servers
         "tls" # TLS certificate
+        "haproxy" # TLS certificate in HAproxy format (public + private concatenated)
         "postgres" # random generated string shipped to the server + the POSTGRES servers
         "s3" # random generated key-pair shipped to the server and the S3 servers
         "step-ca" # TLS certificate authority
-        "ssh-keygen" # Key generation
+        "ssh-keygen" # SSH Key generation
         "nix-store" # nix-store binary-cache keypair
     ];
 
@@ -41,12 +42,6 @@ rec {
                 description = "How to generate the asset";
                 type = provider;
             };
-            /* TODO add in the deployement conf
-            recipients = lib.mkOption {
-                description = "Identity names of the recipients.";
-                type = types.listOf types.deployementEnvironment;
-            };
-            */
             path = lib.mkOption {
                 description = "Installation path";
                 type = types.str;

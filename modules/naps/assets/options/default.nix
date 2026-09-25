@@ -4,7 +4,7 @@ let
 in 
 
 {
-    options.naps.secrets = lib.mkOption {
+    options.naps.assets = lib.mkOption {
         description = "Assets dispatched across the infrastructure";
         type = types.submodule {
             options = {

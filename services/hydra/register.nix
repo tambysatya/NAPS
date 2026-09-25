@@ -21,7 +21,7 @@ let
     };
     links  = {
         postgres = [
-            {database = "hydra"; inherit owner reload;}
+            {database = "hydra"; inherit owner;}
         ];
     };
 
@@ -40,6 +40,7 @@ naps.services.hydra ={
         "hydra-ssh" = {
             provider = "ssh-keygen";
             owner = "hydra";
+            path = "/var/lib/hydra/";
         };
         "hydra-cache" = {
             provider = "nix-store";

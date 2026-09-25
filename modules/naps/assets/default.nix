@@ -33,8 +33,21 @@ let
                 map processPostgres postgres ++
                 map processS3 s3);
 
-    processEndpoints = env: endpoints: {};
-    processAssets = env: assets: {};
+    processEndpoints = env: endpoints:
+        # only reverse proxy are processed. Otherwise, certificates must be 
+        # registered manually in the assets section and handled manually in
+        # the configuration
+        let
+            dst = if env.type == "container" then utils.envUID env else utils.envHost env;
+            processHTTPEndpoint  =
+                {tls, hostname, ...}:
+                let cert = {provider = "haproxy"; owner = "haproxy"; args = {inherit hostname; reload = ["haproxy.service"];};};
+                in lib.optionalAttrs tls {${dst}.${hostname} = cert;}; #if TLS=false, the certificate should be declared manually in the assets
+        in utils.mergeAll(
+                map processHTTPEndpoint endpoints.http);
+    processAssets = env: assets: {
+        ${utils.envUID env} = assets;
+    };
     
     processDeployement = 
         srv@{endpoints, links, assets, ...}:
@@ -49,9 +62,10 @@ let
         srvname: srv@{deployements, ...}:
         utils.mergeAll (map (processDeployement srv) (builtins.attrValues deployements));
 
+
 in {
     imports = [./options];
-    naps.secrets.perEnv = utils.mergeAll (lib.mapAttrsToList processService config.naps.services);
+    naps.assets.perEnv = utils.mergeAll (lib.mapAttrsToList processService config.naps.services);
         /*
     config.naps.secrets = { 
         allEnvs = allEnvs;

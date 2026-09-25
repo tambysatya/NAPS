@@ -11,9 +11,9 @@ in {
              ./services # Requirements of each available service
              ./envs # all the deployement environments
              ./links    # Summary of the links per vm
-             ./secrets # Summary of the secrets (for the secrets-generator)
+             ./assets # Summary of the assets (for the secrets-generator)
              ./volumes # Summary of the storage allocation (for the migration procedure)
-             ./deploy # Summary of the requirements (per vm and per container)
+             ./deploy # Summary of the requirements (per vm and per container) [source of truth: services, assets, volumes]
              ./outputs];
 
 /*  

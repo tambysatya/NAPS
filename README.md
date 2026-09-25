@@ -105,7 +105,8 @@ Migration:
     + NAPS.secrets should entirely depends from NAPS.services (and not from NAPS.deploy)
     + NAPS.secrets should defines perVMs entirely (processing Links, Endpoints,...)
     + TODO enable logging
-    + TODO add reloads to files (and change them: eg a db access reload = postgres for the db file)
+    + TODO do not add reloads to files: this should be handled in the installer when doing installation "in place". Certificates have reloads (for refreshing with step-renew) but not all of them
+    + TODO; logging should be a service added manually: it can then declare its own secrets (mtls for instance)
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets
     + write a script that uploads the secrets to the provisioner using ssh and launch the secret provisioner automatically (based on the topology description)
@@ -152,6 +153,7 @@ CHECKS:
 - checks if the partitions exist on the KVM hosts 
 - centralizeLogs cannot be enabled if journald-remote is not deployed
 - Two services are not listening simultaneously on the same port (at least on the same system)
+- Secrets: TLS certificates must have a reload part
 
 
 EXPERIMENTS:
