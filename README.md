@@ -94,13 +94,14 @@ Migration:
 
 - naps.secrets:  
     + sslCertificates are processed both in naps.deploy.store AND in modules.naps.secrets  (for the reverseProxy) which is confusing
-    + currently, naps.secrets depends on naps.services => should depend on naps.deploy.systems
     + maybe use something more simple for the secrets: a type FILES just a type and an installation path + extra arguments
     + implements constructors to create serets declaration (mkS3Secrets, mkDBSecrets...)
     + Endpoints with TLS=false implies the creation of a certificate file (TLS=false implies that the service handles TLS by itself)
     + Same for LINKS => implies the creation of the files in both deployement systems (check if the secret exists in ./plain before creating it in the generator)
     + gen-secrets implements the generation based on the type using the extra args
     + install-secrets implements the installation based on the type using the extra args
+    + NAPS.secrets should entirely depends from NAPS.services (and not from NAPS.deploy)
+    + NAPS.secrets should defines perVMs entirely (processing Links, Endpoints,...)
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets
     + write a script that uploads the secrets to the provisioner using ssh and launch the secret provisioner automatically (based on the topology description)

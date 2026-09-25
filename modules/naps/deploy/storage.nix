@@ -92,6 +92,5 @@ in
     naps.deploy.systems = utils.mergeAll 
                                 (lib.mapAttrsToList generateMappings config.naps.volumes.perVM
                                 ++ lib.mapAttrsToList generateBinds config.naps.volumes.perDirectory
-                                ++ utils.mergeAll (lib.map (_: {}) (builtins.attrNames config.naps.deploy.systems)));
-                                #++ map processSecret config.naps.secrets.allSecrets);
+                                + map processSecret config.naps.secrets.allSecrets);
 }

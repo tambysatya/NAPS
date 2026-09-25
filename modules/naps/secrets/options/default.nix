@@ -5,22 +5,17 @@ in
 
 {
     options.naps.secrets = lib.mkOption {
-        description = "Summary of the secrets dispatched across the napsstructure. Useful for automatic secret generations.";
+        description = "Assets dispatched across the infrastructure";
         type = types.submodule {
             options = {
-                allEnvs = lib.mkOption {
-                    description = "List of unique identifiers";
-                    type = types.listOf types.deployementEnvironment;
-                    default = [];
-                };
-                allFiles = lib.mkOption {
-                    description = "Summary of the secrets dispatched across the napsstructure. Useful for automatic secret generations.";
-                    type = types.attrsOf types.file ;
+                allAssets = lib.mkOption {
+                    description = "Summary of the assets dispatched across the napsstructure. Useful for automatic secret generations.";
+                    type = types.attrsOf types.assets
                     default = {};
                 };
-                perVM = lib.mkOption {
-                    description = "List of the secrets per virtual machine";
-                    type = types.attrsOf (types.attrsOf types.file);
+                perEnv = lib.mkOption {
+                    description = "List of the assets per environment";
+                    type = types.attrsOf (types.attrsOf types.assets);
                     default = {};
                 };
             };
