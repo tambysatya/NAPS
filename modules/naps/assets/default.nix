@@ -27,7 +27,7 @@ let
             processPostgres = access:
                 mkSharedSecret dbhosts "postgres" (utils.db_key access) {provider = "postgres"; owner = access.owner; args=access;};
             processS3 = access:
-                mkSharedSecret dbhosts "garage" (utils.s3_root access) {provider = "s3"; owner = access.owner; args=access;};
+                mkSharedSecret s3hosts "garage" (utils.s3_root access) {provider = "s3"; owner = access.owner; args=access;};
         in utils.mergeAll (
                 map processLDAP ldap ++
                 map processPostgres postgres ++
@@ -63,16 +63,31 @@ let
         utils.mergeAll (map (processDeployement srv) (builtins.attrValues deployements));
 
 
-    perEnv = utils.mergeAll (lib.mapAttrsToList processService config.naps.services);
+    perEnv = utils.mergeAll (lib.mapAttrsToList processService config.naps.services); # envUID => assetName => asset
+    getEnv = uid: config.naps.envs.all.${uid}; 
+    allAssets = # [{uid, assetname, asset}]
+        let processEnv = uid: assetsattr: lib.mapAttrsToList (assetname: asset: asset // {name=assetname; env = getEnv uid;} ) assetsattr;
+        in lib.concatLists (lib.mapAttrsToList processEnv perEnv);
+    assetsPerType = builtins.groupBy (builtins.getAttr "provider") allAssets; # provider => [{uid, assetname, asset}]
+
+    mkInstallerForEnv = 
+        envname: envassets:
+        let 
+            namedlist = lib.mapAttrsToList (k: v: v // {name=k;}) envassets; # [{name, provider, ..}]
+            byprovider = lib.groupBy (builtins.getAttr "provider") namedlist; # {provider => [{name, provider, ...}]}
+            byproviderbyname = lib.mapAttrs 
+                                    (_: vs: 
+                                        utils.mergeAll 
+                                            (lib.map (v: {${v.name} = {inherit (v) args owner group mode path;};}) vs))
+                                    byprovider;
+        in byproviderbyname;
 
 in {
     imports = [./options];
     naps.assets.perEnv = perEnv;
-        /*
-    config.naps.secrets = { 
-        allEnvs = allEnvs;
-        inherit allSecrets;
-        perVM = vmSecrets;
-    };
-        */
+    naps.assets.generator = lib.mapAttrs  
+                                (_: assets: # {uid, assetname, env} => uid = {assetname, recipient=[env]}
+                                    utils.mergeAll (map ({name, args, env, ...}: {${name} = {inherit args; recipients=[env];}; }) assets) )
+                                assetsPerType;
+    naps.assets.installer = lib.mapAttrs mkInstallerForEnv config.naps.assets.perEnv;
 }

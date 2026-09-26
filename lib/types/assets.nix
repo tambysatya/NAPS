@@ -38,16 +38,16 @@ rec {
 
     asset = types.submodule {
         options = {
+            inherit (types) owner group;
             provider = lib.mkOption {
                 description = "How to generate the asset";
                 type = provider;
             };
             path = lib.mkOption {
                 description = "Installation path";
-                type = types.str;
-                default = "/var/lib/secrets";
+                type = types.nullOr types.str;
+                default = null;
             };
-            inherit (types) owner group;
             mode = lib.mkOption {
                 description = "Permissions of the assets. If not set, the installer sets the default permissions matching the type";
                 type = types.nullOr types.str;

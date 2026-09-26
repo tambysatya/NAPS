@@ -26,6 +26,11 @@ rec {
                     type = types.str;
                     example = "nextcloud";
                 };
+                pgpass = lib.mkOption {
+                    description = "Write the password in a PGPass file";
+                    type = types.bool;
+                    default = false;
+                };
             };
     };
     ldapSSHA = types.submodule {
