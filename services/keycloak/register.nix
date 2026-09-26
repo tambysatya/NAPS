@@ -16,8 +16,8 @@ naps.services.keycloak = {
     assets= {
             "keycloak-initial-admin.key" = {
                 provider = "password";
-                args = {opensslSize = 64; opensslType = "base64";};
-                inherit owner;
+                generateArgs = {opensslSize = 64; opensslType = "base64";};
+                installArgs = {inherit owner;};
             };
     };
     links = {

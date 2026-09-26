@@ -34,17 +34,16 @@ naps.services.hydra ={
     assets = {
         "hydra-admin-pass.key" = {
             provider = "password";
-            owner = "hydra";
-            args = {opensslType = "base64"; opensslSize = 64;};
+            generateArgs = {opensslType = "base64"; opensslSize = 64;};
+            installArgs = {owner = "hydra";};
         };
         "hydra-ssh" = {
             provider = "ssh-keygen";
-            owner = "hydra";
-            path = "/var/lib/hydra/";
+            installArgs = {owner = "hydra"; path = "/var/lib/hydra";};
         };
         "hydra-cache" = {
             provider = "nix-store";
-            owner = "hydra";
+            installArgs = {owner = "hydra";};
         };
     };
     persistent = [

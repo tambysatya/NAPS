@@ -42,18 +42,18 @@ config.naps.services.garage = {
     assets = {
         "garage-rpc.key" = {
             provider = "password";
-            args = {inherit opensslSize opensslType;};
-            inherit owner;
+            generateArgs = {inherit opensslSize opensslType;};
+            installArgs = {inherit owner;};
         };
         "garage-admin.key" = {
             provider = "password";
-            args = {inherit opensslSize opensslType;};
-            inherit owner;
+            generateArgs = {inherit opensslSize opensslType;};
+            installArgs = {inherit owner;};
         };
         "garage-metrics.key" = {
             provider = "password";
-            args = {inherit opensslSize opensslType;};
-            inherit owner;
+            generateArgs = {inherit opensslSize opensslType;};
+            installArgs = {inherit owner;};
         };
     };
     persistent = [

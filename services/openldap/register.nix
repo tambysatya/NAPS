@@ -18,8 +18,8 @@ naps.services.openldap = {
     assets = {
         ${hostname} = {
             provider = "tls";
-            args = {inherit hostname reload;};
-            inherit owner;
+            generateArgs = {inherit hostname reload;};
+            installArgs = {inherit owner;};
         };
     };
     links = {

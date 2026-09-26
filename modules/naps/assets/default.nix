@@ -18,16 +18,16 @@ let
                 secretname:
                 secret:
                 let uid = utils.envUID env;
-                    mkHostSecret = host: {${utils.envUID host}.${secretname} =(secret // {owner=hostsOwner;});}; #replace the owner of the secret transmitted to the hosts
+                    mkHostSecret = host: {${utils.envUID host}.${secretname} =(secret // {installArgs = {owner=hostsOwner;};});}; #replace the owner of the secret transmitted to the hosts
                     dsts = lib.filter (name: name != uid) hosts;
                 in utils.mergeAll 
                         ([{${uid}.${secretname} = secret; }] ++ map mkHostSecret dsts);
             processLDAP = access: 
-                mkSharedSecret ldaphosts "openldap" (utils.ldap_key access) {provider = "ldapssha"; owner = access.owner; args=access;};
+                mkSharedSecret ldaphosts "openldap" (utils.ldap_key access) {provider = "ldapssha"; installArgs = { owner = access.owner;}; generateArgs = access;};
             processPostgres = access:
-                mkSharedSecret dbhosts "postgres" (utils.db_key access) {provider = "postgres"; owner = access.owner; args=access;};
+                mkSharedSecret dbhosts "postgres" (utils.db_key access) {provider = "postgres"; installArgs = {owner = access.owner;}; generateArgs = access;};
             processS3 = access:
-                mkSharedSecret s3hosts "garage" (utils.s3_root access) {provider = "s3"; owner = access.owner; args=access;};
+                mkSharedSecret s3hosts "garage" (utils.s3_root access) {provider = "s3"; installArgs = {owner = access.owner;}; generateArgs = access;};
         in utils.mergeAll (
                 map processLDAP ldap ++
                 map processPostgres postgres ++
@@ -41,7 +41,7 @@ let
             dst = if env.type == "container" then utils.envUID env else utils.envHost env;
             processHTTPEndpoint  =
                 {tls, hostname, ...}:
-                let cert = {provider = "haproxy"; owner = "haproxy"; args = {inherit hostname; reload = ["haproxy.service"];};};
+                let cert = {provider = "haproxy"; installArgs = {owner = "haproxy";}; generateArgs = {inherit hostname; reload = ["haproxy.service"];};};
                 in lib.optionalAttrs tls {${dst}.${hostname} = cert;}; #if TLS=false, the certificate should be declared manually in the assets
         in utils.mergeAll(
                 map processHTTPEndpoint endpoints.http);
@@ -78,7 +78,7 @@ let
             byproviderbyname = lib.mapAttrs 
                                     (_: vs: 
                                         utils.mergeAll 
-                                            (lib.map (v: {${v.name} = {inherit (v) args owner group mode path;};}) vs))
+                                            (lib.map (v: {${v.name} = {args = v.installArgs;};}) vs))
                                     byprovider;
         in byproviderbyname;
 
@@ -87,7 +87,7 @@ in {
     naps.assets.perEnv = perEnv;
     naps.assets.generator = lib.mapAttrs  
                                 (_: assets: # {uid, assetname, env} => uid = {assetname, recipient=[env]}
-                                    utils.mergeAll (map ({name, args, env, ...}: {${name} = {inherit args; recipients=[env];}; }) assets) )
+                                    utils.mergeAll (map ({name, generateArgs, env, ...}: {${name} = {args = generateArgs; recipients=[env];}; }) assets) )
                                 assetsPerType;
     naps.assets.installer = lib.mapAttrs mkInstallerForEnv config.naps.assets.perEnv;
 }

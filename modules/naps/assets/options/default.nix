@@ -17,36 +17,23 @@ let
         };
     };
 
-    installerEntry = types.submodule {
-        options = {
-            args = lib.mkOption {
-                description = "Extra Args for the installer";
-                type = types.attrs;
-            };
-            owner = lib.mkOption {
-                description = "Owner of the asset";
-                type = types.str;
-            };
-            group = lib.mkOption {
-                description = "Group of the asset. If null, the installer will chose the default value for this type of asset (often a group having the same name as the owner)";
-                type = types.nullOr types.str;
-            };
-            mode = lib.mkOption {
-                description = "Permissions of the asset. If null, the installer will chose the default value for this type of asset.";
-                type = types.nullOr types.str;
-            };
-            path = lib.mkOption {
-                description = "Installation path. If null, the installer will chose the default value for this type of asset.";
-                type = types.nullOr types.str;
-            };
-        };
-    };
 
     providerEntry = types.submodule {
         options = {
             assetType = lib.mkOption {
                 description = "The type of the asset";
-                type = types.raw;
+                type =  types.submodule {
+                    options = {
+                        generateArgs = lib.mkOption {
+                            description = "Type of the generator inputs"; 
+                            type = types.submodule;
+                        };
+                        installArgs = lib.mkOption {
+                            description = "Type of the installer inputs"; 
+                            type = types.submodule;
+                        };
+                    };
+                };
             };
             generate = lib.mkOption {
                 description = "A function to generate the asset. Should have type: targetPath -> generatorEntry -> Script";
@@ -77,7 +64,7 @@ in
                 };
                 installer = lib.mkOption {
                     description = "Intermediate Representation of the assets installation script. Format is: Env -> Provider -> name -> args";
-                    type = types.attrsOf (types.attrsOf (types.attrsOf installerEntry));
+                    type = types.attrsOf (types.attrsOf (types.attrs));
                     default = {};
                 };
                 providers = lib.mkOption {

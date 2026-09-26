@@ -20,8 +20,8 @@ naps.services.nextcloud = {
     assets = {
             "nextcloud-admin.key" = {
                 provider = "password";
-                args = {opensslType = "base64"; opensslSize=64;};
-                inherit owner;
+                generateArgs = {opensslType = "base64"; opensslSize=64;};
+                installArgs = {inherit owner;};
             };
     };
     links = {

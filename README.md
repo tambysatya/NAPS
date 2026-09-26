@@ -108,6 +108,7 @@ Migration:
     + TODO; logging should be a service added manually: it can then declare its own secrets (mtls for instance)
     + Providers should declare the type of assets (in order to automatically check that the assets blackboxes are properly formed)
     + TODO: check if each asset providers is declared
+    + TODO adds a distinction between generateArgs and installArgs in the asset declaration
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets
     + write a script that uploads the secrets to the provisioner using ssh and launch the secret provisioner automatically (based on the topology description)

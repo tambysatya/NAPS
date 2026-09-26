@@ -38,24 +38,19 @@ rec {
 
     asset = types.submodule {
         options = {
-            inherit (types) owner group;
             provider = lib.mkOption {
                 description = "How to generate the asset";
                 type = provider;
             };
-            path = lib.mkOption {
-                description = "Installation path";
-                type = types.nullOr types.str;
-                default = null;
-            };
-            mode = lib.mkOption {
-                description = "Permissions of the assets. If not set, the installer sets the default permissions matching the type";
-                type = types.nullOr types.str;
-                default = null;
-            };
-            args = lib.mkOption {
-                description = "Arguments passed to the provisioner and the installer. Must match the type";
+            generateArgs = lib.mkOption {
+                description = "Arguments passed to the generator.";
                 type = types.attrs;
+                default = {};
+            };
+            installArgs = lib.mkOption {
+                description = "Arguments passed to the generator.";
+                type = types.attrs;
+                default = {};
             };
         };
     };
