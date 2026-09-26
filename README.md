@@ -69,6 +69,8 @@ Main module: config.infra
 - GARAGE: adjust the snapshot interval
 
 - LDAP: use a more structured  access definition in links (currently its just a filename which is less structured than dbAccess@{database,...} or s3access@{bucket,...})
+ 
+ - TODO: write a help website, describing the step to check if there is a problem: 1/ logs of the app/system, 2/ logs of haproxy 3/ check if the links have been properly deployed 4/ check if the secrets have been deployed everywhere. The command naps debug can do these steps
 
 
 
@@ -109,6 +111,7 @@ Migration:
     + Providers should declare the type of assets (in order to automatically check that the assets blackboxes are properly formed)
     + TODO: check if each asset providers is declared
     + TODO adds a distinction between generateArgs and installArgs in the asset declaration
+    + Create a service that checks periodically if all the secrets are there, and if its not the case, pull from the provisioning server using mTLS. This service should be a requierment of all the services requestings secrets => we need a reload entry for each secret
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets
     + write a script that uploads the secrets to the provisioner using ssh and launch the secret provisioner automatically (based on the topology description)
