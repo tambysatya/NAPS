@@ -102,12 +102,12 @@ Migration:
     + Same for LINKS => implies the creation of the files in both deployement systems (check if the secret exists in ./plain before creating it in the generator)
     + gen-secrets implements the generation based on the type using the extra args
     + install-secrets implements the installation based on the type using the extra args
-    + NAPS.secrets should entirely depends from NAPS.services (and not from NAPS.deploy)
-    + NAPS.secrets should defines perVMs entirely (processing Links, Endpoints,...)
+    + generator + installer functions should be stored in attrsets 
     + TODO enable logging
     + TODO do not add reloads to files: this should be handled in the installer when doing installation "in place". Certificates have reloads (for refreshing with step-renew) but not all of them
     + TODO; logging should be a service added manually: it can then declare its own secrets (mtls for instance)
-    + TODO: since the assets are now a blackbox, the user may also declare custom generators and installers to handle new types of secrets that are not handled natively in NAPS
+    + Providers should declare the type of assets (in order to automatically check that the assets blackboxes are properly formed)
+    + TODO: check if each asset providers is declared
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets
     + write a script that uploads the secrets to the provisioner using ssh and launch the secret provisioner automatically (based on the topology description)
@@ -154,7 +154,9 @@ CHECKS:
 - checks if the partitions exist on the KVM hosts 
 - centralizeLogs cannot be enabled if journald-remote is not deployed
 - Two services are not listening simultaneously on the same port (at least on the same system)
-- Secrets: TLS certificates must have a reload part
+- Assets: TLS certificates must have a reload part
+- Assets: each asset type should have a provider
+
 
 
 EXPERIMENTS:
