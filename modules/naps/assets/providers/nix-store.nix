@@ -41,10 +41,10 @@ let
         keyname:
         installArgs@{path, owner, ...}:
         ''
-            install -d -m 700 -o ${owner} -g ${owner} ${path}/.ssh
-            cp "$1/${utils.ssh_base_name keyname}" ${path}/.ssh/id_ed25519
-            cp "$1/${utils.ssh_base_name keyname}.pub" ${path}/.ssh/id_ed25519.pub
-            chown -R ${owner}:${owner} ${path}§/ssh
+            install -d -m 700 -o ${owner} -g ${owner} ${path}
+            cp "$1/${utils.ssh_base_name keyname}" ${path}/id_ed25519
+            cp "$1/${utils.ssh_base_name keyname}.pub" ${path}/id_ed25519.pub
+            chown -R ${owner}:${owner} ${path}
         '';
 
 

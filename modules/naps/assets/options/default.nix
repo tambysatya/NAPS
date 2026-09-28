@@ -1,6 +1,7 @@
 {flakeRoot, lib, inputs, ...}:
 let
     types = lib.types // (import "${flakeRoot}/lib/types" {inherit lib inputs;});
+    utils = import "${flakeRoot}/lib" {inherit inputs lib;};
 
     generatorEntry = types.submodule {
         options = {
@@ -72,6 +73,18 @@ in
                     description = "List of the assets per environment";
                     type = types.attrsOf (types.attrsOf types.asset);
                     default = {};
+                    apply =
+                        envassets: 
+                        lib.mapAttrs 
+                            (envname: assets:
+                                lib.mapAttrs 
+                                    (assetname: asset@{installArgs, ...}:  #sets the default value of path
+                                        let installArgs' = if builtins.hasAttr "path" installArgs 
+                                                           then installArgs
+                                                           else installArgs // {path = "${utils.paths.secrets}/${assetname}";};
+                                        in asset // {installArgs = installArgs';})
+                                    assets)
+                           envassets;
                 };
                 generator = lib.mkOption {
                     description = "Intermediate Representation of the assets generation script. Format is: Provider -> name -> generatorArgs ";

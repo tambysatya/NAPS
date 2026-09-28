@@ -16,19 +16,19 @@ config.naps.services.garage = {
     path = ./.;
     users."garage" = {service = "garage"; uid=10001;};
     assets = {
-        "/var/lib/secrets/garage-rpc.key" = {
+        "garage-rpc.key" = {
             provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};
             inherit reload;
         };
-        "/var/lib/secrets/garage-admin.key" = {
+        "garage-admin.key" = {
             provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};
             inherit reload;
         };
-        "/var/lib/secrets/garage-metrics.key" = {
+        "garage-metrics.key" = {
             provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};

@@ -11,7 +11,7 @@ naps.services.forgejo = {
     path = ./.;
     users.forgejo = {service="forgejo"; uid=10010;};
     assets = {
-        "/var/lib/secrets/forgejo-admin.key" = {
+        "forgejo-admin.key" = {
             provider = "password";
             generateArgs = {opensslType = "base64"; opensslSize=64;};
             installArgs = {inherit owner;};
