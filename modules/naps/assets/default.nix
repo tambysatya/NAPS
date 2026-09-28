@@ -100,6 +100,21 @@ let
                 in lib.foldlAttrs (generateAsset genFun) acc assets;
         in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.assets.generator);
 
+    installScript = 
+        let 
+            installAsset = installFun: args: 
+                lib.concatMapStringsSep "\n" installFun args;
+            processProvider = 
+                providername: assets:
+                let provider = config.naps.assets.providers.${providername};
+                    installFun = provider.apply.install;
+                in lib.concatMapStringsSep "\n" installFun (builtins.attrValues assets);
+            processVM = 
+                vmname: assetskinds:
+                let scriptsPerProviders = lib.mapAttrsToList processProvider assetskinds; 
+                in lib.concatStringsSep "\n" scriptsPerProviders;
+        in lib.mapAttrs processVM config.naps.assets.installer;
+
 in {
     imports = [./options ./providers];
     naps.assets.perEnv = perEnv;
@@ -110,5 +125,6 @@ in {
     naps.assets.installer = lib.mapAttrs mkInstallerForEnv config.naps.assets.perEnv;
     naps.assets.script = {
         generate = generateScript;
+        install = installScript;
     };
 }

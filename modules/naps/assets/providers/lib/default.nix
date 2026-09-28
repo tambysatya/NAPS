@@ -15,7 +15,7 @@ let
         in lib.concatMapStringsSep "\n" (env: ''cp ${filepath} ${target env}'') envs;
 
     install = 
-        filename: tgt: 
+        filename: 
         {tgt ? "/var/lib/secrets", owner, group, mode,...}:
         ''
            cp "$1/${filename}" ${tgt}

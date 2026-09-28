@@ -62,7 +62,7 @@ let
             };
             install = lib.mkOption {
                 description = "Asset installation script per VM: format is VM => script";
-                type = types.attrsOf (types.listOf types.str);
+                type = types.attrsOf types.str;
                 default = {};
             };
         };
