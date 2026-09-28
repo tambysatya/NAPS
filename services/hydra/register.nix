@@ -40,11 +40,13 @@ naps.services.hydra ={
         };
         "hydra-ssh" = {
             provider = "ssh-keygen";
+            generateArgs = {keyname = "hydra";};
             installArgs = {owner = "hydra"; path = "/var/lib/hydra";};
             inherit reload;
         };
         "hydra-cache" = {
             provider = "nix-store";
+            generateArgs = {keyname = "hydra";};
             installArgs = {owner = "hydra";};
             inherit reload;
         };

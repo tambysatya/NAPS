@@ -16,6 +16,8 @@ let
     s3_key_id = access@{bucket,...}: "s3-${bucket}.id";
     s3_key = access@{bucket,...}: "s3-${bucket}.key";
     db_key = access@{database, ...}: "db-${database}.key";
+    ssh_base_name = name: "${name}-ssh";
+    store_base_name = name: "${name}-cache";
     ldap_key = access@{olcRootDN,...}: "ldap-${olcRootDN}.key"; #TODO
     
     directory_id = serviceuid: path: "${serviceuid}:${path}";
@@ -33,6 +35,7 @@ let
     mkCTEnv = vmname: ctname: {type="container"; host={container=ctname; vm=vmname;};};
 
 in {
+    inherit ssh_base_name store_base_name;
     inherit ssl_root ssl_crt_path ssl_key_path pemdir;
     inherit s3_root s3_key s3_key_id db_key ldap_key;
     inherit directory_id;

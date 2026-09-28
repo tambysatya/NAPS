@@ -82,7 +82,6 @@
             {type="disk"; path="/dev/ssd/forgejo"; mount="/var/lib/forgejo"; fs="xfs"; shared=false;}
         ];
       };
-      /*
       build = {
         host = "cpuhost1";
         vcpu = 8;
@@ -97,7 +96,6 @@
 
 
       };
-      */
       logs  = {
         host = "cpuhost1";
         vcpu=1;
