@@ -55,12 +55,12 @@ let
                 type = types.submodule {
                     options = {
                         generate = lib.mkOption {
-                            description = "A function to generate the asset. Should have type: [String] -> generatorEntry -> [String]. The first argument is an accumulator of all previously outputted scripts, allowing the generator to add its output BEFORE the others (useful e.g. for the CA which should be generated BEFORE the TLS certificates)";
-                            type = types.functionTo (types.functionTo (types.listOf types.str));
+                            description = "A function to generate the asset. Should have type: [String] -> assetname -> generatorEntry -> [String]. The first argument is an accumulator of all previously outputted scripts, allowing the generator to add its output BEFORE the others (useful e.g. for the CA which should be generated BEFORE the TLS certificates)";
+                            type = types.functionTo (types.functionTo (types.functionTo (types.listOf types.str)));
                         };
                         install = lib.mkOption {
-                            description = "A function to install the asset. Should have type: installerEntry -> Script";
-                            type = types.functionTo types.str;
+                            description = "A function to install the asset. Should have type: assetname -> installerEntry -> Script";
+                            type = types.functionTo (types.functionTo types.str);
                         };
                     };
                 };

@@ -92,7 +92,7 @@ let
     generateScript = 
         let generateAsset =
                 genFun: acc: assetname: {args, recipients}:
-                    genFun acc args ++ [(utils.give assetname recipients)];
+                    genFun acc assetname args ++ [(utils.give assetname recipients)];
             processProvider =
                 acc: providername: assets:
                 let provider = config.naps.assets.providers.${providername};
@@ -108,7 +108,8 @@ let
                 providername: assets:
                 let provider = config.naps.assets.providers.${providername};
                     installFun = provider.apply.install;
-                in lib.concatMapStringsSep "\n" installFun (builtins.attrValues assets);
+                in lib.concatStringsSep "\n"
+                        (lib.mapAttrsToList installFun assets);
             processVM = 
                 vmname: assetskinds:
                 let scriptsPerProviders = lib.mapAttrsToList processProvider assetskinds; 

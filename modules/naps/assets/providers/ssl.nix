@@ -2,6 +2,7 @@
 let
 
     utils = import ./lib {inherit flakeRoot lib inputs path;};
+    types = import "${flakeRoot}/lib" {inherit lib inputs;};
     paths = utils.paths;
 
     domain = config.naps.topology.domain;
@@ -99,8 +100,26 @@ in {
             install = null;
         };
         apply = {
-            generate = acc: _:  [(generateCA domain)] ++ acc;
-            install = _: installCA;
+            generate = acc: secname:  _:  [(generateCA domain)] ++ acc;
+            install = secname: _: installCA;
+        };
+    };
+    naps.assets.providers.tls = {
+        inputs = {
+            generate = types.submodule {
+                options = {
+                    inherit (types) hostname;
+                };
+            };
+            install = types.submodule {
+                options = {
+                    inherit (types) owner group mode;
+                };
+            };
+        };
+        apply = {
+            generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
+            install = secname: _: installCA;
         };
     };
 }
