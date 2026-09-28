@@ -21,6 +21,7 @@ naps.services.keycloak = {
                 inherit reload;
             };
     };
+    
     links = {
         postgres = [
             {database="keycloak"; inherit owner reload;}

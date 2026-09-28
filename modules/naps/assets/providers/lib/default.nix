@@ -17,11 +17,12 @@ let
     install = 
         filename: 
         {tgt ? "/var/lib/secrets", owner, group, mode,...}:
-        ''
-           cp "$1/${filename}" ${tgt}
-           chown ${owner} ${tgt}
-           chgrp ${group} ${tgt}
-           chmod ${mode} ${tgt}
+        let mnttgt = "/mnt${tgt}";
+        in ''
+           cp "$1/${filename}" ${mnttgt}
+           chown ${owner} ${mnttgt}
+           chgrp ${group} ${mnttgt}
+           chmod ${mode} ${mnttgt}
         '';
 
 

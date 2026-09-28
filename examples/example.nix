@@ -38,7 +38,7 @@
         memory = 8000;
         ip = "192.168.1.200";
         #services = ["step-ca" "openldap"];
-        services = ["stepca-main"];
+        services = ["stepca-main" "keycloak-main"];
         disks = [
             {type="disk"; path="/dev/pvhdd/ldap"; mount="/var/lib/openldap/data"; fs="xfs";}
         ];

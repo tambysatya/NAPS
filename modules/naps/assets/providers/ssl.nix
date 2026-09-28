@@ -78,7 +78,7 @@ let
 
 
     installCA =
-        let tgt = /var/lib/secrets;
+        let tgt = "/var/lib/secrets";
             args = {
                 owner = "step-ca";
                 group = "step-ca";
@@ -88,6 +88,27 @@ let
             ${utils.install "ca-password.key" args}
             ${utils.install "intermediate_ca_key" args}
         '';
+    
+    installSSL = 
+        generateArgs@{hostname}:
+        installArgs:
+        ''
+            ${utils.install "${hostname}.crt" installArgs};
+            ${utils.install "${hostname}.key" installArgs};
+        '';
+
+    installHAproxy= 
+        generateArgs@{hostname}:
+        let pemdir = "/var/lib/certs";
+            srcbasename = "$1/${hostname}";
+        in ''
+            mkdir -p ${pemdir}
+            cat ${srcbasename}.crt ${srcbasename}.key > ${pemdir}/${hostname}.pem
+            chown haproxy ${pemdir}/${hostname}.pem
+            chmod 0400 ${pemdir}/${hostname}.pem
+        '';
+
+
 
 
 
@@ -119,7 +140,21 @@ in {
         };
         apply = {
             generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
-            install = secname: _: installCA;
+            install = secname: args: installSSL args.generateArgs args.installArgs;
+        };
+    };
+    naps.assets.providers.haproxy = {
+        inputs = {
+            generate = types.submodule {
+                options = {
+                    inherit (types) hostname;
+                };
+            };
+            install = null;
+        };
+        apply = {
+            generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
+            install = secname: args: installHAproxy args.generateArgs;
         };
     };
 }
