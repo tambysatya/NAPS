@@ -29,6 +29,7 @@ let
                 type = types.attrs;
                 default = [];
             };
+            inherit (types) reload;
             
         };
     };

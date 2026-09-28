@@ -26,7 +26,7 @@ let
                         else [];
                 containers = if env.type == "container"
                              then {
-                                    ${utils.envUID env}.${bindTo} = {hostPath=path; inherit mode owner reload;};
+                                    ${utils.envUID env}.${bindTo} = {hostPath=path; isReadOnly = false;};
                                   }
                              else {};
                 ensureDirs = if path != bindTo then [{inherit path mode owner reload mount env;}] else [];
@@ -39,44 +39,22 @@ let
         assetname:
         asset@{installArgs, ...}:
         let env = config.naps.envs.all.${envuid};
-            path = if builtins.hasAttr "path" installArgs
-                   then "${installArgs.path}/${assetname}"
-                   else "/var/lib/secrets/${assetname}";
-        in {};
+            path = installArgs.path;
+        in lib.optionalAttrs (env.type == "container") {
+            ${utils.envHost env}.storage.containers.${utils.envUID env}.${path} = {
+                    hostPath = path;
+                    isReadOnly = true;
+             };
 
-    processEnvAssets =
-        envuid: assets: {};
-            /*
-    processSecret = 
-        secret@{content, recipients, type}:
-        let secretFiles =  utils.secretFiles secret;
-            processRecipient = env:
-                if env.type == "vm" then {}
-                else if env.type == "container"{
-                    ${utils.envHost env}.storage.containers.${utils.envUID env} =
-                        utils.mergeAll 
-                            (map 
-                                (secname:
-                                 {
-                                    "/var/lib/secrets/${secname}" = {
-                                        hostPath = "/var/lib/secrets/${secname}";
-                                        # These functions implement default values if the field is not filled (secrets is an heterogeneous list)
-                                        owner = utils.secretOwner secret;
-                                        reload = utils.secretReload secret;
-                                        mode = utils.secretMode secret;
-                                        isReadOnly = true;
-                                    };
-                                 })
-                             secretFiles);
-                }
-                else throw "deploy.storage.processSecret not implemented for env ${env.type}";
-        in utils.mergeAll (map processRecipient recipients);
-        */
+        };
+
+    processAssets =
+        envuid: assets: utils.mergeAll (lib.mapAttrsToList (processEnvAsset envuid) assets);
 in 
 {
     imports = [./options];
     naps.deploy.systems = utils.mergeAll 
                                 (lib.mapAttrsToList generateMappings config.naps.volumes.perVM
                                 ++ lib.mapAttrsToList generateBinds config.naps.volumes.perDirectory
-                                + lib.mapAttrsToList processEnvAssets config.naps.assets.perEnv);
+                                ++ lib.mapAttrsToList processAssets config.naps.assets.perEnv);
 }

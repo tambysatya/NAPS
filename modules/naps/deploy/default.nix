@@ -46,7 +46,6 @@ in {
     imports = [./options
                ./users.nix
                ./assets.nix
-               ./links.nix 
                ./storage.nix
                ./endpoints.nix
                ];

@@ -83,7 +83,7 @@ let
             byproviderbyname = lib.mapAttrs 
                                     (_: vs: 
                                         utils.mergeAll 
-                                            (lib.map (v: {${v.name} = {generateArgs =  v.generateArgs; installArgs = v.installArgs;};}) vs))
+                                            (lib.map (v: {${v.name} = {inherit (v) generateArgs installArgs reload;};}) vs))
                                     byprovider;
         in byproviderbyname;
 

@@ -69,9 +69,6 @@ let
                 type = types.bool;
                 default = false;
             };
-            inherit (types) owner reload;
-            mode = types.dirmode;
-
         };
     };
 
@@ -115,11 +112,6 @@ let
                 description = "Attrset of service users to be created";
                 type = types.attrsOf types.user;
                 default = {};
-            };
-            assets = lib.mkOption {
-                description = "All assets files (including sslCertificates).";
-                type = types.listOf types.asset;
-                default = [];
             };
             sslCertificates = lib.mkOption {
                 description = "All SSL certificates to refresh";
