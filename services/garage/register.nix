@@ -9,30 +9,6 @@ let
     filemode = "0400";
     opensslSize = 32;
     opensslType = "hex";
-    
-    /*
-    extraConfig = {
-        virtualHosts."s3.${domain}".extraConfig = 
-            ''
-                    proxy_request_buffering off;
-                    proxy_buffering off;
-                    proxy_http_version 1.1;
-                    proxy_read_timeout 1h;
-                    proxy_send_timeout 1h;
-                    send_timeout 3600s;
-                    client_body_timeout 3600s;
-
-                    proxy_set_header Host $host;
-                    proxy_set_header X-Real-IP $remote_addr;
-                    proxy_set_header Connection "";
-                    proxy_set_header Transfer-Encoding "";
-
-                    keepalive_timeout 65s;
-
-            '';
-            clientMaxBodySize = "100G";
-    };
-    */
 
 in {
 
@@ -40,19 +16,19 @@ config.naps.services.garage = {
     path = ./.;
     users."garage" = {service = "garage"; uid=10001;};
     assets = {
-        "garage-rpc.key" = {
+        "/var/lib/secrets/garage-rpc.key" = {
             provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};
             inherit reload;
         };
-        "garage-admin.key" = {
+        "/var/lib/secrets/garage-admin.key" = {
             provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};
             inherit reload;
         };
-        "garage-metrics.key" = {
+        "/var/lib/secrets/garage-metrics.key" = {
             provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};

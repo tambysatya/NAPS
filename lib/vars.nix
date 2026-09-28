@@ -5,10 +5,15 @@
 let
 
     #paths 
-    ssl_root = "/var/lib/secrets";
+    paths = {
+        secrets = "/var/lib/secrets";
+        git = ".secrets/git";
+        out = ".secrets/out";
+        perVM = ".secrets/perVM";
+    };
     pemdir = "/var/lib/certs";
-    ssl_crt_path = name: "${ssl_root}/${name}.crt";
-    ssl_key_path = name: "${ssl_root}/${name}.key";
+    ssl_crt_path = name: "${paths.secrets}/${name}/${name}.crt";
+    ssl_key_path = name: "${paths.secrets}/${name}/${name}.key";
 
     #naming conventions
     container_id = vmname: service: "${vmname}-${service}"; #returns the containers ID
@@ -35,8 +40,9 @@ let
     mkCTEnv = vmname: ctname: {type="container"; host={container=ctname; vm=vmname;};};
 
 in {
+    inherit paths;
     inherit ssh_base_name store_base_name;
-    inherit ssl_root ssl_crt_path ssl_key_path pemdir;
+    inherit ssl_crt_path ssl_key_path pemdir;
     inherit s3_root s3_key s3_key_id db_key ldap_key;
     inherit directory_id;
     inherit envUID envHost hostDeployementEnv;

@@ -34,31 +34,19 @@ let
         };
 
 
-    processSecret = 
-        secret@{content, recipients, type}:
-        let secretFiles =  utils.secretFiles secret;
-            processRecipient = env:
-                if env.type == "vm" then {}
-                else if env.type == "container" then {
-                    ${utils.envHost env}.storage.containers.${utils.envUID env} =
-                        utils.mergeAll 
-                            (map 
-                                (secname:
-                                 {
-                                    "/var/lib/secrets/${secname}" = {
-                                        hostPath = "/var/lib/secrets/${secname}";
-                                        # These functions implement default values if the field is not filled (secrets is an heterogeneous list)
-                                        owner = utils.secretOwner secret;
-                                        reload = utils.secretReload secret;
-                                        mode = utils.secretMode secret;
-                                        isReadOnly = true;
-                                    };
-                                 })
-                             secretFiles);
-                }
-                else throw "deploy.storage.processSecret not implemented for env ${env.type}";
-        in utils.mergeAll (map processRecipient recipients);
-/*
+    processEnvAsset = 
+        envuid:
+        assetname:
+        asset@{installArgs, ...}:
+        let env = config.naps.envs.all.${envuid};
+            path = if builtins.hasAttr "path" installArgs
+                   then "${installArgs.path}/${assetname}"
+                   else "/var/lib/secrets/${assetname}";
+        in {};
+
+    processEnvAssets =
+        envuid: assets: {};
+            /*
     processSecret = 
         secret@{content, recipients, type}:
         let secretFiles =  utils.secretFiles secret;
@@ -90,5 +78,5 @@ in
     naps.deploy.systems = utils.mergeAll 
                                 (lib.mapAttrsToList generateMappings config.naps.volumes.perVM
                                 ++ lib.mapAttrsToList generateBinds config.naps.volumes.perDirectory
-                                + map processSecret config.naps.secrets.allSecrets);
+                                + lib.mapAttrsToList processEnvAssets config.naps.assets.perEnv);
 }

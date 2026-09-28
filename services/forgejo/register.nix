@@ -1,6 +1,5 @@
-{inputs, config, lib, pkgs,...}:
+{flakeRoot, inputs, config, lib, pkgs,...}:
 let
- 
     topology= config.naps.topology;
     hostname = "git.${topology.domain}";
     reload = ["forgejo.service" "forgejo-dump.service" "forgejo-init-password.service"];
@@ -12,7 +11,7 @@ naps.services.forgejo = {
     path = ./.;
     users.forgejo = {service="forgejo"; uid=10010;};
     assets = {
-        "forgejo-admin.key" = {
+        "/var/lib/secrets/forgejo-admin.key" = {
             provider = "password";
             generateArgs = {opensslType = "base64"; opensslSize=64;};
             installArgs = {inherit owner;};
