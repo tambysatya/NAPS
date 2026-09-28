@@ -118,22 +118,20 @@ let
                     };
                 };
 
-        compileInstallSecrets = 
+        compileInstallAssets = 
             args:
             let naps = compileNAPS args;
                 build = 
-                    name: secrets: 
-                    let script =(import tools/secrets-generator/main.nix 
-                                {inherit inputs lib pkgs naps flakeRoot; inherit (args.extraArgs) path;}).mkInstaller secrets;
-                    in {
-                        packages.${system}."install-secrets-${name}" = script;
-                        apps.${system}."install-secrets-${name}" = {
+                    name: script: 
+                    {
+                        packages.${system}."install-assets-${name}" = script;
+                        apps.${system}."install-assets-${name}" = {
                             type = "app";
-                            program = lib.getExe script;
-                            meta.description = "Install secrets for ${name}";
+                            program = lib.getExe self.packages.${system}."install-assets-${name}";
+                            meta.description = "Install assets for ${name}";
                         };
                     };
-            in utils.mergeAll (lib.mapAttrsToList build naps.assets.installer);
+            in utils.mergeAll (lib.mapAttrsToList build naps.assets.scripts.install);
                
 
 
@@ -200,7 +198,7 @@ let
             args:
             utils.mergeAll [
                 (compileGenAssets args) 
-                #(compileInstallSecrets args)
+                (compileInstallAssets args)
                # (compileVisualization args)
             ];
 
