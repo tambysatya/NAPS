@@ -17,7 +17,6 @@ naps.services.step-ca = {
     assets = {
         "step-ca" = {
             provider = "step-ca";
-            installArgs = {owner = "step-ca";};
             reload = ["step-ca.service"];
         };
     };

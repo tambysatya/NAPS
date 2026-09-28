@@ -1,7 +1,7 @@
-{flakeRoot, lib, inputs, config,...}:
+{flakeRoot, lib, inputs, config, path,...}:
 let
 
-    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import ./providers/lib {inherit flakeRoot lib inputs path;};
    
             
     domain = config.naps.topology.domain;
@@ -87,12 +87,28 @@ let
                                     byprovider;
         in byproviderbyname;
 
+
+
+    generateScript = 
+        let generateAsset =
+                genFun: acc: assetname: {args, recipients}:
+                    genFun acc args ++ [(utils.give assetname recipients)];
+            processProvider =
+                acc: providername: assets:
+                let provider = config.naps.assets.providers.${providername};
+                    genFun = provider.apply.generate;
+                in lib.foldlAttrs (generateAsset genFun) acc assets;
+        in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.assets.generator);
+
 in {
-    imports = [./options];
+    imports = [./options ./providers];
     naps.assets.perEnv = perEnv;
     naps.assets.generator = lib.mapAttrs  
                                 (_: assets: # {uid, assetname, env} => uid = {assetname, recipient=[env]}
                                     utils.mergeAll (map ({name, generateArgs, env, ...}: {${name} = {args = generateArgs; recipients=[env];}; }) assets) )
                                 assetsPerType;
     naps.assets.installer = lib.mapAttrs mkInstallerForEnv config.naps.assets.perEnv;
+    naps.assets.script = {
+        generate = generateScript;
+    };
 }
