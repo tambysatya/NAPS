@@ -6,21 +6,27 @@ let
     paths = utils.paths;
     domain = config.naps.topology.domain;
     generateNixStore = 
+        assetname:
         keyname:
-        ''
-            if ! [[ -f ${paths.out}/${utils.store_base_name keyname}.key ]]; then 
-                nix-store --generate-binary-cache-key cache.${domain} ${paths.out}/${utils.store_base_name keyname}.key ${paths.out}/${utils.store_base_name keyname}.pub
+        let tgt = "${paths.out}/${assetname}";
+        in ''
+            if ! [[ -f ${tgt}/${utils.store_base_name keyname}.key ]]; then 
+                mkdir -p ${tgt}
+                nix-store --generate-binary-cache-key cache.${domain} ${tgt}/${utils.store_base_name keyname}.key ${tgt}/${utils.store_base_name keyname}.pub
             else
-                 nix key convert-secret-to-public < ${paths.out}/${utils.store_base_name keyname}.key > ${paths.out}/${utils.store_base_name keyname}.pub
+                 nix key convert-secret-to-public < ${tgt}/${utils.store_base_name keyname}.key > ${tgt}/${utils.store_base_name keyname}.pub
             fi
-            cp ${paths.out}/${utils.store_base_name keyname}.pub" ${paths.git}
+            cp ${tgt}/${utils.store_base_name keyname}.pub ${paths.git}
         '';
 
     generateSSH = 
+       assetname:
        keyname:
-        ''
-            if ! [[ -f ${paths.out}/${utils.ssh_base_name keyname} ]]; then
-                ssh-keygen -t ed25519 -f ${paths.out}/${utils.ssh_base_name keyname} -C "${keyname}@${domain}" -N "" -q
+       let tgt = "${paths.out}/${assetname}";
+       in ''
+            mkdir -p ${tgt}
+            if ! [[ -f ${tgt}/${utils.ssh_base_name keyname} ]]; then
+                ssh-keygen -t ed25519 -f ${tgt}/${utils.ssh_base_name keyname} -C "${keyname}@${domain}" -N "" -q
             fi
         '';
 
@@ -45,11 +51,11 @@ let
 in {
 
 naps.assets.providers.ssh-keygen = {
-    generate = acc: assetname: args: acc ++ [(generateSSH args.keyname)];
+    generate = acc: assetname: args: acc ++ [(generateSSH assetname args.keyname)];
     install = assetname: args: installSSH args.generateArgs.keyname args.installArgs;
 };
 naps.assets.providers.nix-store = {
-    generate = acc: assetname: args: acc ++ [(generateNixStore args.keyname)];
+    generate = acc: assetname: args: acc ++ [(generateNixStore assetname args.keyname)];
     install = assetname: args: installNixStore args.generateArgs.keyname args.installArgs;
 };
 }

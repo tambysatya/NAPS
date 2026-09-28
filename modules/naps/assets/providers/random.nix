@@ -22,8 +22,9 @@ let
         assetname:
         access@{bucket,...}:
         ''
-            ${generatePlain (utils.s3_key_id access) {opensslSize=32; opensslType="hex";}}
-            ${utils.generateSSLString (utils.s3_key access) {opensslSize=32; opensslType="hex";}}
+            mkdir -p ${paths.out}/${assetname}
+            ${generatePlain "${assetname}/${utils.s3_key_id access}" {opensslSize=32; opensslType="hex";}}
+            ${utils.generateSSLString "${assetname}/${utils.s3_key access}" {opensslSize=32; opensslType="hex";}}
         '';
 
     generateDB = 

@@ -97,17 +97,24 @@ let
         in configs;
 
 
-        compileGenSecrets = 
+        compileGenAssets= 
             args:
                 let naps = compileNAPS args;
-                    script =(import tools/secrets-generator/main.nix 
-                                {inherit inputs lib pkgs naps flakeRoot; inherit (args.extraArgs) path;}).generator;
                 in {
-                    packages.${system}.gen-secrets = script;
-                    apps.${system}.gen-secrets = {
+                    packages.${system}.gen-assets= pkgs.writeShellApplication {
+                        name = "gen-assets"; 
+                        runtimeInputs = [
+                            pkgs.openssl
+                            pkgs.openldap
+                            pkgs.step-cli
+                            pkgs.gzip
+                        ];
+                        text = naps.assets.scripts.generate;
+                    };
+                    apps.${system}.gen-assets= {
                         type = "app";
-                        program = lib.getExe script;
-                        meta.description = "Generates all the secrets";
+                        program = lib.getExe self.packages.${system}.gen-assets;
+                        meta.description = "Generates all the assets";
                     };
                 };
 
@@ -126,7 +133,7 @@ let
                             meta.description = "Install secrets for ${name}";
                         };
                     };
-            in utils.mergeAll (lib.mapAttrsToList build naps.secrets.perVM);
+            in utils.mergeAll (lib.mapAttrsToList build naps.assets.installer);
                
 
 
@@ -192,8 +199,8 @@ let
         exposeApps = 
             args:
             utils.mergeAll [
-               # (compileGenSecrets args) 
-               # (compileInstallSecrets args)
+                (compileGenAssets args) 
+                #(compileInstallSecrets args)
                # (compileVisualization args)
             ];
 

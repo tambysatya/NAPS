@@ -12,8 +12,7 @@ let
         domain:
         ''
         PWD=$(pwd)
-        export STEPPATH="$PWD/${paths.out}/CA";
-        mkdir -p ${paths.out}
+        export STEPPATH="$PWD/${paths.out}/step-ca";
         CA_NAME="ca.${domain}"
 
         if [[ ! -d $STEPPATH ]]; then
@@ -36,7 +35,6 @@ let
                 | tr -d '\n' \
                 > "$STEPPATH/fingerprint" # step adds a \n at the end of the line
         fi
-        mkdir -p ${paths.git}
         cp "$STEPPATH/fingerprint" ${paths.git}
         cp "$STEPPATH/certs/root_ca.crt" ${paths.git}
         cp "$STEPPATH/certs/intermediate_ca.crt" ${paths.git}
@@ -56,9 +54,11 @@ let
     gen_ssl_certificate = crtname:
             ''
                 PWD=$(pwd)
-                export STEPPATH="$PWD/${paths.out}/CA";
+                export STEPPATH="$PWD/${paths.out}/step-ca";
 
-                TARGET_PATH="${paths.out}"
+                TARGET_PATH="${paths.out}/${crtname}"
+                mkdir -p "$TARGET_PATH"
+
                 if [[ -f "$TARGET_PATH/${crtname}.key" ]]; then
                     rm "$TARGET_PATH/${crtname}.key"
                 fi

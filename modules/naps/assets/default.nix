@@ -123,9 +123,21 @@ in {
                                 (_: assets: # {uid, assetname, env} => uid = {assetname, recipient=[env]}
                                     utils.mergeAll (map ({name, generateArgs, env, ...}: {${name} = {args = generateArgs; recipients=[env];}; }) assets) )
                                 assetsPerType;
-    naps.assets.installer = lib.mapAttrs mkInstallerForEnv config.naps.assets.perEnv;
+    naps.assets.installer = 
+        utils.mergeAll (lib.mapAttrsToList (envname: envassets: { ${utils.envHost (getEnv envname)} = mkInstallerForEnv envname envassets;}) config.naps.assets.perEnv);
     naps.assets.scripts = {
-        generate = generateScript;
+        generate = ''
+            mkdir -p ${utils.paths.out} ${utils.paths.git}
+            ${lib.concatMapStringsSep 
+                "\n"
+                (vmname:
+                    ''
+                    [[ -d .secrets/perVM/${vmname} ]] && rm -R .secrets/perVM/${vmname}
+                    mkdir -p .secrets/perVM/${vmname}
+                    '')
+                (builtins.attrNames config.naps.assets.installer)}
+            ${generateScript}
+        '';
         install = installScript;
     };
 }

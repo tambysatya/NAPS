@@ -23,7 +23,7 @@ let
     give = filename: envs: 
         let filepath = "${paths.out}/${filename}";
             target = env: "${paths.perVM}/${utils.envHost env}/${filename}";
-        in lib.concatMapStringsSep "\n" (env: ''cp ${filepath} ${target env}'') envs;
+        in lib.concatMapStringsSep "\n" (env: ''cp -r ${filepath} ${target env}'') envs;
 
     install = 
         filename: 
