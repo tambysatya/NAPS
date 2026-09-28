@@ -15,19 +15,24 @@ let
             mkSharedSecret =
                 hosts: 
                 hostsOwner:  # service user running on the host (e.g. postgres, garage...) 
+                hostsReload: # services on the host that depends on the secret
                 secretname:
                 secret:
                 let uid = utils.envUID env;
-                    mkHostSecret = host: {${utils.envUID host}.${secretname} =(secret // {installArgs = {owner=hostsOwner;};});}; #replace the owner of the secret transmitted to the hosts
+                    override = {
+                        installArgs = {owner = hostsOwner;};
+                        reload = hostsReload;
+                    };
+                    mkHostSecret = host: {${utils.envUID host}.${secretname} =(secret // override);}; #replace the owner of the secret transmitted to the hosts
                     dsts = lib.filter (name: name != uid) hosts;
                 in utils.mergeAll 
                         ([{${uid}.${secretname} = secret; }] ++ map mkHostSecret dsts);
             processLDAP = access: 
-                mkSharedSecret ldaphosts "openldap" (utils.ldap_key access) {provider = "ldapssha"; installArgs = { owner = access.owner;}; generateArgs = access;};
+                mkSharedSecret ldaphosts "openldap" ["openldap.service"] (utils.ldap_key access) {provider = "ldapssha"; installArgs = { owner = access.owner;}; generateArgs = access; inherit (access) reload;};
             processPostgres = access:
-                mkSharedSecret dbhosts "postgres" (utils.db_key access) {provider = "postgres"; installArgs = {owner = access.owner;}; generateArgs = access;};
+                mkSharedSecret dbhosts "postgres" ["postgresql.service"] (utils.db_key access) {provider = "postgres"; installArgs = {owner = access.owner;}; generateArgs = access; inherit (access) reload;};
             processS3 = access:
-                mkSharedSecret s3hosts "garage" (utils.s3_root access) {provider = "s3"; installArgs = {owner = access.owner;}; generateArgs = access;};
+                mkSharedSecret s3hosts "garage" ["garage.service"]  (utils.s3_root access) {provider = "s3"; installArgs = {owner = access.owner;}; generateArgs = access; inherit (access) reload;};
         in utils.mergeAll (
                 map processLDAP ldap ++
                 map processPostgres postgres ++
@@ -41,7 +46,7 @@ let
             dst = if env.type == "container" then utils.envUID env else utils.envHost env;
             processHTTPEndpoint  =
                 {tls, hostname, ...}:
-                let cert = {provider = "haproxy"; installArgs = {owner = "haproxy";}; generateArgs = {inherit hostname; reload = ["haproxy.service"];};};
+                let cert = {provider = "haproxy"; installArgs = {owner = "haproxy";}; generateArgs = {inherit hostname;}; reload = ["haproxy.service"];};
                 in lib.optionalAttrs tls {${dst}.${hostname} = cert;}; #if TLS=false, the certificate should be declared manually in the assets
         in utils.mergeAll(
                 map processHTTPEndpoint endpoints.http);

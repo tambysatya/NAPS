@@ -18,11 +18,12 @@ naps.services.keycloak = {
                 provider = "password";
                 generateArgs = {opensslSize = 64; opensslType = "base64";};
                 installArgs = {inherit owner;};
+                inherit reload;
             };
     };
     links = {
         postgres = [
-            {database="keycloak"; inherit owner;}
+            {database="keycloak"; inherit owner reload;}
         ];  
     };
     endpoints.http = [

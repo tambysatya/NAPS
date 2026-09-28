@@ -16,6 +16,7 @@ naps.services.postgres = {
             provider = "tls";
             generateArgs = {inherit hostname reload;};
             installArgs = {inherit owner;};
+            inherit reload;
         };
     };
     endpoints.tcp = [

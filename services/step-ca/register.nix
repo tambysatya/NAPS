@@ -18,6 +18,7 @@ naps.services.step-ca = {
         "step-ca" = {
             provider = "step-ca";
             installArgs = {owner = "step-ca";};
+            reload = ["step-ca.service"];
         };
     };
     endpoints.http = [

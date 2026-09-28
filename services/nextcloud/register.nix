@@ -22,14 +22,15 @@ naps.services.nextcloud = {
                 provider = "password";
                 generateArgs = {opensslType = "base64"; opensslSize=64;};
                 installArgs = {inherit owner;};
+                inherit reload;
             };
     };
     links = {
         postgres = [
-            {database = "nextcloud"; inherit owner;}
+            {database = "nextcloud"; inherit owner reload;}
         ];
         s3 = [
-            {bucket = "nextcloud"; inherit owner;}
+            {bucket = "nextcloud"; inherit owner reload;}
         ];
     };
     persistent = [

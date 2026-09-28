@@ -20,11 +20,12 @@ naps.services.openldap = {
             provider = "tls";
             generateArgs = {inherit hostname reload;};
             installArgs = {inherit owner;};
+            inherit reload;
         };
     };
     links = {
         ldap = [
-            {olcRootDN ="cn=admin"; inherit owner;} #TODO add the suffix
+            {olcRootDN ="cn=admin"; inherit owner reload;} #TODO add the suffix
         ];
     };
 

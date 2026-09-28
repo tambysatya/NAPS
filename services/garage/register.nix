@@ -44,16 +44,19 @@ config.naps.services.garage = {
             provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};
+            inherit reload;
         };
         "garage-admin.key" = {
             provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};
+            inherit reload;
         };
         "garage-metrics.key" = {
             provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};
+            inherit reload;
         };
     };
     persistent = [

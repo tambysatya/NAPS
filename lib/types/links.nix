@@ -10,7 +10,7 @@ rec {
 
     s3access = types.submodule {
             options = {
-                inherit owner;
+                inherit owner reload;
                 bucket = lib.mkOption{
                     description = "Name of the bucket";
                     type = types.str;
@@ -20,7 +20,7 @@ rec {
     };
     postgresAccess = types.submodule {
             options = {
-                inherit owner; 
+                inherit owner reload; 
                 database = lib.mkOption {
                     description = "Name of the database. So far, the role (= user) name does necessarily match the database"; #TODO
                     type = types.str;
@@ -39,7 +39,7 @@ rec {
                     description = "Root DN";
                     type = types.str;
                 };
-                inherit owner;
+                inherit owner reload;
             };
     };
     links = types.submodule{

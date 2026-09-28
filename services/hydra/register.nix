@@ -21,7 +21,7 @@ let
     };
     links  = {
         postgres = [
-            {database = "hydra"; inherit owner;}
+            {database = "hydra"; inherit owner reload;}
         ];
     };
 
@@ -36,14 +36,17 @@ naps.services.hydra ={
             provider = "password";
             generateArgs = {opensslType = "base64"; opensslSize = 64;};
             installArgs = {owner = "hydra";};
+            inherit reload;
         };
         "hydra-ssh" = {
             provider = "ssh-keygen";
             installArgs = {owner = "hydra"; path = "/var/lib/hydra";};
+            inherit reload;
         };
         "hydra-cache" = {
             provider = "nix-store";
             installArgs = {owner = "hydra";};
+            inherit reload;
         };
     };
     persistent = [

@@ -20,26 +20,33 @@ let
 
     providerEntry = types.submodule {
         options = {
-            assetType = lib.mkOption {
+            inputs = lib.mkOption {
                 description = "The type of the asset";
                 type =  types.submodule {
                     options = {
-                        generateArgs = lib.mkOption {
+                        generate = lib.mkOption {
                             description = "Type of the generator inputs"; 
                             type = types.submodule;
                         };
-                        installArgs = lib.mkOption {
+                        install = lib.mkOption {
                             description = "Type of the installer inputs"; 
                             type = types.submodule;
                         };
                     };
                 };
             };
-            generate = lib.mkOption {
-                description = "A function to generate the asset. Should have type: targetPath -> generatorEntry -> Script";
-            };
-            install = lib.mkOption {
-                description = "A function to install the asset. Should have type: installerEntry -> Script";
+            apply = lib.mkOption {
+                description = "Processing functions";
+                type = types.submodule {
+                    options = {
+                        generate = lib.mkOption {
+                            description = "A function to generate the asset. Should have type: targetPath -> generatorEntry -> Script";
+                        };
+                        install = lib.mkOption {
+                            description = "A function to install the asset. Should have type: installerEntry -> Script";
+                        };
+                    };
+                };
             };
         };
     };

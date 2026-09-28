@@ -16,14 +16,15 @@ naps.services.forgejo = {
             provider = "password";
             generateArgs = {opensslType = "base64"; opensslSize=64;};
             installArgs = {inherit owner;};
+            inherit reload;
         };
     };
     links = {
         postgres = [
-            {database = "forgejo"; inherit owner;}
+            {database = "forgejo"; inherit owner reload;}
         ];
         s3 = [
-            {bucket = "forgejo"; inherit owner;}
+            {bucket = "forgejo"; inherit owner reload;}
         ];
     };
     endpoints = {

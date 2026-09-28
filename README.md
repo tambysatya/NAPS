@@ -109,7 +109,7 @@ Migration:
     + TODO do not add reloads to files: this should be handled in the installer when doing installation "in place". Certificates have reloads (for refreshing with step-renew) but not all of them
     + TODO; logging should be a service added manually: it can then declare its own secrets (mtls for instance)
     + Providers should declare the type of assets (in order to automatically check that the assets blackboxes are properly formed)
-    + TODO: check if each asset providers is declared
+    + TODO: check if each asset providers is declared + types of inputs + each secret has at least one reload
     + TODO adds a distinction between generateArgs and installArgs in the asset declaration
     + Create a service that checks periodically if all the secrets are there, and if its not the case, pull from the provisioning server using mTLS. This service should be a requierment of all the services requestings secrets => we need a reload entry for each secret
 - NAPS application: 
