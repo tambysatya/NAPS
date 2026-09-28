@@ -98,6 +98,7 @@ let
             group' = if group == null then owner else group;
         in
         ''
+            install -d -o ${owner} -g ${group'} -m ${mode} /var/lib/secrets/${secname} 
             ${utils.install "${secname}/${hostname}.crt" "file" {inherit owner mode; group=group';}}
             ${utils.install "${secname}/${hostname}.key" "file" {inherit owner mode; group=group';}}
         '';
@@ -108,7 +109,7 @@ let
         let pemdir = "/var/lib/certs";
             srcbasename = "$1/${secname}/${hostname}";
         in ''
-            mkdir -p ${pemdir}
+            install -d -o haproxy -g haproxy -m 0400 ${pemdir} 
             cat ${srcbasename}.crt ${srcbasename}.key > ${pemdir}/${hostname}.pem
             chown haproxy ${pemdir}/${hostname}.pem
             chmod 0400 ${pemdir}/${hostname}.pem

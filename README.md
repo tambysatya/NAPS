@@ -112,6 +112,8 @@ Migration:
     + TODO: check if each asset providers is declared + types of inputs + each secret has at least one reload
     + TODO adds a distinction between generateArgs and installArgs in the asset declaration
     + Create a service that checks periodically if all the secrets are there, and if its not the case, pull from the provisioning server using mTLS. This service should be a requierment of all the services requestings secrets => we need a reload entry for each secret
+    + install scripts: need to handle the situation where a secret is already isntalled (e.g. removing the directory if it exists)
+
 
     naps.assets.default: clean the code of the link processing, because the secrets passed to the hosts + secrets passed to the target may differ. Note that e.g. pgpass may be enabled for the target but not for the hosts;
 - NAPS application: 
