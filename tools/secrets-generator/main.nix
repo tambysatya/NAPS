@@ -16,11 +16,11 @@ let
                 pkgs.step-cli
                 pkgs.gzip
             ];
-            text = gen.processSecrets;
+            text = naps.assets.generator;
            };
-    mkInstaller = vmsecrets: pkgs.writeShellApplication {
+    mkInstaller = vmname: pkgs.writeShellApplication {
             name = "install-secrets";
-            text = gen.mkInstaller vmsecrets;
+            text = naps.assets.install.${vmname};
             runtimeInputs = [
                 pkgs.age
                 pkgs.openssh

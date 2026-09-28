@@ -32,7 +32,7 @@ let
         '';
 
     installSSH = 
-        generateArgs@{keyname}:
+        keyname:
         installArgs@{path, owner, ...}:
         ''
             install -d -m 700 -o ${owner} -g ${owner} ${path}/.ssh
