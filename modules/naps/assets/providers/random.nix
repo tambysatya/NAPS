@@ -48,7 +48,7 @@ let
         assetname:
         access:
         installArgs@{path ? "/var/lib/secrets", ...}:
-        utils.install (utils.s3_key access) "file" installArgs;
+        utils.install "${assetname}/${utils.s3_key access}" "file" installArgs;
        
     installDB =
         assetname:

@@ -78,6 +78,7 @@ let
 
 
     installCA =
+        secname:
         let tgt = "/var/lib/secrets";
             args = {
                 owner = "step-ca";
@@ -85,25 +86,27 @@ let
                 mode = "0400";
             };
         in ''
-            ${utils.install "ca-password.key" "file" args}
-            ${utils.install "intermediate_ca_key" "file" args}
+            ${utils.install "${secname}/ca-password.key" "file" args}
+            ${utils.install "${secname}/intermediate_ca_key" "file" args}
         '';
     
     installSSL = 
+        secname:
         generateArgs@{hostname}:
         installArgs@{owner, group ? null, mode ? "0400", ...}:
         let
             group' = if group == null then owner else group;
         in
         ''
-            ${utils.install "${hostname}.crt" "file" {inherit owner mode; group=group';}}
-            ${utils.install "${hostname}.key" "file" {inherit owner mode; group=group';}}
+            ${utils.install "${secname}/${hostname}.crt" "file" {inherit owner mode; group=group';}}
+            ${utils.install "${secname}/${hostname}.key" "file" {inherit owner mode; group=group';}}
         '';
 
     installHAproxy= 
+        secname:
         generateArgs@{hostname}:
         let pemdir = "/var/lib/certs";
-            srcbasename = "$1/${hostname}";
+            srcbasename = "$1/${secname}/${hostname}";
         in ''
             mkdir -p ${pemdir}
             cat ${srcbasename}.crt ${srcbasename}.key > ${pemdir}/${hostname}.pem
@@ -120,14 +123,14 @@ let
 in {
     naps.assets.providers.step-ca = {
         generate = acc: secname:  _:  [(generateCA domain)] ++ acc;
-        install = secname: _: installCA;
+        install = secname: _: installCA secname;
     };
     naps.assets.providers.tls = {
         generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
-        install = secname: args: installSSL args.generateArgs args.installArgs;
+        install = secname: args: installSSL secname args.generateArgs args.installArgs;
     };
     naps.assets.providers.haproxy = {
         generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
-        install = secname: args: installHAproxy args.generateArgs;
+        install = secname: args: installHAproxy secname args.generateArgs;
     };
 }
