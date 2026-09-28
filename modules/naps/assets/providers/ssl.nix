@@ -1,7 +1,7 @@
 {flakeRoot, lib, inputs, pkgs, path, config, ...}:
 let
 
-    utils = import ./lib {inherit flakeRoot lib inputs path;};
+    utils = import ./lib {inherit flakeRoot lib inputs path pkgs;};
     types = import "${flakeRoot}/lib" {inherit lib inputs;};
     paths = utils.paths;
 
@@ -85,16 +85,19 @@ let
                 mode = "0400";
             };
         in ''
-            ${utils.install "ca-password.key" args}
-            ${utils.install "intermediate_ca_key" args}
+            ${utils.install "ca-password.key" "file" args}
+            ${utils.install "intermediate_ca_key" "file" args}
         '';
     
     installSSL = 
         generateArgs@{hostname}:
-        installArgs:
+        installArgs@{owner, group ? null, mode ? "0400", ...}:
+        let
+            group' = if group == null then owner else group;
+        in
         ''
-            ${utils.install "${hostname}.crt" installArgs};
-            ${utils.install "${hostname}.key" installArgs};
+            ${utils.install "${hostname}.crt" "file" {inherit owner mode; group=group';}}
+            ${utils.install "${hostname}.key" "file" {inherit owner mode; group=group';}}
         '';
 
     installHAproxy= 
@@ -116,45 +119,15 @@ let
 
 in {
     naps.assets.providers.step-ca = {
-        inputs = {
-            generate = null;
-            install = null;
-        };
-        apply = {
-            generate = acc: secname:  _:  [(generateCA domain)] ++ acc;
-            install = secname: _: installCA;
-        };
+        generate = acc: secname:  _:  [(generateCA domain)] ++ acc;
+        install = secname: _: installCA;
     };
     naps.assets.providers.tls = {
-        inputs = {
-            generate = types.submodule {
-                options = {
-                    inherit (types) hostname;
-                };
-            };
-            install = types.submodule {
-                options = {
-                    inherit (types) owner group mode;
-                };
-            };
-        };
-        apply = {
-            generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
-            install = secname: args: installSSL args.generateArgs args.installArgs;
-        };
+        generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
+        install = secname: args: installSSL args.generateArgs args.installArgs;
     };
     naps.assets.providers.haproxy = {
-        inputs = {
-            generate = types.submodule {
-                options = {
-                    inherit (types) hostname;
-                };
-            };
-            install = null;
-        };
-        apply = {
-            generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
-            install = secname: args: installHAproxy args.generateArgs;
-        };
+        generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
+        install = secname: args: installHAproxy args.generateArgs;
     };
 }

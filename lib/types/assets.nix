@@ -9,14 +9,17 @@ let
 in
 rec {
     provider = types.enum [
-        "plain"  # random generated string stored in /nix/store (world readable)
-        "password"  # random generated string shipped by the provisioning server
-        "ldapssha"  # random generated string shipped to the server + hashed and shipped to the LDAP servers
+        
         "tls" # TLS certificate
         "haproxy" # TLS certificate in HAproxy format (public + private concatenated)
+        "step-ca" # TLS certificate authority
+
+        "plain"  # random generated string stored in /nix/store (world readable)
+        "password"  # random generated string shipped by the provisioning server
         "postgres" # random generated string shipped to the server + the POSTGRES servers
         "s3" # random generated key-pair shipped to the server and the S3 servers
-        "step-ca" # TLS certificate authority
+        "ldapssha"  # random generated string shipped to the server + hashed and shipped to the LDAP servers
+
         "ssh-keygen" # SSH Key generation
         "nix-store" # nix-store binary-cache keypair
     ];

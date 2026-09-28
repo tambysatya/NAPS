@@ -1,7 +1,7 @@
-{flakeRoot, lib, inputs, config, path,...}:
+{flakeRoot, lib, inputs, config, path, pkgs,...}:
 let
 
-    utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import ./providers/lib {inherit flakeRoot lib inputs path;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import ./providers/lib {inherit flakeRoot lib inputs path pkgs;};
    
             
     domain = config.naps.topology.domain;
@@ -20,7 +20,7 @@ let
                 secret:
                 let uid = utils.envUID env;
                     override = {
-                        installArgs = {owner = hostsOwner;};
+                        installArgs = {owner = hostsOwner;}; #note that pgpass is set to false by default
                         reload = hostsReload;
                     };
                     mkHostSecret = host: {${utils.envUID host}.${secretname} =(secret // override);}; #replace the owner of the secret transmitted to the hosts
@@ -30,7 +30,7 @@ let
             processLDAP = access: 
                 mkSharedSecret ldaphosts "openldap" ["openldap.service"] (utils.ldap_key access) {provider = "ldapssha"; installArgs = { owner = access.owner;}; generateArgs = access; inherit (access) reload;};
             processPostgres = access:
-                mkSharedSecret dbhosts "postgres" ["postgresql.service"] (utils.db_key access) {provider = "postgres"; installArgs = {owner = access.owner;}; generateArgs = access; inherit (access) reload;};
+                mkSharedSecret dbhosts "postgres" ["postgresql.service"] (utils.db_key access) {provider = "postgres"; installArgs = {inherit (access) owner pgpass;}; generateArgs = access; inherit (access) reload;};
             processS3 = access:
                 mkSharedSecret s3hosts "garage" ["garage.service"]  (utils.s3_root access) {provider = "s3"; installArgs = {owner = access.owner;}; generateArgs = access; inherit (access) reload;};
         in utils.mergeAll (
@@ -96,7 +96,7 @@ let
             processProvider =
                 acc: providername: assets:
                 let provider = config.naps.assets.providers.${providername};
-                    genFun = provider.apply.generate;
+                    genFun = provider.generate;
                 in lib.foldlAttrs (generateAsset genFun) acc assets;
         in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.assets.generator);
 
@@ -107,7 +107,7 @@ let
             processProvider = 
                 providername: assets:
                 let provider = config.naps.assets.providers.${providername};
-                    installFun = provider.apply.install;
+                    installFun = provider.install;
                 in lib.concatStringsSep "\n"
                         (lib.mapAttrsToList installFun assets);
             processVM = 

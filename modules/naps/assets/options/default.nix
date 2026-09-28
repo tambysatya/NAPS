@@ -35,35 +35,13 @@ let
 
     providerEntry = types.submodule {
         options = {
-            inputs = lib.mkOption {
-                description = "The type of the asset";
-                type =  types.submodule {
-                    options = {
-                        generate = lib.mkOption {
-                            description = "Type of the generator inputs"; 
-                            type = types.nullOr types.raw;
-                        };
-                        install = lib.mkOption {
-                            description = "Type of the installer inputs"; 
-                            type = types.nullOr types.raw;
-                        };
-                    };
-                };
+            generate = lib.mkOption {
+                description = "A function to generate the asset. Should have type: [String] -> assetname -> generatorEntry -> [String]. The first argument is an accumulator of all previously outputted scripts, allowing the generator to add its output BEFORE the others (useful e.g. for the CA which should be generated BEFORE the TLS certificates)";
+                type = types.functionTo (types.functionTo (types.functionTo (types.listOf types.str)));
             };
-            apply = lib.mkOption {
-                description = "Processing functions";
-                type = types.submodule {
-                    options = {
-                        generate = lib.mkOption {
-                            description = "A function to generate the asset. Should have type: [String] -> assetname -> generatorEntry -> [String]. The first argument is an accumulator of all previously outputted scripts, allowing the generator to add its output BEFORE the others (useful e.g. for the CA which should be generated BEFORE the TLS certificates)";
-                            type = types.functionTo (types.functionTo (types.functionTo (types.listOf types.str)));
-                        };
-                        install = lib.mkOption {
-                            description = "A function to install the asset. Should have type: assetname -> installerEntry -> Script";
-                            type = types.functionTo (types.functionTo types.str);
-                        };
-                    };
-                };
+            install = lib.mkOption {
+                description = "A function to install the asset. Should have type: assetname -> installerEntry -> Script";
+                type = types.functionTo (types.functionTo types.str);
             };
         };
     };
@@ -82,7 +60,6 @@ let
             };
         };
     };
-
 
 in 
 

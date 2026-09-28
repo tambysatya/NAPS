@@ -14,7 +14,7 @@ naps.services.postgres = {
     assets = {
         ${hostname} = {
             provider = "tls";
-            generateArgs = {inherit hostname reload;};
+            generateArgs = {inherit hostname;};
             installArgs = {inherit owner;};
             inherit reload;
         };
