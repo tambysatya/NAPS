@@ -17,6 +17,21 @@ let
         };
     };
 
+    installerEntry = types.submodule {
+        options = {
+            generateArgs = lib.mkOption {
+                description = "Args that have been passed to the generator";
+                type = types.attrs;
+            };
+            installArgs = lib.mkOption {
+                description = "Installer args";
+                type = types.attrs;
+                default = [];
+            };
+            
+        };
+    };
+
 
     providerEntry = types.submodule {
         options = {
@@ -88,7 +103,7 @@ in
                 };
                 installer = lib.mkOption {
                     description = "Intermediate Representation of the assets installation script. Format is: Env -> Provider -> name -> args";
-                    type = types.attrsOf (types.attrsOf (types.attrs));
+                    type = types.attrsOf (types.attrsOf (types.attrsOf installerEntry));
                     default = {};
                 };
                 providers = lib.mkOption {
@@ -96,7 +111,7 @@ in
                     type = types.attrsOf providerEntry;
                     default = {};
                 };
-                script = lib.mkOption {
+                scripts = lib.mkOption {
                     description = "Actual generations and installation script, per VM. The generator is a single script, the installers are defined per VM";
                     type = assetScripts;
                 };

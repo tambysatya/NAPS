@@ -83,7 +83,7 @@ let
             byproviderbyname = lib.mapAttrs 
                                     (_: vs: 
                                         utils.mergeAll 
-                                            (lib.map (v: {${v.name} = {args = v.installArgs;};}) vs))
+                                            (lib.map (v: {${v.name} = {generateArgs =  v.generateArgs; installArgs = v.installArgs;};}) vs))
                                     byprovider;
         in byproviderbyname;
 
@@ -123,7 +123,7 @@ in {
                                     utils.mergeAll (map ({name, generateArgs, env, ...}: {${name} = {args = generateArgs; recipients=[env];}; }) assets) )
                                 assetsPerType;
     naps.assets.installer = lib.mapAttrs mkInstallerForEnv config.naps.assets.perEnv;
-    naps.assets.script = {
+    naps.assets.scripts = {
         generate = generateScript;
         install = installScript;
     };
