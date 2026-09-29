@@ -8,7 +8,7 @@ let
 
   certEntries =
     map
-      ({hostname, owner, sslFormat,...}:
+      ({hostname, reload, sslFormat,...}:
       ''
         echo "Renewing ${hostname}"
 
