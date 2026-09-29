@@ -136,7 +136,7 @@ let
 
         compileBuildDomains = 
             args:
-            let naps= compileNAPS args;
+            let naps= builtins.trace args (compileNAPS args);
             in {
                 packages.${system}.build-domains = 
                     ((import tools/build-domains) ({inherit flakeRoot inputs lib pkgs naps;} // args.extraArgs)).buildDomains;
