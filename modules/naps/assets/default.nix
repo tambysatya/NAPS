@@ -126,7 +126,10 @@ let
             processVM = 
                 vmname: assetskinds:
                 let scriptsPerProviders = lib.mapAttrsToList processProvider assetskinds; 
-                in lib.concatStringsSep "\n" scriptsPerProviders;
+                in ''
+                    install -d -m 0711 -o root -g root ${utils.paths.secrets}
+                    ${lib.concatStringsSep "\n" scriptsPerProviders}
+                '';
         in lib.mapAttrs processVM config.naps.assets.installer;
 
 in {
@@ -156,9 +159,6 @@ in {
             # Generates the secrets
             ${generateScript}
         '';
-        install =  ''
-            install -d -m 0711 -o root -g root ${utils.paths.secrets}
-            ${installScript};
-        '';
+        install = installScript;
     };
 }
