@@ -110,6 +110,7 @@ let
             install -d -o step-renew -g haproxy -m 0540 ${pemdir} 
             cat ${srcbasename}.crt ${srcbasename}.key > ${pemdir}/${hostname}.pem
             chown step-renew ${pemdir}/${hostname}.pem
+            chgrp -R haproxy ${pemdir}
             chmod 0540 ${pemdir}/${hostname}.pem
         '';
 
