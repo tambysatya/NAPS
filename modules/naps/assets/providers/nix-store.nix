@@ -40,11 +40,12 @@ let
     installSSH = 
         keyname:
         installArgs@{path, owner, ...}:
-        ''
-            install -d -m 700 -o ${owner} -g ${owner} ${path}
-            cp "$1/${utils.ssh_base_name keyname}" ${path}/id_ed25519
-            cp "$1/${utils.ssh_base_name keyname}.pub" ${path}/id_ed25519.pub
-            chown -R ${owner}:${owner} ${path}
+        let tgt = "/mnt${path}";
+        in ''
+            install -d -m 700 -o ${owner} -g ${owner} ${tgt}
+            cp "$1/${keyname}/${utils.ssh_base_name keyname}" ${tgt}/id_ed25519
+            cp "$1/${keyname}/${utils.ssh_base_name keyname}.pub" ${tgt}/id_ed25519.pub
+            chown -R ${owner}:${owner} ${tgt}
         '';
 
 
