@@ -128,10 +128,9 @@ in {
     };
     naps.assets.providers.tls = {
         generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
-        install = secname: args: installSSL secname args.generateArgs args.installArgs;
-    };
-    naps.assets.providers.haproxy = {
-        generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
-        install = secname: args: installHAproxy secname args.generateArgs;
+        install = secname: args:
+                  if args.installArgs.format == "step"
+                  then installSSL secname args.generateArgs args.installArgs
+                  else installHAproxy secname args.generateArgs;
     };
 }

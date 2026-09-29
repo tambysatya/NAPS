@@ -3,18 +3,22 @@
 let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
 
     extractCert = 
-        {generateArgs, reload, ...}: {inherit (generateArgs) hostname; inherit reload;};
+        {generateArgs, reload, installArgs, ...}: 
+            {
+                inherit (generateArgs) hostname; 
+                inherit (installArgs) format;
+                inherit reload;
+            };
 
 in
 {
      naps.deploy.systems = 
         lib.mapAttrs 
             (vmname: 
-             assets@{tls ? {}, haproxy ? {},...}:
+             assets@{tls ? {},...}:
                 {
                     sslCertificates = 
-                        (map extractCert (builtins.attrValues tls) ++
-                         map extractCert (builtins.attrValues haproxy));
+                        map extractCert (builtins.attrValues tls); 
                 })
             config.naps.assets.installer;
 }

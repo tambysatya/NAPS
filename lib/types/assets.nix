@@ -11,7 +11,6 @@ rec {
     provider = types.enum [
         
         "tls" # TLS certificate
-        "haproxy" # TLS certificate in HAproxy format (public + private concatenated)
         "step-ca" # TLS certificate authority
 
         "plain"  # random generated string stored in /nix/store (world readable)
@@ -36,6 +35,11 @@ rec {
     sslCertificate = types.submodule {
             options = {
                 inherit (types) hostname reload;
+                format = lib.mkOption {
+                    description = "Whether to use the haproxy format or not";
+                    type = types.enum ["step" "haproxy"];
+                    default = "step";
+                };
             };
     };
 

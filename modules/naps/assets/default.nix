@@ -46,7 +46,7 @@ let
             dst = if env.type == "container" then utils.envUID env else utils.envHost env;
             processHTTPEndpoint  =
                 {tls, hostname, ...}:
-                let cert = {provider = "haproxy"; installArgs = {owner = "haproxy";}; generateArgs = {inherit hostname;}; reload = ["haproxy.service"];};
+                let cert = {provider = "tls"; installArgs = {owner = "haproxy"; format="haproxy";}; generateArgs = {inherit hostname;}; reload = ["haproxy.service"];};
                 in lib.optionalAttrs tls {${dst}.${hostname} = cert;}; #if TLS=false, the certificate should be declared manually in the assets
         in utils.mergeAll(
                 map processHTTPEndpoint endpoints.http);
