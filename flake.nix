@@ -124,7 +124,10 @@ let
                 build = 
                     name: script: 
                     {
-                        packages.${system}."install-assets-${name}" = script;
+                        packages.${system}."install-assets-${name}" = pkgs.writeShellApplication {
+                            name = "install-assets-${name}";
+                            text = script;
+                        };
                         apps.${system}."install-assets-${name}" = {
                             type = "app";
                             program = lib.getExe self.packages.${system}."install-assets-${name}";
