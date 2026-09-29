@@ -151,6 +151,8 @@ Migration:
 
 - ISO: should be generic (no need to rebuild it for every configuration change). The iso just download a tarball from the provisioning server, including the flake
 
+- STEP: should run under a specific user
+
 ### IDEAS
 
 - add a "why" option in the persistent directory declaration in register to add a message describing why the repository is useful whenever the user does not declare it. E.G "/nix: used for hydra to cache builds. Should be consequent enough to handle multiple versions of the same project"

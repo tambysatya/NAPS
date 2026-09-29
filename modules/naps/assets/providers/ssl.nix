@@ -94,12 +94,11 @@ let
     installSSL = 
         secname:
         generateArgs@{hostname}:
-        installArgs@{owner, path, group ? null, mode ? "0400", ...}:
-        let group' = if group == null then owner else group;
-        in ''
-            install -d -o ${owner} -g ${group'} -m ${mode} /var/lib/secrets/${secname} 
-            ${utils.install "${secname}/${hostname}.crt" "file" {inherit owner mode path; group=group';}}
-            ${utils.install "${secname}/${hostname}.key" "file" {inherit owner mode path; group=group';}}
+        installArgs@{owner, path, group ? "step-renew", mode ? "0420", ...}:
+        ''
+            install -d -o ${owner} -g ${group} -m ${mode} /var/lib/secrets/${secname} 
+            ${utils.install "${secname}/${hostname}.crt" "file" {inherit owner mode path group;}}
+            ${utils.install "${secname}/${hostname}.key" "file" {inherit owner mode path group;}}
         '';
 
     installHAproxy= 
@@ -108,7 +107,7 @@ let
         let pemdir = "/mnt${utils.paths.pemdir}";
             srcbasename = ''"$1"/${secname}/${hostname}'';
         in ''
-            install -d -o haproxy -g step -m 0520 ${pemdir} 
+            install -d -o haproxy -g step-renew -m 0520 ${pemdir} 
             cat ${srcbasename}.crt ${srcbasename}.key > ${pemdir}/${hostname}.pem
             chown haproxy ${pemdir}/${hostname}.pem
             chmod 0400 ${pemdir}/${hostname}.pem

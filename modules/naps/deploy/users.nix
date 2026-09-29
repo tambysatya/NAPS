@@ -4,7 +4,8 @@ let
     utils = import ./lib.nix {inherit lib inputs flakeRoot;};
 
     haproxy= {service = "haproxy"; uid=9999;};
-    users = utils.mergeAll (map (builtins.getAttr "users") (builtins.attrValues config.naps.services)) // {inherit haproxy;};
+    step-renew = {service = "step-renew"; uid=9998;};
+    users = utils.mergeAll (map (builtins.getAttr "users") (builtins.attrValues config.naps.services)) // {inherit haproxy step-renew;};
     
 
 
@@ -21,6 +22,7 @@ let
         in utils.mergeAll (map processDeployement (builtins.attrValues deployements));
 
     addHaproxy = vmname: {${vmname}.users.haproxy = haproxy;};
+    addStepRenew = envuid: {${envuid}.users.step-renew= step-renew;};
 
 
 in {
@@ -28,5 +30,6 @@ in {
     naps.deploy.systems =
         utils.mergeAll 
             (map processService (builtins.attrValues config.naps.services)
-            ++ map addHaproxy (builtins.attrNames config.naps.topology.vms));
+            ++ map addHaproxy (builtins.attrNames config.naps.topology.vms)
+            ++ map addStepRenew (builtins.attrNames config.naps.envs.all));
 }
