@@ -17,7 +17,7 @@ let
 
 
             # Generate the terranix configuration
-            nix build .#terranix -o terraform.tf.json.tmp
+            nix build ${path}#terranix -o terraform.tf.json.tmp
             cp terraform.tf.json.tmp terraform.tf.json
             chmod u+w terraform.tf.json
             rm terraform.tf.json.tmp

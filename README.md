@@ -149,6 +149,7 @@ Migration:
 - lifecycle: tofu must ignore the smbios parameters
 - nix: run garbage collector every xxx days to save space ?
 
+- ISO: should be generic (no need to rebuild it for every configuration change). The iso just download a tarball from the provisioning server, including the flake
 
 ### IDEAS
 
