@@ -211,7 +211,7 @@ let
 
         exposeApps = 
             args:
-            let ret = {name="NAPS"; inherit args;};
+            let ret = {name="NAPS"; inherit args.extraArgs.path;};
             in builtins.trace (builtins.deepSeq ret ret) (
             utils.mergeAll [
                 (compileGenAssets args) 
