@@ -71,9 +71,12 @@ let
     checkAsset = 
         {provider, generateArgs, installArgs, reload}:
         let 
+            applyMerge =
+                type: value:
+                if type == null then value else type.merge [] [{inherit value; file = "modules.naps.assets.default";}];
             inputs = config.naps.assets.providers.${provider}.inputs;
-            generateArgs' = inputs.generateArgs.merge [] [{value = generateArgs; file = "modules.naps.assets.default";}];
-            installArgs' = inputs.installArgs.merge [] [{value = installArgs; file = "modules.naps.assets.default";}];
+            generateArgs' = applyMerge inputs.generateArgs generateArgs;
+            installArgs' = applyMerge inputs.installArgs installArgs;
         in {inherit provider reload; generateArgs=generateArgs'; installArgs=installArgs';};
 
     perEnv = 

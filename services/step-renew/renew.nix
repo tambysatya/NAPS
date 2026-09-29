@@ -8,7 +8,7 @@ let
 
   certEntries =
     map
-      ({hostname, owner, reload,...}:
+      ({hostname, owner, sslFormat,...}:
       ''
         echo "Renewing ${hostname}"
 
@@ -22,7 +22,7 @@ let
           "$KEY_PATH" \
           --force
 
-        ${if owner == "haproxy" then 
+        ${if sslFormat == "haproxy" then 
             ''cat "$CRT_PATH" "$KEY_PATH" > ${vars.pemdir}/${hostname}.pem''
           else ""}
 

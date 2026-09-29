@@ -43,16 +43,24 @@ let
                 type = types.submodule {
                     options = {
                         generateArgs = lib.mkOption {
-                            description = "Types of the attrset passed to the generator";
+                            description = "Types of the attrset passed to the generator. If set to null, any attrset is valid.";
                             type = types.raw;
-                            default = types.attrs;
+                            default = null;
                         };
                         installArgs = lib.mkOption {
-                            description = "Types of the attrset passed to the installer";
+                            description = "Types of the attrset passed to the installer. If set to null, any attrset is valid.";
                             type = types.raw;
                             default = types.submodule {
                                 options = {inherit (types) owner;};
                             };
+                            defaultText = lib.literalExpression #to avoid stack overflow during doc generation
+                                ''
+                                    types.submodule {
+                                      options = {
+                                        inherit (types) owner;
+                                      };
+                                    }
+                                '';
                         };
                     };
                 };
