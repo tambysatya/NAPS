@@ -56,7 +56,7 @@ let
         installArgs@{pgpass ? false, owner,...}:
         if pgpass
         then let str = "postgres.${domain}:5432:${database}:${database}";
-                 tgt = "/mnt${path}/${utils.db_key access}.pgpass";
+                 tgt = "/mnt${utils.paths.secrets}/${utils.db_key access}.pgpass";
              in ''
                 CONTENT=$(cat "$1"/${utils.db_key access})
                 echo "${str}:$CONTENT" > ${tgt}
