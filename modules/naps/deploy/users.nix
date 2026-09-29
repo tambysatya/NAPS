@@ -5,7 +5,7 @@ let
 
     haproxy= {service = "haproxy"; uid=9999;};
     step-renew = {service = "step-renew"; uid=9998;};
-    users = utils.mergeAll (map (builtins.getAttr "users") (builtins.attrValues config.naps.services)) // {inherit haproxy step-renew;};
+    users = utils.mergeAll (map (builtins.getAttr "users") (builtins.attrValues config.naps.services)) // {inherit haproxy;};
     
 
 
@@ -22,7 +22,7 @@ let
         in utils.mergeAll (map processDeployement (builtins.attrValues deployements));
 
     addHaproxy = vmname: {${vmname}.users.haproxy = haproxy;};
-    addStepRenew = envuid: {${envuid}.users.step-renew= step-renew;};
+    #addStepRenew = envuid: {${envuid}.users.step-renew= step-renew;};
 
 
 in {
@@ -31,5 +31,6 @@ in {
         utils.mergeAll 
             (map processService (builtins.attrValues config.naps.services)
             ++ map addHaproxy (builtins.attrNames config.naps.topology.vms)
-            ++ map addStepRenew (builtins.attrNames config.naps.envs.all));
+            #++ map addStepRenew (builtins.attrNames config.naps.envs.all)
+            );
 }

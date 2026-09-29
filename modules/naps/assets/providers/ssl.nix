@@ -95,7 +95,7 @@ let
         secname:
         generateArgs@{hostname}:
         installArgs@{owner, path, ...}:
-        let args = {inherit path; group = owner; owner = "step-renew"; mode = "0750";}; # the certificate is owned by step-renew but belongs to the group of the service owner
+        let args = {inherit path; group = owner; owner = "root"; mode = "0750";}; # the certificate is owned by ROOT but belongs to the group of the service owner
         in ''
             install -d -o ${args.owner} -g ${args.group} -m ${args.mode} ${args.path} 
             ${utils.install "${secname}" "dir" args}
@@ -106,10 +106,11 @@ let
         generateArgs@{hostname}:
         let pemdir = "/mnt${utils.paths.pemdir}";
             srcbasename = ''"$1"/${secname}/${hostname}'';
+            owner = "root";
         in ''
-            install -d -o step-renew -g haproxy -m 0750 ${pemdir} 
+            install -d -o ${owner} -g haproxy -m 0750 ${pemdir} 
             cat ${srcbasename}.crt ${srcbasename}.key > ${pemdir}/${hostname}.pem
-            chown step-renew ${pemdir}/${hostname}.pem
+            chown ${owner} ${pemdir}/${hostname}.pem
             chgrp -R haproxy ${pemdir}
             chmod 0640 ${pemdir}/${hostname}.pem
         '';

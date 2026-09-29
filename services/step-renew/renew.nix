@@ -61,8 +61,8 @@ in
         StateDirectory = "step";
         Restart = "on-failure";
         RestartSec = "30s";
-        DynamicUser = false;
-        User = "step-renew";
+        # DynamicUser = false;
+        # User = "step-renew";
       };
 
       environment = {
