@@ -26,7 +26,7 @@ let
             group' = if group == null then owner else group;
             mode' = if mode != null then mode else {"file" = "0400"; "dir" = "500";}.${type};
         in ''
-           cp "$1/${filename}" ${mnttgt}
+           cp -R "$1/${filename}" ${mnttgt}
            chown -R ${owner} ${mnttgt}
            chgrp -R ${group'} ${mnttgt}
            chmod -R ${mode'} ${mnttgt}
