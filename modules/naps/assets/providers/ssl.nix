@@ -87,7 +87,7 @@ let
             };
         in ''
             ${utils.install "${secname}/ca-password.key" "file" args}
-            ${utils.install "${secname}/intermediate_ca_key" "file" args}
+            ${utils.install "${secname}/secrets/intermediate_ca_key" "file" args}
         '';
     
     installSSL = 
