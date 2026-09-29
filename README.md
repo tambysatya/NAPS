@@ -5,6 +5,8 @@
 
 ![With NAPS, enjoy more naps !](./images/naps.png)
 
+*With NAPS, enjoy more naps !*
+
 Status: WIP, experimental
 
 Features: 
@@ -151,7 +153,7 @@ Migration:
 
 - ISO: should be generic (no need to rebuild it for every configuration change). The iso just download a tarball from the provisioning server, including the flake
 
-- STEP: should run under a specific user
+- STEP: should run under a specific user. Problem; postgres does not accept not being owner of its TLS certificates so a mecanism should be writen
 
 ### IDEAS
 
