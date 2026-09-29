@@ -31,8 +31,8 @@ config =
                 settings = {
                     password_encryption = "scram-sha-256";
                     ssl = true;
-                    ssl_cert_file = utils.ssl_crt_path "postgres.${domain}.crt";
-                    ssl_key_file = utils.ssl_key_path "postgres.${domain}.key";
+                    ssl_cert_file = utils.ssl_crt_path "postgres.${domain}";
+                    ssl_key_file = utils.ssl_key_path "postgres.${domain}";
                     ssl_ca_file = "/etc/root_ca.crt";
                 };
             };
