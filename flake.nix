@@ -209,7 +209,7 @@ let
 
         
         #args = {file=./examples/example.nix; flake-path=inputs.self.outPath;};
-        args = {modules = [./examples/example.nix]; extraArgs = {path=flakeRoot;};};
+        exampleArgs = {modules = [./examples/example.nix]; extraArgs = {path=flakeRoot;};};
 
 
         exposeApps = 
@@ -223,7 +223,7 @@ let
 
 
     in utils.mergeAll [
-        (exposeApps args)
+        (exposeApps exampleArgs)
         {
           
 
@@ -234,23 +234,23 @@ let
           };
 
 
-          naps = compileNAPS args;
+          naps = compileNAPS exampleArgs;
           #registry = compileRegistry args;
           #naps = gen-naps args;
           #registry = gen-registry args;
-          terranix = compileTerranix args;
+          terranix = compileTerranix exampleArgs;
           #nixosConfigurations = compileNixos args // {iso = compileIso args;};
 
           checks.${system} = gen-config-checks inputs;
 
           packages.${system}.options-doc = 
-            let module = compileModule args;
+            let module = compileModule exampleArgs;
             in (pkgs.nixosOptionsDoc {options = module.options;}).optionsJSON;
                        
 
           nixosConfigurations = utils.mergeAll [
-                                    (nixos-generator args)
-                                    ({iso = compileIso args;})
+                                    (nixos-generator exampleArgs)
+                                    ({iso = compileIso exampleArgs;})
                                 ];
           nixosModules = {
             naps.services = ./modules/naps/services;
