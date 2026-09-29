@@ -37,13 +37,41 @@ let
 
     providerEntry = types.submodule {
         options = {
-            generate = lib.mkOption {
-                description = "A function to generate the asset. Should have type: [String] -> assetname -> generatorEntry -> [String]. The first argument is an accumulator of all previously outputted scripts, allowing the generator to add its output BEFORE the others (useful e.g. for the CA which should be generated BEFORE the TLS certificates)";
-                type = types.functionTo (types.functionTo (types.functionTo (types.listOf types.str)));
+            
+            inputs = lib.mkOption {
+                description = "Inputs types";
+                type = types.submodule {
+                    options = {
+                        generateArgs = lib.mkOption {
+                            description = "Types of the attrset passed to the generator";
+                            type = types.raw;
+                            default = types.attrs;
+                        };
+                        installArgs = lib.mkOption {
+                            description = "Types of the attrset passed to the installer";
+                            type = types.raw;
+                            default = types.submodule {
+                                options = {inherit (types) owner;};
+                            };
+                        };
+                    };
+                };
+
             };
-            install = lib.mkOption {
-                description = "A function to install the asset. Should have type: assetname -> installerEntry -> Script";
-                type = types.functionTo (types.functionTo types.str);
+            apply = lib.mkOption {
+                description = "Functions to generate and install assets";
+                type = types.submodule {
+                    options = {
+                        generate = lib.mkOption {
+                            description = "A function to generate the asset. Should have type: [String] -> assetname -> generatorEntry -> [String]. The first argument is an accumulator of all previously outputted scripts, allowing the generator to add its output BEFORE the others (useful e.g. for the CA which should be generated BEFORE the TLS certificates)";
+                            type = types.functionTo (types.functionTo (types.functionTo (types.listOf types.str)));
+                        };
+                        install = lib.mkOption {
+                            description = "A function to install the asset. Should have type: assetname -> installerEntry -> Script";
+                            type = types.functionTo (types.functionTo types.str);
+                        };
+                    };
+                };
             };
         };
     };
@@ -98,7 +126,7 @@ in
                     default = {};
                 };
                 providers = lib.mkOption {
-                    description = "Provider functions library";
+                    description = "Providers library. An asset provider is composed of a generation and an installation script, as well as a description of the corresponding input types.";
                     type = types.attrsOf providerEntry;
                     default = {};
                 };

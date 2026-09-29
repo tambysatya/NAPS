@@ -5,7 +5,7 @@
 let
 
     utils = import ./lib {inherit flakeRoot lib inputs path pkgs;};
-    types = import "${flakeRoot}/lib" {inherit lib inputs;};
+    types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     paths = utils.paths;
     domain = config.naps.topology.domain;
 
@@ -78,24 +78,46 @@ let
 in {
 
 naps.assets.providers.plain = {
-    generate = acc: assetname: args: acc ++ [(generatePlain assetname args)];
-    install = assetname: args: ""; #no installation script since the file goes in the store
+    apply = {
+        generate = acc: assetname: args: acc ++ [(generatePlain assetname args)];
+        install = assetname: args: ""; #no installation script since the file goes in the store
+    };
 };
 naps.assets.providers.password = {
-    generate = acc: assetname: args: acc ++ [(utils.generateSSLString assetname args)];
-    install = assetname: args: utils.install assetname "file" args.installArgs;
+    apply = {
+        generate = acc: assetname: args: acc ++ [(utils.generateSSLString assetname args)];
+        install = assetname: args: utils.install assetname "file" args.installArgs;
+    };
 };
 naps.assets.providers.postgres = {
-    generate = acc: assetname: args: acc ++ [(generateDB assetname args)];
-    install = assetname: args: installDB assetname args.generateArgs args.installArgs;
+    inputs = {
+        installArgs = types.submodule {
+            options = {
+                inherit (types) owner;
+                pgpass = lib.mkOption {
+                    description = "True if the password should be installed in a pgpass format";
+                    type = types.bool;
+                    default = false;
+                };
+            };
+        };
+    };
+    apply = {
+        generate = acc: assetname: args: acc ++ [(generateDB assetname args)];
+        install = assetname: args: installDB assetname args.generateArgs args.installArgs;
+    };
 };
 naps.assets.providers.s3 = {
-    generate = acc: assetname: args: acc ++ [(generateS3 assetname args)];
-    install = assetname: args: installS3 assetname args.generateArgs args.installArgs;
+    apply = {
+        generate = acc: assetname: args: acc ++ [(generateS3 assetname args)];
+        install = assetname: args: installS3 assetname args.generateArgs args.installArgs;
+    };
 };
 naps.assets.providers.ldapssha = {
-    generate = acc: assetname: args: acc ++ [(generateLDAP assetname args)];
-    install = assetname: args: installLDAP assetname args.generateArgs args.installArgs;
+    apply = {
+        generate = acc: assetname: args: acc ++ [(generateLDAP assetname args)];
+        install = assetname: args: installLDAP assetname args.generateArgs args.installArgs;
+    };
 };
 }
 

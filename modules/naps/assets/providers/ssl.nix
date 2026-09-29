@@ -2,7 +2,7 @@
 let
 
     utils = import ./lib {inherit flakeRoot lib inputs path pkgs;};
-    types = import "${flakeRoot}/lib" {inherit lib inputs;};
+    types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     paths = utils.paths;
 
     domain = config.naps.topology.domain;
@@ -123,14 +123,25 @@ let
 
 in {
     naps.assets.providers.step-ca = {
-        generate = acc: secname:  _:  [(generateCA domain)] ++ acc;
-        install = secname: _: installCA secname;
+        apply = {
+            generate = acc: secname:  _:  [(generateCA domain)] ++ acc;
+            install = secname: _: installCA secname;
+        };
     };
     naps.assets.providers.tls = {
-        generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
-        install = secname: args:
-                  if args.installArgs.format == "step"
-                  then installSSL secname args.generateArgs args.installArgs
-                  else installHAproxy secname args.generateArgs;
+        inputs = {
+            installArgs = types.submodule {
+                options = {
+                    inherit (types) owner sslFormat;
+                };
+            };
+        };
+        apply = {
+            generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
+            install = secname: args:
+                      if args.installArgs.sslFormat == "step"
+                      then installSSL secname args.generateArgs args.installArgs
+                      else installHAproxy secname args.generateArgs;
+        };
     };
 }

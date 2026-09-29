@@ -46,7 +46,7 @@ let
             dst = if env.type == "container" then utils.envUID env else utils.envHost env;
             processHTTPEndpoint  =
                 {tls, hostname, ...}:
-                let cert = {provider = "tls"; installArgs = {owner = "haproxy"; format="haproxy";}; generateArgs = {inherit hostname;}; reload = ["haproxy.service"];};
+                let cert = {provider = "tls"; installArgs = {owner = "haproxy"; sslFormat="haproxy";}; generateArgs = {inherit hostname;}; reload = ["haproxy.service"];};
                 in lib.optionalAttrs tls {${dst}.${hostname} = cert;}; #if TLS=false, the certificate should be declared manually in the assets
         in utils.mergeAll(
                 map processHTTPEndpoint endpoints.http);
@@ -68,7 +68,17 @@ let
         utils.mergeAll (map (processDeployement srv) (builtins.attrValues deployements));
 
 
-    perEnv = utils.mergeAll (lib.mapAttrsToList processService config.naps.services); # envUID => assetName => asset
+    checkAsset = 
+        {provider, generateArgs, installArgs, reload}:
+        let 
+            inputs = config.naps.assets.providers.${provider}.inputs;
+            generateArgs' = inputs.generateArgs.merge [] [{value = generateArgs; file = "modules.naps.assets.default";}];
+            installArgs' = inputs.installArgs.merge [] [{value = installArgs; file = "modules.naps.assets.default";}];
+        in {inherit provider reload; generateArgs=generateArgs'; installArgs=installArgs';};
+
+    perEnv = 
+        let assetattrs = utils.mergeAll (lib.mapAttrsToList processService config.naps.services); # envUID => assetName => asset
+        in lib.mapAttrs (_: lib.mapAttrs (_: checkAsset)) assetattrs; 
     getEnv = uid: config.naps.envs.all.${uid}; 
     allAssets = # [{uid, assetname, asset}]
         let processEnv = uid: assetsattr: lib.mapAttrsToList (assetname: asset: asset // {name=assetname; env = getEnv uid;} ) assetsattr;
@@ -96,7 +106,7 @@ let
             processProvider =
                 acc: providername: assets:
                 let provider = config.naps.assets.providers.${providername};
-                    genFun = provider.generate;
+                    genFun = provider.apply.generate;
                 in lib.foldlAttrs (generateAsset genFun) acc assets;
         in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.assets.generator);
 
@@ -107,7 +117,7 @@ let
             processProvider = 
                 providername: assets:
                 let provider = config.naps.assets.providers.${providername};
-                    installFun = provider.install;
+                    installFun = provider.apply.install;
                 in lib.concatStringsSep "\n"
                         (lib.mapAttrsToList installFun assets);
             processVM = 

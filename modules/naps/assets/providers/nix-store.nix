@@ -2,7 +2,7 @@
 let
 
     utils = import ./lib {inherit flakeRoot lib inputs path pkgs;};
-    types = import "${flakeRoot}/lib" {inherit lib inputs;};
+    types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     paths = utils.paths;
     domain = config.naps.topology.domain;
     generateNixStore = 
@@ -51,12 +51,28 @@ let
 in {
 
 naps.assets.providers.ssh-keygen = {
-    generate = acc: assetname: args: acc ++ [(generateSSH assetname args.keyname)];
-    install = assetname: args: installSSH args.generateArgs.keyname args.installArgs;
+    inputs = {
+        installArgs = types.submodule {
+            options = {
+                inherit (types) owner;
+                path = lib.mkOption {
+                    description = "Where to install the ssh key";
+                    type = types.str;
+                    example = "/var/lib/hydra/.ssh";
+                };
+            };
+        };
+    };
+    apply = {
+        generate = acc: assetname: args: acc ++ [(generateSSH assetname args.keyname)];
+        install = assetname: args: installSSH args.generateArgs.keyname args.installArgs;
+    };
 };
 naps.assets.providers.nix-store = {
-    generate = acc: assetname: args: acc ++ [(generateNixStore assetname args.keyname)];
-    install = assetname: args: installNixStore args.generateArgs.keyname args.installArgs;
+    apply = {
+        generate = acc: assetname: args: acc ++ [(generateNixStore assetname args.keyname)];
+        install = assetname: args: installNixStore args.generateArgs.keyname args.installArgs;
+    };
 };
 }
 

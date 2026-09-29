@@ -32,14 +32,15 @@ rec {
         description = "Type of the string to be generated using openssl rand";
         type = types.enum ["base64" "hex"];
     };
+    sslFormat = lib.mkOption {
+        description = "Whether to use the haproxy format or not";
+        type = types.enum ["step" "haproxy"];
+        default = "step";
+    };
     sslCertificate = types.submodule {
             options = {
                 inherit (types) hostname reload;
-                format = lib.mkOption {
-                    description = "Whether to use the haproxy format or not";
-                    type = types.enum ["step" "haproxy"];
-                    default = "step";
-                };
+                inherit sslFormat;
             };
     };
 

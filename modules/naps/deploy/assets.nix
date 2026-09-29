@@ -6,7 +6,7 @@ let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
         {generateArgs, reload, installArgs, ...}: 
             {
                 inherit (generateArgs) hostname; 
-                inherit (installArgs) format;
+                inherit (installArgs) sslFormat;
                 inherit reload;
             };
 
