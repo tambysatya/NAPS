@@ -149,6 +149,7 @@ in {
                     ''
                     [[ -d ${utils.paths.perVM}/${vmname} ]] && rm -R ${utils.paths.perVM}/${vmname}
                     mkdir -p ${utils.paths.perVM}/${vmname}
+                    echo ${vmname} > ${utils.paths.perVM}/${vmname}/FLAKE
                     '')
                 (builtins.attrNames config.naps.assets.installer)}
             
