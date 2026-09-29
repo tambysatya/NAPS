@@ -61,10 +61,7 @@ let
                 ] ++ modules ++ services;
            });
     compileConfig = args: (compileModule args).config;
-
-    compileAssertions = args: (compileModule args).assertions;
     compileNAPS = args: (compileConfig args).naps;
-    compileRegistry = args: (compileConfig args).registry;
 
     nixos-generator = args@{extraArgs,
                             view ? (config: {}), # config -> attrSet : an attrSet extracted from the phase 1 and passed to the phase2 
