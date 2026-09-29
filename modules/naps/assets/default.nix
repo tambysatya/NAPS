@@ -156,6 +156,9 @@ in {
             # Generates the secrets
             ${generateScript}
         '';
-        install = installScript;
+        install =  ''
+            install -d -m 0711 -o root -g root ${utils.paths.secrets}
+            ${installScript};
+        '';
     };
 }
