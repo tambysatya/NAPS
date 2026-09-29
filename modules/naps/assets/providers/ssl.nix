@@ -107,7 +107,7 @@ let
         secname:
         generateArgs@{hostname}:
         let pemdir = "/var/lib/certs";
-            srcbasename = "$1/${secname}/${hostname}";
+            srcbasename = ''"$1"/${secname}/${hostname}'';
         in ''
             install -d -o haproxy -g haproxy -m 0400 ${pemdir} 
             cat ${srcbasename}.crt ${srcbasename}.key > ${pemdir}/${hostname}.pem
