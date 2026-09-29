@@ -135,6 +135,21 @@ let
                         };
                     };
             in utils.mergeAll (lib.mapAttrsToList build naps.assets.scripts.install);
+
+
+        compileBuildDomains = 
+            args:
+            let naps= compileNAPS args;
+            in {
+                packages.${system}.build-domains = 
+                    ((import tools/build-domains) ({inherit flakeRoot inputs lib pkgs naps;} // args.extraArgs)).buildDomains;
+                apps.${system}.build-domains = {
+                    type = "app";
+                    program = lib.getExe self.packages.${system}.build-domains;
+                    meta.description = "Generate terranix configurations";
+                };
+            };
+               
                
 
 
@@ -202,6 +217,7 @@ let
             utils.mergeAll [
                 (compileGenAssets args) 
                 (compileInstallAssets args)
+                (compileBuildDomains args)
                # (compileVisualization args)
             ];
 

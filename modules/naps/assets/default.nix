@@ -141,14 +141,18 @@ in {
     naps.assets.scripts = {
         generate = ''
             mkdir -p ${utils.paths.out} ${utils.paths.git}
+
+            # Initializes the perVM repository
             ${lib.concatMapStringsSep 
                 "\n"
                 (vmname:
                     ''
-                    [[ -d .secrets/perVM/${vmname} ]] && rm -R .secrets/perVM/${vmname}
-                    mkdir -p .secrets/perVM/${vmname}
+                    [[ -d ${utils.paths.perVM}/${vmname} ]] && rm -R ${utils.paths.perVM}/${vmname}
+                    mkdir -p ${utils.paths.perVM}/${vmname}
                     '')
                 (builtins.attrNames config.naps.assets.installer)}
+            
+            # Generates the secrets
             ${generateScript}
         '';
         install = installScript;
