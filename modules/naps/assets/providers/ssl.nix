@@ -106,7 +106,7 @@ let
     installHAproxy= 
         secname:
         generateArgs@{hostname}:
-        let pemdir = "/var/lib/certs";
+        let pemdir = "/mnt${utils.paths.pemdir}";
             srcbasename = ''"$1"/${secname}/${hostname}'';
         in ''
             install -d -o haproxy -g haproxy -m 0400 ${pemdir} 

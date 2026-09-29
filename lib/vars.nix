@@ -7,11 +7,11 @@ let
     #paths 
     paths = {
         secrets = "/var/lib/secrets";
+        pemdir = "/var/lib/certs";
         git = ".secrets/git";
         out = ".secrets/out";
         perVM = ".secrets/perVM";
     };
-    pemdir = "/var/lib/certs";
     ssl_crt_path = name: "${paths.secrets}/${name}/${name}.crt";
     ssl_key_path = name: "${paths.secrets}/${name}/${name}.key";
 
@@ -42,7 +42,7 @@ let
 in {
     inherit paths;
     inherit ssh_base_name store_base_name;
-    inherit ssl_crt_path ssl_key_path pemdir;
+    inherit ssl_crt_path ssl_key_path;
     inherit s3_root s3_key s3_key_id db_key ldap_key;
     inherit directory_id;
     inherit envUID envHost hostDeployementEnv;
