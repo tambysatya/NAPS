@@ -21,7 +21,7 @@ let
     install = 
         filename: 
         type:
-        {path ? "/var/lib/secrets", owner, group ? null, mode ? null,  ...}:
+        {path, owner, group ? null, mode ? null,  ...}:
         let mnttgt = "/mnt${path}";
             group' = if group == null then owner else group;
             mode' = if mode != null then mode else {"file" = "0400"; "dir" = "500";}.${type};

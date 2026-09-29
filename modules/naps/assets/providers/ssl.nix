@@ -80,27 +80,26 @@ let
     installCA =
         secname:
         let tgt = "/var/lib/secrets";
-            args = {
+            args = name: {
                 owner = "step-ca";
                 group = "step-ca";
                 mode = "0400";
+                path = "${tgt}/${name}";
             };
         in ''
-            ${utils.install "${secname}/ca-password.key" "file" args}
-            ${utils.install "${secname}/secrets/intermediate_ca_key" "file" args}
+            ${utils.install "${secname}/ca-password.key" "file" (args "ca-password.key")}
+            ${utils.install "${secname}/secrets/intermediate_ca_key" "file" (args "intermediate-ca.key")}
         '';
     
     installSSL = 
         secname:
         generateArgs@{hostname}:
-        installArgs@{owner, group ? null, mode ? "0400", ...}:
-        let
-            group' = if group == null then owner else group;
-        in
-        ''
+        installArgs@{owner, path, group ? null, mode ? "0400", ...}:
+        let group' = if group == null then owner else group;
+        in ''
             install -d -o ${owner} -g ${group'} -m ${mode} /var/lib/secrets/${secname} 
-            ${utils.install "${secname}/${hostname}.crt" "file" {inherit owner mode; group=group';}}
-            ${utils.install "${secname}/${hostname}.key" "file" {inherit owner mode; group=group';}}
+            ${utils.install "${secname}/${hostname}.crt" "file" {inherit owner mode path; group=group';}}
+            ${utils.install "${secname}/${hostname}.key" "file" {inherit owner mode path; group=group';}}
         '';
 
     installHAproxy= 
