@@ -43,8 +43,8 @@ let
         let tgt = "/mnt${path}";
         in ''
             install -d -m 700 -o ${owner} -g ${owner} ${tgt}
-            cp "$1/${keyname}/${utils.ssh_base_name keyname}" ${tgt}/id_ed25519
-            cp "$1/${keyname}/${utils.ssh_base_name keyname}.pub" ${tgt}/id_ed25519.pub
+            cp "$1/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}" ${tgt}/id_ed25519
+            cp "$1/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}.pub" ${tgt}/id_ed25519.pub
             chown -R ${owner}:${owner} ${tgt}
         '';
 
