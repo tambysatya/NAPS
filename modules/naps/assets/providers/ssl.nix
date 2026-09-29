@@ -108,7 +108,7 @@ let
         let pemdir = "/mnt${utils.paths.pemdir}";
             srcbasename = ''"$1"/${secname}/${hostname}'';
         in ''
-            install -d -o haproxy -g haproxy -m 0500 ${pemdir} 
+            install -d -o haproxy -g step -m 0520 ${pemdir} 
             cat ${srcbasename}.crt ${srcbasename}.key > ${pemdir}/${hostname}.pem
             chown haproxy ${pemdir}/${hostname}.pem
             chmod 0400 ${pemdir}/${hostname}.pem

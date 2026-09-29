@@ -27,9 +27,9 @@ let
             mode' = if mode != null then mode else {"file" = "0400"; "dir" = "500";}.${type};
         in ''
            cp "$1/${filename}" ${mnttgt}
-           chown ${owner} ${mnttgt}
-           chgrp ${group'} ${mnttgt}
-           chmod ${mode'} ${mnttgt}
+           chown -R ${owner} ${mnttgt}
+           chgrp -R ${group'} ${mnttgt}
+           chmod -R ${mode'} ${mnttgt}
         '';
 
 
