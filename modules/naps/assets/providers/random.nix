@@ -69,7 +69,7 @@ let
         assetname: access:
         installArgs@{hashed ? true, ...}:
         if hashed 
-        then "rm $1/${utils.ldap_key access}" # if the password is supposed to be hashed, it is already stored publicly so we remove the plain text password
+        then ''rm "$1"/${utils.ldap_key access}'' # if the password is supposed to be hashed, it is already stored publicly so we remove the plain text password
         else utils.install (utils.ldap_key access) "file" installArgs;
 
 
