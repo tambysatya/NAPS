@@ -61,7 +61,7 @@ let
 				set +x
 
 				echo "Deploying $HOST configuration"
-                nix run /etc/nixos#install-secrets-"$HOST" /tmp
+                nix run /etc/nixos#install-assets-"$HOST" /tmp
 
                 
 
