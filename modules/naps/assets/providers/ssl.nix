@@ -99,7 +99,7 @@ let
         in ''
             install -d -o ${args.owner} -g ${args.group} -m ${args.mode} ${path} 
             ${utils.install "${secname}" "dir" args}
-            chmod 0640 ${path}/*
+            chmod 0640 /mnt${path}/*
         '';
 
     installHAproxy= 
