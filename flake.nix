@@ -97,20 +97,21 @@ let
         compileGenAssets= 
             args:
                 let naps = compileNAPS args;
+                    pkg = pkgs.writeShellApplication {
+                                name = "gen-assets"; 
+                                runtimeInputs = [
+                                    pkgs.openssl
+                                    pkgs.openldap
+                                    pkgs.step-cli
+                                    pkgs.gzip
+                                ];
+                                text = naps.assets.scripts.generate;
+                           };
                 in {
-                    packages.${system}.gen-assets= pkgs.writeShellApplication {
-                        name = "gen-assets"; 
-                        runtimeInputs = [
-                            pkgs.openssl
-                            pkgs.openldap
-                            pkgs.step-cli
-                            pkgs.gzip
-                        ];
-                        text = naps.assets.scripts.generate;
-                    };
+                    packages.${system}."gen-assets"= pkg;
                     apps.${system}.gen-assets= {
                         type = "app";
-                        program = lib.getExe self.packages.${system}.gen-assets;
+                        program = lib.getExe pkg;
                         meta.description = "Generates all the assets";
                     };
                 };
@@ -118,16 +119,19 @@ let
         compileInstallAssets = 
             args:
             let naps = compileNAPS args;
-                build = 
+
+
+                build =
                     name: script: 
-                    {
-                        packages.${system}."install-assets-${name}" = pkgs.writeShellApplication {
-                            name = "install-assets-${name}";
-                            text = script;
-                        };
+                    let pkg = pkgs.writeShellApplication {
+                                    name = "install-assets-${name}";
+                                    text = script;
+                               };
+                    in {
+                        packages.${system}."install-assets-${name}"= pkg;
                         apps.${system}."install-assets-${name}" = {
                             type = "app";
-                            program = lib.getExe self.packages.${system}."install-assets-${name}";
+                            program = lib.getExe pkg;
                             meta.description = "Install assets for ${name}";
                         };
                     };
@@ -137,12 +141,12 @@ let
         compileBuildDomains = 
             args:
             let naps= compileNAPS args;
+                pkg = ((import tools/build-domains) ({inherit flakeRoot inputs lib pkgs naps;} // args.extraArgs)).buildDomains;
             in {
-                packages.${system}.build-domains = 
-                    ((import tools/build-domains) ({inherit flakeRoot inputs lib pkgs naps;} // args.extraArgs)).buildDomains;
+                packages.${system}.build-domain = pkg; 
                 apps.${system}.build-domains = {
                     type = "app";
-                    program = lib.getExe self.packages.${system}.build-domains;
+                    program = lib.getExe pkg;
                     meta.description = "Generate terranix configurations";
                 };
             };
@@ -211,18 +215,16 @@ let
 
         exposeApps = 
             args:
-            let ret = {name="NAPS"; inherit (args.extraArgs) path;};
-            in builtins.trace (builtins.deepSeq ret ret) (
             utils.mergeAll [
                 (compileGenAssets args) 
                 (compileInstallAssets args)
                 (compileBuildDomains args)
                # (compileVisualization args)
-            ]);
+            ];
 
 
     in utils.mergeAll [
-        #(exposeApps exampleArgs)
+        (exposeApps exampleArgs)
         {
           
 
