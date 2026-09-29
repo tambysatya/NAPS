@@ -136,7 +136,7 @@ let
 
         compileBuildDomains = 
             args:
-            let naps= builtins.trace args (compileNAPS args);
+            let naps= compileNAPS args;
             in {
                 packages.${system}.build-domains = 
                     ((import tools/build-domains) ({inherit flakeRoot inputs lib pkgs naps;} // args.extraArgs)).buildDomains;
@@ -211,12 +211,14 @@ let
 
         exposeApps = 
             args:
+            let ret = builtins.trace {name="NAPS"; inherit args;};
+            in builtins.trace (builtins.deepSeq ret ret) (
             utils.mergeAll [
                 (compileGenAssets args) 
                 (compileInstallAssets args)
                 (compileBuildDomains args)
                # (compileVisualization args)
-            ];
+            ]);
 
 
     in utils.mergeAll [
