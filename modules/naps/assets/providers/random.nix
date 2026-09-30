@@ -54,15 +54,7 @@ let
         assetname:
         access@{database,...}:
         installArgs@{path, pgpass ? false, owner,...}:
-        if pgpass != null
-        then let str = "postgres.${domain}:5432:${database}:${database}";
-             in ''
-                CONTENT=$(cat "$1"/${utils.db_key access})
-                echo "${str}:$CONTENT" > ${path}
-                chown ${owner} ${path}
-                chmod 0400 ${path}
-             ''
-        else utils.install assetname "file" installArgs;
+        utils.install assetname "file" installArgs;
 
     installLDAP =
         assetname: access:
