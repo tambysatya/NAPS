@@ -20,16 +20,18 @@ let
 
     install = 
         filename: 
-        type:
-        {path, owner, group ? null, mode ? null,  ...}:
+        type: # if type == dir, the directory will be in 111 and the permissions specified in 'mode' will be applied to all files
+        {path, owner, group ? null, mode ? "0400",  ...}: 
         let mnttgt = "/mnt${path}";
             group' = if group == null then owner else group;
-            mode' = if mode != null then mode else {"file" = "0400"; "dir" = "500";}.${type};
         in ''
            cp -R "$1/${filename}" ${mnttgt}
            chown -R ${owner} ${mnttgt}
            chgrp -R ${group'} ${mnttgt}
-           chmod -R ${mode'} ${mnttgt}
+           chmod -R ${mode} ${mnttgt}
+           ${lib.optionalString 
+                (type == "dir")
+                "chmod 111 ${mnttgt}"}
         '';
 
 
