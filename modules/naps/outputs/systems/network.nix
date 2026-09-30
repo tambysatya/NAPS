@@ -64,6 +64,16 @@ let
             hostdeploy = config.naps.deploy.systems.${host};
         in{
             ${host}.config = {
+
+                /* allows services to listen on IP address that are not bound to an interface
+                   useful for launching haproxy before all the containers
+                   (otherwise, haproxy is stuck because the direct proxy cannot bind to the veth interfaces)
+                */
+                boot.kernel.sysctl = {
+                    "net.ipv4.ip_nonlocal_bind" = 1;
+                    "net.ipv6.ip_nonlocal_bind" = 1;
+                };
+
                 
                 networking = {
                     nat = {

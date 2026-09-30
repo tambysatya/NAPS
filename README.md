@@ -172,6 +172,9 @@ CHECKS:
 - Assets: each asset type should have a provider
 
 
+PROBLEMS:
+evaluation warning: autoinstall.service is ordered after 'network-online.target' but doesn't depend on it
+
 
 EXPERIMENTS:
 - check multiple containers running on the same VM
