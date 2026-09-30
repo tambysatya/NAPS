@@ -30,7 +30,8 @@ let
     
     generateAccess = access@{bucket, ...}: #TODO: the key has the name of the bucket
                     ''
-                    if ! ${pkgs.garage_2}/bin/garage bucket info ${bucket}; then
+                    #if ! ${pkgs.garage_2}/bin/garage bucket info ${bucket}; then
+                    if [[ -z ${pkgs.garage_2}/bin/garage bucket list | grep ${bucket} ]]; then
                         echo "Creating bucket: ${bucket}"
                         ${pkgs.garage_2}/bin/garage bucket create ${bucket}
                     else
