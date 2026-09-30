@@ -47,6 +47,9 @@ let
             cp "$1/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}" ${tgt}/id_ed25519
             cp "$1/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}.pub" ${tgt}/id_ed25519.pub
             chown -R ${owner}:${group'} ${tgt}
+
+            ${pkgs.openssh}/bin/ssh-keyscan -H github.com > ${tgt}/known_hosts #adding the github pubkey
+
             chmod ${mode} ${tgt}/*
         '';
 

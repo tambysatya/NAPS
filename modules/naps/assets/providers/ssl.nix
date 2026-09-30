@@ -139,9 +139,19 @@ in {
         apply = {
             generate = acc: secname: {hostname}:  acc ++ [(gen_ssl_certificate hostname)];
             install = secname: args:
+                      # HA proxy is installed if requested. Note that we still need to install the certificates in order
+                      # to refresh it
+                      ''
+                        ${installSSL secname args.generateArgs args.installArgs}
+                        ${lib.optionalString
+                            (args.installArgs.sslFormat == "haproxy")
+                            (installHAproxy secname args.generateArgs)}
+                      '';
+                      /*
                       if args.installArgs.sslFormat == "step"
                       then installSSL secname args.generateArgs args.installArgs
                       else installHAproxy secname args.generateArgs;
+                      */
         };
     };
 }

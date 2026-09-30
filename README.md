@@ -124,6 +124,10 @@ Migration:
     + write a script that uploads the secrets to the provisioner using ssh and launch the secret provisioner automatically (based on the topology description)
 
 
+### Notes
+
+- ssh assets => public key of github added in the known_host. The list of hosts should be registered by the service.
+
 ### Late game project
 
 - write a tool that deploys only the vm that have changed
@@ -156,6 +160,8 @@ Migration:
 
 - STEP: should run under a specific user. Problem; postgres does not accept not being owner of its TLS certificates so a mecanism should be writen
 - rewrite the installer library because sometimes it appends /mnt, sometimes not, ... + should handle the in-place deployement (e.g. in this case, this should not append /mnt)
+
+
 
 ### IDEAS
 
