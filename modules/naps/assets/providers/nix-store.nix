@@ -39,13 +39,15 @@ let
 
     installSSH = 
         keyname:
-        installArgs@{path, owner, ...}:
+        installArgs@{path, owner, group ? null, mode ? "0440", ...}:
         let tgt = "/mnt${path}";
+            group' = if group == null then owner else group;
         in ''
             install -d -m 700 -o ${owner} -g ${owner} ${tgt}
             cp "$1/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}" ${tgt}/id_ed25519
             cp "$1/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}.pub" ${tgt}/id_ed25519.pub
-            chown -R ${owner}:${owner} ${tgt}
+            chown -R ${owner}:${group'} ${tgt}
+            chmod ${mode} ${tgt}/*
         '';
 
 

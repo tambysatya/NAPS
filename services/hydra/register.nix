@@ -47,7 +47,7 @@ naps.services.hydra ={
         "hydra-cache" = {
             provider = "nix-store";
             generateArgs = {keyname = "hydra";};
-            installArgs = {owner = "hydra";};
+            installArgs = {owner = "hydra"; mode="0440";};
             inherit reload;
         };
     };
