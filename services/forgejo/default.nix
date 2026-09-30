@@ -41,7 +41,7 @@ services.forgejo = {
     };
     secrets = {
         storage = {
-            MINIO_SECRET_ACCESS_KEY = "/var/lib/secrets/s3-forgejo.key";
+            MINIO_SECRET_ACCESS_KEY = "/var/lib/secrets/s3-forgejo/s3-forgejo.key";
         };
     };
 };

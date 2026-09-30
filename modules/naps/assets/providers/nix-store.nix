@@ -32,9 +32,14 @@ let
 
     installNixStore = 
         keyname:
-        installArgs:
-        ''
-           ${utils.install "${utils.store_base_name keyname}/${utils.store_key_name keyname}" "file" (installArgs // {path = "/var/lib/secrets/${utils.store_key_name keyname}";})}
+        installArgs@{path, owner, mode,...}:
+        let tgt = "/mnt${path}";
+        in ''
+           ${utils.install "${utils.store_base_name keyname}" "dir" installArgs}
+           cp -R "$1/${utils.store_base_name keyname}" ${tgt}
+           chmod 711 ${tgt}
+           chown -R ${owner} ${tgt}
+           chmod ${mode} ${tgt}/*
         '';
 
     installSSH = 
@@ -46,9 +51,9 @@ let
             install -d -m 700 -o ${owner} -g ${owner} ${tgt}
             cp "$1/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}" ${tgt}/id_ed25519
             cp "$1/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}.pub" ${tgt}/id_ed25519.pub
+            ${pkgs.openssh}/bin/ssh-keyscan -H github.com > ${tgt}/known_hosts #adding the github pubkey
             chown -R ${owner}:${group'} ${tgt}
 
-            ${pkgs.openssh}/bin/ssh-keyscan -H github.com > ${tgt}/known_hosts #adding the github pubkey
 
             chmod ${mode} ${tgt}/*
         '';

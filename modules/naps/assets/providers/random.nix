@@ -48,22 +48,21 @@ let
         assetname:
         access:
         installArgs@{path, ...}:
-        utils.install "${assetname}/${utils.s3_key access}" "file" (installArgs // {path="/var/lib/secrets/${utils.s3_key access}";});
+        utils.install assetname "dir" installArgs;
        
     installDB =
         assetname:
         access@{database,...}:
-        installArgs@{pgpass ? false, owner,...}:
-        if pgpass
+        installArgs@{path, pgpass ? false, owner,...}:
+        if pgpass != null
         then let str = "postgres.${domain}:5432:${database}:${database}";
-                 tgt = "/mnt${utils.paths.secrets}/${utils.db_key access}.pgpass";
              in ''
                 CONTENT=$(cat "$1"/${utils.db_key access})
-                echo "${str}:$CONTENT" > ${tgt}
-                chown ${owner} ${tgt}
-                chmod 0400 ${tgt}
+                echo "${str}:$CONTENT" > ${path}
+                chown ${owner} ${path}
+                chmod 0400 ${path}
              ''
-        else utils.install (utils.db_key access) "file" (installArgs // {path = "/var/lib/secrets/${utils.db_key access}";});
+        else utils.install assetname "file" installArgs;
 
     installLDAP =
         assetname: access:
@@ -95,11 +94,12 @@ naps.assets.providers.postgres = {
             options = {
                 inherit (types) owner;
                 pgpass = lib.mkOption {
-                    description = "True if the password should be installed in a pgpass format";
-                    type = types.bool;
-                    default = false;
+                    description = "If specified, a pgpass file will be created at this location.";
+                    type = types.nullOr types.str;
+                    default = null;
                 };
             };
+            freeformType = types.attrs;
         };
     };
     apply = {

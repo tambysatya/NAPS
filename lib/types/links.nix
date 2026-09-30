@@ -27,9 +27,9 @@ rec {
                     example = "nextcloud";
                 };
                 pgpass = lib.mkOption {
-                    description = "Write the password in a PGPass file";
-                    type = types.bool;
-                    default = false;
+                    description = "Write a pgpass at this place. IF set to null, no pgpass will be created";
+                    type = types.nullOr types.str;
+                    default = null;
                 };
             };
     };

@@ -67,7 +67,7 @@ in {
                   #autocreate = true;
                   verify_bucket_exists = true;
                   key = builtins.readFile "${path}/.secrets/git/s3-nextcloud.id"; #Key ID #TODO
-                  secretFile = "/var/lib/secrets/s3-nextcloud.key";
+                  secretFile = "/var/lib/secrets/s3-nextcloud/s3-nextcloud.key";
 
                   hostname = "s3.${domain}";
                   useSsl = true;
