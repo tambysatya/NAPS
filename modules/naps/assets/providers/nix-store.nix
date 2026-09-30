@@ -39,7 +39,7 @@ let
 
     installSSH = 
         keyname:
-        installArgs@{path, owner, group ? null, mode ? "0440", ...}:
+        installArgs@{path, owner, group ? null, mode,  ...}:
         let tgt = "/mnt${path}";
             group' = if group == null then owner else group;
         in ''
@@ -63,6 +63,7 @@ naps.assets.providers.ssh-keygen = {
                     type = types.str;
                     example = "/var/lib/hydra/.ssh";
                 };
+                mode = types.filemode;
             };
         };
     };
@@ -72,6 +73,15 @@ naps.assets.providers.ssh-keygen = {
     };
 };
 naps.assets.providers.nix-store = {
+    inputs = {
+        installArgs = types.submodule {
+            options = {
+                inherit (types) owner;
+                mode = types.filemode;
+            };
+        };
+    };
+
     apply = {
         generate = acc: assetname: args: acc ++ [(generateNixStore assetname args.keyname)];
         install = assetname: args: installNixStore args.generateArgs.keyname args.installArgs;
