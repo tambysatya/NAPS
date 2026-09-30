@@ -23,6 +23,7 @@ let
     db_key = access@{database, ...}: "db-${database}.key";
     ssh_base_name = name: "${name}-ssh";
     store_base_name = name: "${name}-cache";
+    store_key_name = name: "${name}-cache.key";
     ldap_key = access@{olcRootDN,...}: "ldap-${olcRootDN}.key"; #TODO
     
     directory_id = serviceuid: path: "${serviceuid}:${path}";
@@ -41,7 +42,7 @@ let
 
 in {
     inherit paths;
-    inherit ssh_base_name store_base_name;
+    inherit ssh_base_name store_base_name store_key_name;
     inherit ssl_crt_path ssl_key_path;
     inherit s3_root s3_key s3_key_id db_key ldap_key;
     inherit directory_id;
