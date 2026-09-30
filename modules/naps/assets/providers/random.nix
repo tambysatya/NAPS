@@ -47,8 +47,8 @@ let
     installS3 = 
         assetname:
         access:
-        installArgs@{path ? "/var/lib/secrets", ...}:
-        utils.install "${assetname}/${utils.s3_key access}" "file" installArgs;
+        installArgs@{path, ...}:
+        utils.install "${assetname}/${utils.s3_key access}" "file" (installArgs // {path="/var/lib/secrets/${utils.s3_key access}";});
        
     installDB =
         assetname:
@@ -63,14 +63,14 @@ let
                 chown ${owner} ${tgt}
                 chmod 0400 ${tgt}
              ''
-        else utils.install (utils.db_key access) "file" installArgs;
+        else utils.install (utils.db_key access) "file" (installArgs // {path = "/var/lib/secrets/${utils.db_key access}";});
 
     installLDAP =
         assetname: access:
         installArgs@{hashed ? true, ...}:
-        if hashed 
-        then ''rm "$1"/${utils.ldap_key access}'' # if the password is supposed to be hashed, it is already stored publicly so we remove the plain text password
-        else utils.install (utils.ldap_key access) "file" installArgs;
+        lib.optionalString
+            (!hashed)  # if the password is supposed to be hashed, it is already stored publicly so we dont install the password
+            (utils.install (utils.ldap_key access) "file" installArgs);
 
 
 

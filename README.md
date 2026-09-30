@@ -160,6 +160,8 @@ Migration:
 
 - add a "why" option in the persistent directory declaration in register to add a message describing why the repository is useful whenever the user does not declare it. E.G "/nix: used for hydra to cache builds. Should be consequent enough to handle multiple versions of the same project"
 
+- add a naps.predicate that summarizes characteristics of the network like have_ca, have_hydra, have_postgres,...
+
 
 CHECKS:
 - check that each disk is declared once

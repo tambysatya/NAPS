@@ -4,7 +4,7 @@ let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
     domain = topology.domain;
     hostname = "hydra.${domain}";
-    secretkeypath = "/var/lib/secrets/hydra-cache.key";
+    secretkeypath = "/var/lib/secrets/hydra-cache/hydra-cache.key";
     /* 
     sudo -u hydra env \
           PGPASSFILE=/var/lib/hydra/pgpass \
