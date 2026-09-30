@@ -36,21 +36,18 @@ let
                     else
                         echo "Skipping bucket creation: ${bucket}"
                     fi
-                    if ! ${pkgs.garage_2}/bin/garage key info ${bucket}; then
-                        echo "Creating ${bucket} key"
-                        ${createKey access} 
-                    else
-                        OLD_KEY=$(${pkgs.garage_2}/bin/garage key info ${bucket}| ${lib.getExe pkgs.gawk} '/^Key ID:\s+(.*$)/ {print $3}')
-                        NEW_KEY=$(cat /var/lib/secrets/${utils.s3_root access}/${utils.s3_key_id access})
-                        if [[ "$OLD_KEY" == "$NEW_KEY" ]]; then
-                            echo "Skipping creation ${bucket} [key already exists]"
-                        else
-                            echo "Replacing existing key of ${bucket}"
+                    
+                    OLD_KEY=$(${pkgs.garage_2}/bin/garage key list | ${lib.getExe pkgs.gawk} '$3 == "${bucket}" {print $1}')
+                    NEW_KEY=$(cat /var/lib/secrets/${utils.s3_root access}/${utils.s3_key_id access})
+                    if [[ "$OLD_KEY" != "$NEW_KEY" ]]; then
+                        if [[ -n "$OLD_KEY" ]]; then
+                            echo "Replacing existing key for ${bucket}"
                             ${pkgs.garage_2}/bin/garage key delete $OLD_KEY --yes
-                            ${createKey access}
+                        else
+                            echo "Creating a new key for ${bucket}
                         fi
+                        ${createKey access}
                     fi
-
                     '';
 
 
