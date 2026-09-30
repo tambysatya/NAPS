@@ -97,7 +97,7 @@ let
         installArgs@{owner, path, ...}:
         let args = {inherit path; group = owner; owner = "root"; mode = "0750";}; # the certificate is owned by ROOT but belongs to the group of the service owner
         in ''
-            install -d -o ${args.owner} -g ${args.group} -m ${args.mode} ${path} 
+            install -d -o ${args.owner} -g ${args.group} -m ${args.mode} /mnt${path} 
             ${utils.install "${secname}" "dir" args}
             chmod 0640 /mnt${path}/*
         '';
