@@ -98,7 +98,6 @@ let
         let args = {inherit path; group = owner; owner = "root"; mode = "0750";}; # the certificate is owned by ROOT but belongs to the group of the service owner
         in ''
             ${utils.install "${secname}" "dir" args}
-            chmod 0750 /mnt${path}
             chmod 0640 /mnt${path}/*
         '';
 
