@@ -21,7 +21,7 @@ let
     };
     links  = {
         postgres = [
-            {database = "hydra"; inherit owner reload; pgpass="/var/lib/hydra/pgpass";}
+            {database = "hydra"; inherit owner reload;}
         ];
     };
 

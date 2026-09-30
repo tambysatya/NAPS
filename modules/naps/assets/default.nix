@@ -30,8 +30,8 @@ let
             processLDAP = access: 
                 mkSharedSecret ldaphosts "openldap" ["openldap.service"] (utils.ldap_key access) {provider = "ldapssha"; installArgs = { owner = access.owner;}; generateArgs = access; inherit (access) reload;};
             processPostgres = access:
-                let pgpass = access.pgpass;
-                    installArgs = {inherit (access) owner pgpass;} // lib.optionalAttrs (pgpass != null) {path = pgpass;}; # if pgpass is set, the install path corresponds to the path specified in the pgpass
+                let 
+                    installArgs = {inherit (access) owner;};
                     secret =  {provider = "postgres"; inherit installArgs; generateArgs = access; inherit (access) reload;};
                 in mkSharedSecret dbhosts "postgres" ["postgresql.service"] (utils.db_key access) secret;
             processS3 = access:

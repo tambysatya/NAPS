@@ -26,11 +26,6 @@ rec {
                     type = types.str;
                     example = "nextcloud";
                 };
-                pgpass = lib.mkOption {
-                    description = "Write a pgpass at this place. IF set to null, no pgpass will be created";
-                    type = types.nullOr types.str;
-                    default = null;
-                };
             };
     };
     ldapSSHA = types.submodule {

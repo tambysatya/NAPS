@@ -26,6 +26,15 @@ let
         --password-hash "$hash" \
         --role admin
     '';
+
+    pgpassrow = "postgres.${domain}:5432:hydra:hydra";
+    pgpasspath = "/var/lib/secrets/db-hydra.key.pgpass";
+    mkPGPass = ''
+        CONTENT=$(cat /var/lib/secrets/db-hydra.key)
+        echo "${pgpassrow}:$CONTENT" > ${pgpasspath}
+        chown hydra:hydra ${pgpasspath}
+        chmod 0400 ${pgpasspath}
+    '';
 in {
 config.services.hydra = {
     enable = true;
@@ -54,6 +63,8 @@ config.systemd.services.darkhttpd = {
 };
 
 config.systemd.services.hydra-init.preStart = lib.mkAfter ''
+  ${mkPGPass}
+
   install -m 0600 -o hydra -g hydra \
     /var/lib/secrets/db-hydra.key.pgpass \
     /var/lib/hydra/pgpass

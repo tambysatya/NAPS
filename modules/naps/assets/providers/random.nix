@@ -89,6 +89,7 @@ naps.assets.providers.password = {
     };
 };
 naps.assets.providers.postgres = {
+/*
     inputs = {
         installArgs = types.submodule {
             options = {
@@ -102,6 +103,7 @@ naps.assets.providers.postgres = {
             freeformType = types.attrs;
         };
     };
+*/
     apply = {
         generate = acc: assetname: args: acc ++ [(generateDB assetname args)];
         install = assetname: args: installDB assetname args.generateArgs args.installArgs;
