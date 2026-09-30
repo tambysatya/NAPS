@@ -45,7 +45,7 @@ let
                             echo "Replacing existing key for ${bucket}"
                             ${pkgs.garage_2}/bin/garage key delete $OLD_KEY --yes
                         else
-                            echo "Creating a new key for ${bucket}
+                            echo "Creating a new key for ${bucket}"
                         fi
                         ${createKey access}
                     fi
