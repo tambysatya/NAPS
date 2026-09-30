@@ -34,7 +34,7 @@ let
         keyname:
         installArgs:
         ''
-           ${utils.install "${utils.store_base_name keyname}/${utils.store_key_name keyname}" "file" installArgs}
+           ${utils.install "${utils.store_base_name keyname}/${utils.store_key_name keyname}" "file" (installArgs // {path = "/var/lib/secrets/${utils.store_key_name keyname}";})}
         '';
 
     installSSH = 
