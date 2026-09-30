@@ -40,7 +40,7 @@ let
                         echo "Creating ${bucket} key"
                         ${createKey access} 
                     else
-                        OLD_KEY=$(${pkgs.garage_2}/bin/garage key info nextcloud | ${lib.getExe pkgs.gawk} '/^Key ID:\s+(.*$)/ {print $3}')
+                        OLD_KEY=$(${pkgs.garage_2}/bin/garage key info ${bucket}| ${lib.getExe pkgs.gawk} '/^Key ID:\s+(.*$)/ {print $3}')
                         NEW_KEY=$(cat /var/lib/secrets/${utils.s3_key_id access})
                         if [[ "$OLD_KEY" == "$NEW_KEY" ]]; then
                             echo "Skipping creation ${bucket} [key already exists]"
