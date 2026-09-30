@@ -1,4 +1,4 @@
-{lib,pkgs, inputs, flakeRoot, pkgs, ...}:
+{lib,pkgs, inputs, flakeRoot, ...}:
 
 let
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
