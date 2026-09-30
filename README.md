@@ -155,7 +155,7 @@ Migration:
 - ISO: should be generic (no need to rebuild it for every configuration change). The iso just download a tarball from the provisioning server, including the flake
 
 - STEP: should run under a specific user. Problem; postgres does not accept not being owner of its TLS certificates so a mecanism should be writen
-- rewrite the installer library because sometimes it appends /mnt, sometimes not, ...
+- rewrite the installer library because sometimes it appends /mnt, sometimes not, ... + should handle the in-place deployement (e.g. in this case, this should not append /mnt)
 
 ### IDEAS
 
