@@ -1,4 +1,4 @@
-{lib,pkgs, inputs, flakeRoot, ...}:
+{lib,pkgs, inputs, flakeRoot, pkgs, ...}:
 
 let
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
@@ -40,13 +40,13 @@ let
                         echo "Creating ${bucket} key"
                         ${createKey access} 
                     else
-                        OLD_KEY=$(garage key info nextcloud | awk '/^Key ID:\s+(.*$)/ {print $3}')
+                        OLD_KEY=$(garage key info nextcloud | ${lib.getExe pkgs.gawk} '/^Key ID:\s+(.*$)/ {print $3}')
                         NEW_KEY=$(cat /var/lib/secrets/${utils.s3_key_id access})
                         if [[ "$OLD_KEY" == "$NEW_KEY" ]]; then
                             echo "Skipping creation ${bucket} [key already exists]"
                         else
                             echo "Replacing existing key of ${bucket}"
-                            garage key delete $OLD_KEY --yes
+                            ${pkgs.garage_2}/bin/garage key delete $OLD_KEY --yes
                             ${createKey access}
                         fi
                     fi
