@@ -46,6 +46,7 @@ config.services.hydra = {
     extraConfig = ''
       store_uri = file:///var/lib/hydra/cache?secret-key=${secretkeypath}
     '';
+    smtpHost = topology.smtpHost;
 };
 config.services.darkhttpd = {
     enable = true;

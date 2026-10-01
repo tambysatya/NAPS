@@ -27,6 +27,12 @@ let
 
     topology = types.submodule {
         options = {
+            smtpHost = lib.mkOption {
+                description = "Hostname of the mail server";
+                type = types.nullOr types.str;
+                default = null;
+                example = "mail.local.fr";
+            };
             provisionerHost = lib.mkOption {
                 description = "Address of the provisioning server. It will be used to reach the secrets.";
                 type = types.str;
