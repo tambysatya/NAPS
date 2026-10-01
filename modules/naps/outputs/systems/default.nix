@@ -48,6 +48,7 @@ in
 {
     imports = [./step.nix
                ./volumes.nix
+               ./assets.nix # secrets provisioning service
                ./network.nix
                ./proxy.nix
                ./links.nix # services dependency
