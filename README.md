@@ -48,13 +48,9 @@ Main module: config.infra
 
 # TODO
 
-
-- step-renew increase the refresh rate
 - step-renew: use a service user instead of root
 
 - network config in infra + regroup the options by theme 
-
-
 
 - persistence of datas: Two independent tofu states: compute state (destroyable) and storage state (persistent)
 
@@ -80,7 +76,6 @@ Main module: config.infra
 Deployement:
 - curent refactor involved deployement options (like priority), but VMs may also have tags (like testing, backup) that is applied to their services
 
--TODO: add flakes templates for users
 
 Migration:
 - store the current state in a JSON
@@ -129,10 +124,9 @@ Migration:
 
 - Use UserID instead of proper user creation (for the secrets and files within the containers)
 - containerMount non-shared persistent volumes
-- haproxy: handle both tls termination + passthrough (https://pastebin.com/pkRsp9cc)
 - config: use deploy.<name>.reverseProxy and deploy.<name>.proxy to handle clearly both directions of the proxy and resolves conflicts ?
 - instead of working in domain (local.fr) create a subdomain like (naps.local.fr) to ensure no clash with existing installation
-- params the ip address of the containers private network (actually its forced to be 192.168.100.0/24) 
+- params the ip address of the containers private network (currently forced to be 192.168.100.0/24) 
 - integrate full chain in the certificates and only pass root_ca.crt (not intermediate_ca.crt) (WIP)
 - deploy: being able to deploy new machines withotu destroying the others 
 - containers: BRIDGE all the interfaces for the vm to allow haproxy to listen simultaneously for all containers ?TODO
