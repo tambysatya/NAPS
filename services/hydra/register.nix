@@ -4,7 +4,7 @@ let
 
     domain = config.naps.topology.domain;
     owner = "hydra";
-    reload = ["hydra.service" "hydra-init.service"];
+    reload = ["hydra-server.service" "hydra-init.service"];
     endpoints = {
         http = [
             {
