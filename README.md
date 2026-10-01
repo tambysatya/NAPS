@@ -101,9 +101,8 @@ Migration:
     + Create a service that checks periodically if all the secrets are there, and if its not the case, pull from the provisioning server using mTLS. This service should be a requierment of all the services requestings secrets => we need a reload entry for each secret
 
     + install scripts: need to handle the situation where a secret is already isntalled (e.g. removing the directory if it exists)
+    + PRIO: naps.assets.default: clean the code of the link processing, because the secrets passed to the hosts + secrets passed to the target may differ. Note that e.g. pgpass may be enabled for the target but not for the hosts;
 
-
-    naps.assets.default: clean the code of the link processing, because the secrets passed to the hosts + secrets passed to the target may differ. Note that e.g. pgpass may be enabled for the target but not for the hosts;
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets
     + write a script that uploads the secrets to the provisioner using ssh and launch the secret provisioner automatically (based on the topology description)
