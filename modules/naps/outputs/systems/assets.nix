@@ -96,8 +96,10 @@ let
                             };
                             wants = ["assets-fetch-all.service"]; #starts assets-fetch-all in parallel. Useful to have a single fetch-all per VM, but a check per service
 
-                            wantedBy = ["sysinit-reactivation.target" "multi-user.target" srvname]; # we let the service start: it will be restarted whenever the secrets are reached 
-                            before = [srvname "sysinit-reactivation.target"]; #restart at every rebuild
+                            wantedBy = ["nixos-rebuild-switch-to-configuration.service" srvname]; # we let the service start: it will be restarted whenever the secrets are reached 
+                            #wantedBy = ["sysinit-reactivation.target" "multi-user.target" srvname]; # we let the service start: it will be restarted whenever the secrets are reached 
+                            before = [srvname "nixos-rebuild-switch-to-configuration.service"]; #restart at every rebuild
+                            #before = [srvname "sysinit-reactivation.target"]; #restart at every rebuild
                             script = ''
                                   if ! [[ ${mkCondition allassets} ]] then
                                       echo "Waiting for assets being downloaded."
