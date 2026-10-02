@@ -22,50 +22,25 @@ let
     processVM =
         vmname:
         vmassets: # type: AttrSet provider asset
-        let allassets = utils.mergeAll (builtins.attrValues vmassets);
+        let allassets = utils.mergeAll (builtins.attrValues (builtins.removeAttrs vmassets ["plain"])); # we remove the plain assets (which are transmitted through the store)
         in utils.mergeAll [
-                (mkFetchAllAssets vmname (builtins.attrValues allassets))
-                (utils.mergeAll 
-                    (lib.mapAttrsToList (mkAssetExistsService vmname) allassets))
+                (mkFetchAll vmname (builtins.attrValues allassets))
+                (mkCheckService vmname (builtins.attrValues allassets))
             ];
 
-    mkAssetExistsService = 
-        vmname:
-        assetname:
-        {installArgs, reload, ...}:
-        let path = installArgs.path;
-        in {
-               ${vmname}.config.systemd.services."asset-${assetname}-exists" = {
-                    description = "Waits until ${assetname} is present in ${path}";
-                    serviceConfig = {
-                        Type = "oneshot";
-                        Restart = "on-failure";
-                        RestartSec = "30s";
-                    };
-                    before = reload;
-                    requiredBy = reload;
-                    wants = ["fetch-all-assets.service"]; #TODO add after ?
-                    script = ''
-                        until [[ -e "${path}" || -L "${path}" ]]; do
-                            sleep 2
-                        done
-                    '';
-                };
-
-        };
-
-    mkFetchAllAssets = 
+    mkCondition = allassets:
+        lib.concatMapStringsSep "&&"
+            ({installArgs, ...}:
+                let path = installArgs.path;
+                in ''-e "${path}"'')
+            allassets;
+    mkFetchAll =
         vmname:
         allassets:
-        let 
-           condition =
-                lib.concatMapStringsSep "&&"
-                    ({installArgs, ...}:
-                        let path = installArgs.path;
-                        in ''-e "${path}"'')
-                    allassets;
+        let
+
         in {
-             ${vmname}.config.systemd.services."fetch-all-assets" = {
+             ${vmname}.config.systemd.services."assets-fetch-all" = {
                     description = "Fetch the assets of the server";
                     serviceConfig = {
                         Type = "oneshot";
@@ -73,7 +48,7 @@ let
                         RestartSec = "30s";
                     };
                     script = ''
-                        until [[ ${condition} ]]; do
+                        until [[ ${mkCondition allassets} ]]; do
                             if
                             ${fetchAssetsScript vmname}
                             then
@@ -87,6 +62,67 @@ let
                 };
 
         };
+
+
+        mkCheckService = 
+            vmname:
+            allassets:
+            let
+                splitAssets =
+                    lib.concatMap  
+                        (asset@{reload, installArgs, ...}: 
+                            map (srvname: {${srvname} =  [installArgs.path];}  ) reload) #plain assets are not download: they are installed directly in the store
+                        allassets;
+                assetsPerService = utils.mergeAll splitAssets; # {servicename = [path]}
+
+                processService =
+                    srvname:
+                    assetslist:
+                    let sortedassets = builtins.sort builtins.lessThan assetslist;
+                        hashPath = "${srvname}.hash";
+                        condition = lib.concatMapStringsSep " && "
+                                        (path: 
+                                            ''
+                                                -e ${path}
+                                            '')
+                                        sortedassets;
+                    in {
+                        ${vmname}.config.systemd.services."assets-check-${srvname}" = {
+                            description = "Checks if the assets of ${srvname} have changed";
+                            serviceConfig = {
+                                Type = "oneshot";
+                                Restart = "on-failure";
+                                RestartSec = "30s";
+                            };
+                            wants = ["assets-fetch-all.service"]; #starts assets-fetch-all in parallel. Useful to have a single fetch-all per VM, but a check per service
+                            requiredBy = [srvname];
+                            before = [srvname];
+                            script = ''
+                                  if ! [[ ${mkCondition allassets} ]] then
+                                      echo "Waiting for assets being downloaded."
+                                      until ([[ ${condition} ]]); do
+                                        sleep 2
+                                      done
+                                  fi
+                                  NEW_HASH=$(for f in ${lib.concatStringsSep " " sortedassets}; do
+                                                printf '%s\0' "$f"
+                                                cat "$f"
+                                             done | sha256sum | cut -d' ' -f1 ) 
+                                  OLD_HASH=$((cat ${hashPath}) || "")
+                                  
+                                  if [[ "$OLD_HASH" != "$NEW_HASH" ]]; then
+                                    echo "Assets have changed. Restarting ${srvname}."
+                                    systemctl restart ${srvname}
+
+                                    echo "$NEW_HASH" > ${hashPath}
+                                  fi
+                            '';
+                        };
+                    };
+
+            in utils.mergeAll (lib.mapAttrsToList processService assetsPerService);
+
+
 
 in {
 
