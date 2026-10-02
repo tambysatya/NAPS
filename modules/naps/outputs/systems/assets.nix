@@ -107,10 +107,17 @@ let
                                       done
                                   fi
                                   NEW_HASH=$(for f in ${lib.concatStringsSep " " sortedassets}; do
-                                                printf '%s\0' "$f"
-                                                cat "$f"
+                                                if [[ -f "$f" ]]; then
+                                                    printf '%s\0' "$f"
+                                                    cat "$f"
+                                                elif [[ -d "$f" ]]; then
+                                                    find "$name" -type f -print0 | sort -z | xargs -0 cat
+                                                fi
                                              done | sha256sum | cut -d' ' -f1 ) 
-                                  OLD_HASH=$((cat ${hashPath}) || "")
+                                  OLD_HASH=""
+                                  if [[ -e "${hashPath}" ]]; then
+                                    OLD_HASH=$(<"${hashPath}")
+                                  fi
                                   
                                   if [[ "$OLD_HASH" != "$NEW_HASH" ]]; then
                                     echo "Assets have changed. Restarting ${srvname}."
@@ -119,7 +126,7 @@ let
                                     echo "$NEW_HASH" > ${hashPath}
                                   fi
                             '';
-                                                    };
+                        };
                     };
 
             in utils.mergeAll (lib.mapAttrsToList processService assetsPerService);
