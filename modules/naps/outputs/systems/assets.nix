@@ -86,7 +86,7 @@ let
                                                 -e ${path}
                                             '')
                                         sortedassets;
-                    in {
+                    in lib.optionalAttrs (assetslist != []) {
                         ${vmname}.config.systemd.services."assets-check-${srvname}" = {
                             description = "Checks if the assets of ${srvname} have changed";
                             serviceConfig = {
