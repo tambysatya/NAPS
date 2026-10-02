@@ -96,7 +96,9 @@ let
                             };
                             wants = ["assets-fetch-all.service"]; #starts assets-fetch-all in parallel. Useful to have a single fetch-all per VM, but a check per service
                             requiredBy = [srvname];
-                            before = [srvname];
+
+                            wantedBy = ["sysinit-reactivation.target" "multi-user.target"];
+                            before = [srvname "sysinit-reactivation.target"]; #restart at every rebuild
                             script = ''
                                   if ! [[ ${mkCondition allassets} ]] then
                                       echo "Waiting for assets being downloaded."
@@ -117,7 +119,7 @@ let
                                     echo "$NEW_HASH" > ${hashPath}
                                   fi
                             '';
-                        };
+                                                    };
                     };
 
             in utils.mergeAll (lib.mapAttrsToList processService assetsPerService);
