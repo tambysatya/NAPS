@@ -79,7 +79,7 @@ let
                     srvname:
                     assetslist:
                     let sortedassets = builtins.sort builtins.lessThan assetslist;
-                        hashPath = "${srvname}.hash";
+                        hashPath = "/var/lib/secrets/${srvname}.hash";
                         condition = lib.concatMapStringsSep " && "
                                         (path: 
                                             ''
