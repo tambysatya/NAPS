@@ -111,7 +111,7 @@ let
                                                     printf '%s\0' "$f"
                                                     cat "$f"
                                                 elif [[ -d "$f" ]]; then
-                                                    find "$name" -type f -print0 | sort -z | xargs -0 cat
+                                                    find "$f" -type f -print0 | sort -z | xargs -0 cat
                                                 fi
                                              done | sha256sum | cut -d' ' -f1 ) 
                                   OLD_HASH=""
