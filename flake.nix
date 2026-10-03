@@ -185,7 +185,8 @@ let
                             extraArgs = {inherit inputs lib;};
                         };
         compileNixos =
-            args: nixos-generator args;
+            args: utils.mergeAll [(nixos-generator args) 
+                                  {iso = compileIso exampleArgs;}];
 
          compileIso = args:
             let naps = compileNAPS args;
@@ -236,11 +237,7 @@ let
 
 
           naps = compileNAPS exampleArgs;
-          #registry = compileRegistry args;
-          #naps = gen-naps args;
-          #registry = gen-registry args;
           terranix = compileTerranix exampleArgs;
-          #nixosConfigurations = compileNixos args // {iso = compileIso args;};
 
           checks.${system} = gen-config-checks inputs;
 
@@ -249,10 +246,7 @@ let
             in (pkgs.nixosOptionsDoc {options = module.options;}).optionsJSON;
                        
 
-          nixosConfigurations = utils.mergeAll [
-                                    (nixos-generator exampleArgs)
-                                    ({iso = compileIso exampleArgs;})
-                                ];
+          nixosConfigurations = compileNixos exampleArgs;
           nixosModules = {
             naps.services = ./modules/naps/services;
           };

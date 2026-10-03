@@ -144,6 +144,7 @@ Migration:
 - STEP: should run under a specific user. Problem; postgres does not accept not being owner of its TLS certificates so a mecanism should be writen
 - rewrite the installer library because sometimes it appends /mnt, sometimes not, ... + should handle the in-place deployement (e.g. in this case, this should not append /mnt)
 
+- VERIFY if the cehck services restarts when the secrets change (e.g. by adding an endpoint or a dbaccess somewhere)
 
 
 ### IDEAS
