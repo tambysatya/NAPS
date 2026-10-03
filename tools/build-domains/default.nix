@@ -6,9 +6,13 @@ let
     
     script = 
         ''
-            mkdir -p .secrets/provisioner/ssl
 
+            if ! [[ -e .secrets/git/root_ca.crt ]]; then
+                echo "No PKI interface found. Please run the asset-generator before"
+                exit 1
+            fi
 
+            mkdir -p .secrets/provisioner/{ssl,secrets,mtls}
             
             ${utils.gen_ssl_certificate naps.topology.provisionerHost}
 
@@ -24,6 +28,8 @@ let
 
             #Replace the tokens with their value
             ${lib.concatMapStringsSep "\n" (utils.applyToken "terraform.tf.json") (builtins.attrNames naps.topology.vms)}
+
+            cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/
         '';
 
 

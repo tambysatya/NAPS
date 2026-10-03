@@ -10,17 +10,17 @@
 			url = "github:Mic92/sops-nix";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
-	#	secret-provisioner = {
-	#		url = "github:tambysatya/secrets-provisioner";
-	#		inputs.nixpkgs.follows = "nixpkgs";
-	#	};
-    terranix = {
-      url = "github:terranix/terranix";
+		provisioner = {
+			url = "github:tambysatya/secrets-provisioner";
 			inputs.nixpkgs.follows = "nixpkgs";
-    };
+		};
+        terranix = {
+          url = "github:terranix/terranix";
+                inputs.nixpkgs.follows = "nixpkgs";
+        };
 	};
 
-  outputs = inputs@{nixpkgs, self, terranix, ...}:
+  outputs = inputs@{nixpkgs, self, terranix, provisioner, ...}:
 
 let
     system = "x86_64-linux";
@@ -143,7 +143,7 @@ let
             let naps= compileNAPS args;
                 pkg = ((import tools/build-domains) ({inherit flakeRoot inputs lib pkgs naps;} // args.extraArgs)).buildDomains;
             in {
-                packages.${system}.build-domain = pkg; 
+                packages.${system}.build-domains = pkg; 
                 apps.${system}.build-domains = {
                     type = "app";
                     program = lib.getExe pkg;
@@ -170,6 +170,51 @@ let
                 };
  
                             
+
+        compileProvisioner = args:
+            let naps= compileNAPS args;
+                pkg = provisioner.packages.${system};
+
+                host = naps.topology.provisionerHost;
+                provisionerExe = lib.getExe provisioner.packages.${system}.default;
+
+                provisionerTokens = pkgs.writeShellApplication {
+                    name = "provisioner-token";
+                    text = ''
+                        PROVISIONER_DIR=$1
+                        export TOKEN_DIR="$PROVISIONER_DIR/secrets"
+                        ${provisionerExe} \
+                            --port 8080 \
+                            --ssl_cert "$PROVISIONER_DIR/ssl/${host}.crt" \
+                            --ssl_key "$PROVISIONER_DIR/ssl/${host}.key"
+                    '';
+                };
+                provisionerMTLS = pkgs.writeShellApplication {
+                    name = "provisioner-mtls";
+                    text = ''
+                        PROVISIONER_DIR=$1
+                        export TOKEN_DIR="$PROVISIONER_DIR/mtls/"
+                        ${provisionerExe} \
+                            --port 8081 \
+                            --ssl_cert "$PROVISIONER_DIR/ssl/${host}.crt"\
+                            --ssl_key "$PROVISIONER_DIR/ssl/${host}.key"\
+                            --ssl_ca "$PROVISIONER_DIR/ssl/root_ca.crt"
+                    '';
+                };
+            in {
+                apps.${system} = {
+                    provisioner-tokens = {
+                        type = "app";
+                        meta.description = "Token-based provisioner";
+                        program = lib.getExe provisionerTokens;
+                    };
+                    provisioner-mtls = {
+                        type = "app";
+                        meta.description = "mTLS-based provisioner";
+                        program = lib.getExe provisionerMTLS;
+                    };
+                };
+            };
 
     
 
@@ -207,6 +252,7 @@ let
                         flake-inputs.self.nixosConfigurations;
                 
 
+
             
 
         
@@ -220,6 +266,7 @@ let
                 (compileGenAssets args) 
                 (compileInstallAssets args)
                 (compileBuildDomains args)
+                (compileProvisioner args)
                # (compileVisualization args)
             ];
 

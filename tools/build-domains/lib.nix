@@ -14,8 +14,12 @@ let
             ${lib.getExe pkgs.gzip} ${path}/${name}.tar
 
             TOKEN=$(${lib.getExe pkgs.openssl} rand -hex 64)
-            mv ${path}/${name}.tar.gz "${provisioner}/$TOKEN.tar.gz"
+            cp ${path}/${name}.tar.gz "${provisioner}/$TOKEN.tar.gz"
             echo "$TOKEN" > "${tokens}/${name}.token"
+
+            # to the mTLS server
+            mkdir -p .secrets/provisioner/mtls
+            mv ${path}/${name}.tar.gz ".secrets/provisioner/mtls/vm-${name}.tar.gz"
         '';
 
     applyToken = 
