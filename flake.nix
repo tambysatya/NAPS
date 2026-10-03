@@ -3,19 +3,19 @@
 	inputs = {
 		nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 		disko = {
-			url = "github:nix-community/disko";
+			url = "git+ssh://git@github.com/nix-community/disko";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
 		sops-nix = {
-			url = "github:Mic92/sops-nix";
+			url = "git+ssh://git@github.com/Mic92/sops-nix";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
 		provisioner = {
-			url = "github:tambysatya/secrets-provisioner";
+			url = "git+ssh://git@github.com/tambysatya/secrets-provisioner";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
         terranix = {
-          url = "github:terranix/terranix";
+          url = "git+ssh://git@github.com/terranix/terranix";
                 inputs.nixpkgs.follows = "nixpkgs";
         };
 	};

@@ -150,6 +150,7 @@ Migration:
 - VERIFY if the cehck services restarts when the secrets change (e.g. by adding an endpoint or a dbaccess somewhere)
 
 -TLS: increase the lifetime of the certificates to 7d (in case of power cuts...)
+- we rely on ANYCORN which is not packaged by nixos so we have to maintain it ouerselve
 
 
 ### IDEAS

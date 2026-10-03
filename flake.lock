@@ -9,15 +9,15 @@
       "locked": {
         "lastModified": 1789770686,
         "narHash": "sha256-uZkBR7yHdIKUFB5SZdfgh1qkGfI3XmYmI/lTiquxbck=",
-        "owner": "nix-community",
-        "repo": "disko",
+        "ref": "refs/heads/master",
         "rev": "725ea35e410ad83be4931d1bff7e090eacaf3563",
-        "type": "github"
+        "revCount": 1394,
+        "type": "git",
+        "url": "ssh://git@github.com/nix-community/disko"
       },
       "original": {
-        "owner": "nix-community",
-        "repo": "disko",
-        "type": "github"
+        "type": "git",
+        "url": "ssh://git@github.com/nix-community/disko"
       }
     },
     "flake-parts": {
@@ -79,17 +79,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1791040078,
-        "narHash": "sha256-Y0O79Q2FzeAUkhz/qc7jIWntP/7m9msn8/Cy3jx14rs=",
-        "owner": "tambysatya",
-        "repo": "secrets-provisioner",
-        "rev": "c7d4a126f6fdb2b4c7a091ffd03dacc0f519d6a8",
-        "type": "github"
+        "lastModified": 1791058196,
+        "narHash": "sha256-TUqV9Acif0JPEnRELrk0jE7FRkAOMV9m5NPDme2L02Q=",
+        "ref": "refs/heads/main",
+        "rev": "7d28e109d2eed83b7ea7f8e9d62b5dd068381b33",
+        "revCount": 32,
+        "type": "git",
+        "url": "ssh://git@github.com/tambysatya/secrets-provisioner"
       },
       "original": {
-        "owner": "tambysatya",
-        "repo": "secrets-provisioner",
-        "type": "github"
+        "type": "git",
+        "url": "ssh://git@github.com/tambysatya/secrets-provisioner"
       }
     },
     "root": {
@@ -110,15 +110,15 @@
       "locked": {
         "lastModified": 1790498116,
         "narHash": "sha256-rs9meAYxW3zzrh43yaW7htrqCD+X9+pupDPHN86fumI=",
-        "owner": "Mic92",
-        "repo": "sops-nix",
+        "ref": "refs/heads/master",
         "rev": "5efb5a6f4f5ab192817d28557dd4d650fa14d866",
-        "type": "github"
+        "revCount": 1248,
+        "type": "git",
+        "url": "ssh://git@github.com/Mic92/sops-nix"
       },
       "original": {
-        "owner": "Mic92",
-        "repo": "sops-nix",
-        "type": "github"
+        "type": "git",
+        "url": "ssh://git@github.com/Mic92/sops-nix"
       }
     },
     "systems": {
@@ -148,15 +148,15 @@
       "locked": {
         "lastModified": 1790023441,
         "narHash": "sha256-9vmOUIearXFJbafvJjEd8yaQQV/dKN2J5t3rC92Hi+Y=",
-        "owner": "terranix",
-        "repo": "terranix",
+        "ref": "refs/heads/main",
         "rev": "cb9dd00fe24f3f1323baaa19b5ee5fb514d37d77",
-        "type": "github"
+        "revCount": 490,
+        "type": "git",
+        "url": "ssh://git@github.com/terranix/terranix"
       },
       "original": {
-        "owner": "terranix",
-        "repo": "terranix",
-        "type": "github"
+        "type": "git",
+        "url": "ssh://git@github.com/terranix/terranix"
       }
     }
   },

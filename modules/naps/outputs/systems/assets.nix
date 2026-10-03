@@ -13,12 +13,13 @@ let
                  --key  ${utils.ssl_key_path crt_basename} \
                  --cacert /etc/nixos/root_ca.crt \
                  --output /root/assets.tar.gz \
-                 ${config.naps.topology.provisionerHost}:8081/mtls/${vmname}
+                 ${config.naps.topology.provisionerHost}:8081/mtls \
+                 > /root/assets.tar.gz
                 
             install -d -o root -g root -m 700 /tmp/assets
             tar -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
 
-            ${config.naps.assets.scripts.install.${vmname}}
+            ${config.naps.assets.scripts.install.${vmname}} /tmp/assets
         '';
 
     processVM =
