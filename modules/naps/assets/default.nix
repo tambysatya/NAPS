@@ -84,11 +84,26 @@ let
 
     perEnv = 
         let assetattrs = utils.mergeAll (lib.mapAttrsToList processService config.naps.services); # envUID => assetName => asset
-        in lib.mapAttrs (_: lib.mapAttrs (_: checkAsset)) assetattrs; 
+            addTLSIdentity = 
+                vmname:
+                {
+                    ${vmname}."vm-${vmname}.${domain}" = {
+                        provider = "tls";
+                        generateArgs.hostname = "vm-${vmname}.${domain}";
+                        installArgs.owner = "root";
+                        reload = [];
+                    };
+                };
+            allassets = 
+                utils.mergeAll (
+                    [assetattrs]
+                    ++ (map addTLSIdentity (builtins.attrNames config.naps.topology.vms)));
+        in lib.mapAttrs (_: lib.mapAttrs (_: checkAsset)) allassets; 
+
     getEnv = uid: config.naps.envs.all.${uid}; 
     allAssets = # [{uid, assetname, asset}]
         let processEnv = uid: assetsattr: lib.mapAttrsToList (assetname: asset: asset // {name=assetname; env = getEnv uid;} ) assetsattr;
-        in lib.concatLists (lib.mapAttrsToList processEnv perEnv);
+        in lib.concatLists (lib.mapAttrsToList processEnv config.naps.assets.perEnv);
     assetsPerType = builtins.groupBy (builtins.getAttr "provider") allAssets; # provider => [{uid, assetname, asset}]
 
     mkInstallerForEnv = 

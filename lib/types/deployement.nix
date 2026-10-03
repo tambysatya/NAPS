@@ -32,6 +32,15 @@ in rec {
                 description = "Which environment hosts the service";
                 type = deployementHost;
             };
+        };
+    };
+
+    serviceEnvironment = types.submodule {
+        options = {
+            deployement = lib.mkOption {
+                description = "Deployement environment of this service";
+                type = deployementEnvironment;
+            };
             priority = lib.mkOption{
                 description = "Max priority is the primary";
                 type = types.int;

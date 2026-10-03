@@ -63,9 +63,6 @@ rec {
             reload = lib.mkOption {
                 description = "List of services depending on this asset. At least one is required.";
                 type = types.listOf types.str;
-                apply = l:
-                    assert l != [] || throw "asset has no dependencies (reload = [])";
-                    l;
             };
         };
     };

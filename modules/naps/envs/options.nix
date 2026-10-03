@@ -7,6 +7,11 @@ options.naps.envs = lib.mkOption {
     description = "All deployement environments";
     type = types.submodule {
         options = {
+            services = lib.mkOption {
+                description = "All service declarations, with the priority and the tags";
+                type = types.attrsOf types.serviceEnvironment;
+                default = {};
+            };
             all = lib.mkOption {
                 description = "All environments. Useful to get the environment from an uid";
                 type = types.attrsOf types.deployementEnvironment;

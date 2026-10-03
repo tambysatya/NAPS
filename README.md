@@ -144,7 +144,12 @@ Migration:
 - STEP: should run under a specific user. Problem; postgres does not accept not being owner of its TLS certificates so a mecanism should be writen
 - rewrite the installer library because sometimes it appends /mnt, sometimes not, ... + should handle the in-place deployement (e.g. in this case, this should not append /mnt)
 
+- confusion between service UUID, deployement environemnet ID (which can involves VM that runs only containers) => vm running only containers does not appear in naps.envs.
+- one implication of this confusion is that we have priority over VMs (deployement environment) instead of service instances.
+
 - VERIFY if the cehck services restarts when the secrets change (e.g. by adding an endpoint or a dbaccess somewhere)
+
+-TLS: increase the lifetime of the certificates to 7d (in case of power cuts...)
 
 
 ### IDEAS
