@@ -13,10 +13,12 @@ let
                  --key  ${utils.ssl_key_path crt_basename} \
                  --cacert /etc/nixos/root_ca.crt \
                  --output /root/assets.tar.gz \
-                 ${config.naps.topology.provisionerHost}:8081/${vmname}
+                 ${config.naps.topology.provisionerHost}:8081/mtls/${vmname}
                 
             install -d -o root -g root -m 700 /tmp/assets
             tar -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
+
+            ${config.naps.assets.scripts.install.${vmname}}
         '';
 
     processVM =
@@ -47,14 +49,18 @@ let
                         Restart = "on-failure";
                         RestartSec = "30s";
                     };
+
+                    /* While true because we always check if there is a neww version of the assets */
                     script = ''
-                        until [[ ${mkCondition allassets} ]]; do
+                        while true; do
                             if
-                            ${fetchAssetsScript vmname}
+                               !  ${fetchAssetsScript vmname}
                             then
-                                ${config.naps.assets.scripts.install.${vmname}}
-                            else
                                 sleep 2
+                            fi
+
+                            if [[ ${mkCondition allassets} ]]; then
+                                break
                             fi
                         done
                         echo "All assets are installed."
@@ -97,9 +103,7 @@ let
                             wants = ["assets-fetch-all.service"]; #starts assets-fetch-all in parallel. Useful to have a single fetch-all per VM, but a check per service
 
                             wantedBy = ["nixos-rebuild-switch-to-configuration.service"]; # we let the service start: it will be restarted whenever the secrets are reached 
-                            #wantedBy = ["sysinit-reactivation.target" "multi-user.target" srvname]; # we let the service start: it will be restarted whenever the secrets are reached 
                             before = ["nixos-rebuild-switch-to-configuration.service"]; #restart at every rebuild
-                            #before = [srvname "sysinit-reactivation.target"]; #restart at every rebuild
                             script = ''
                                   if ! [[ ${mkCondition allassets} ]] then
                                       echo "Waiting for assets being downloaded."
