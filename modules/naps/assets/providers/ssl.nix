@@ -104,7 +104,7 @@ let
     installHAproxy= 
         secname:
         generateArgs@{hostname}:
-        let pemdir = "/mnt${utils.paths.pemdir}";
+        let pemdir = "$PREFIX${utils.paths.pemdir}";
             srcbasename = ''"$1"/${secname}/${hostname}'';
             owner = "root";
         in ''

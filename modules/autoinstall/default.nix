@@ -61,6 +61,8 @@ let
 				set +x
 
 				echo "Deploying $HOST configuration"
+
+                export $PREFIX=/mnt
                 nix run /etc/nixos#install-assets-"$HOST" /tmp
 
                 

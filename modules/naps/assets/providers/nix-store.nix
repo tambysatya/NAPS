@@ -33,7 +33,7 @@ let
     installNixStore = 
         keyname:
         installArgs@{path, owner, group ? null, mode,...}:
-        let tgt = "/mnt${path}";
+        let tgt = "$PREFIX${path}";
             group' = if group == null then owner else group;
         in ''
            cp -R "$1/${utils.store_base_name keyname}" ${tgt}
@@ -45,7 +45,7 @@ let
     installSSH = 
         keyname:
         installArgs@{path, owner, group ? null, mode,  ...}:
-        let tgt = "/mnt${path}";
+        let tgt = "$PREFIX${path}";
             group' = if group == null then owner else group;
         in ''
             install -d -m 700 -o ${owner} -g ${owner} ${tgt}
