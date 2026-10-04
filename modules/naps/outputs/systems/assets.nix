@@ -81,6 +81,7 @@ let
                             map (srvname: {${srvname} =  [installArgs.path];}  ) reload) #plain assets are not download: they are installed directly in the store
                         allassets;
                 assetsPerService = utils.mergeAll splitAssets; # {servicename = [path]}
+                servicesInContainers = map (srvuid: config.naps.topology.services.${srvuid}.is) config.naps.topology.vms.${vmname}.containers;
 
                 processService =
                     srvname:
@@ -93,6 +94,7 @@ let
                                                 -e ${path}
                                             '')
                                         sortedassets;
+                        srvuid = lib.filter (uid: config.naps.topology.services.${uid}.is == srvname) (config.naps.topology.vms.${vmname}.containers ++ config.naps.topology.vms.${vmname}.services);
                     in lib.optionalAttrs (assetslist != []) {
                         ${vmname}.config.systemd.services."assets-check-${srvname}" = {
                             description = "Checks if the assets of ${srvname} have changed";
@@ -127,7 +129,10 @@ let
                                   
                                   if [[ "$OLD_HASH" != "$NEW_HASH" ]]; then
                                     echo "Assets have changed. Restarting ${srvname}."
-                                    systemctl restart ${srvname}
+                                    ${ if builtins.elem srvname servicesInContainers
+                                       then "${lib.getExe pkgs.nixos-containers} run ${srvuid} -- systemctl restart ${srvname}"
+                                       else "systemctl restart ${srvname}"
+                                    }
 
                                     echo "$NEW_HASH" > ${hashPath}
                                   fi
