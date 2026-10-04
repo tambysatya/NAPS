@@ -35,7 +35,6 @@ let
         installArgs@{path, owner, mode,...}:
         let tgt = "/mnt${path}";
         in ''
-           ${utils.install "${utils.store_base_name keyname}" "dir" installArgs}
            cp -R "$1/${utils.store_base_name keyname}" ${tgt}
            chmod 711 ${tgt}
            chown -R ${owner} ${tgt}
