@@ -27,15 +27,15 @@ let
                     dsts = lib.filter (name: name != uid) hosts;
                 in utils.mergeAll 
                         ([{${uid}.${secretname} = secret; }] ++ map mkHostSecret dsts);
-            processLDAP = access: 
+            processLDAP = access:  #TODO the service reload is not corect
                 mkSharedSecret ldaphosts "openldap" ["openldap.service"] (utils.ldap_key access) {provider = "ldapssha"; installArgs = { owner = access.owner;}; generateArgs = access; inherit (access) reload;};
             processPostgres = access:
                 let 
                     installArgs = {inherit (access) owner;};
                     secret =  {provider = "postgres"; inherit installArgs; generateArgs = access; inherit (access) reload;};
-                in mkSharedSecret dbhosts "postgres" ["postgresql.service"] (utils.db_key access) secret;
+                in mkSharedSecret dbhosts "postgres" ["postgresql-password.service"] (utils.db_key access) secret;
             processS3 = access:
-                mkSharedSecret s3hosts "garage" ["garage.service"]  (utils.s3_root access) {provider = "s3"; installArgs = {owner = access.owner;}; generateArgs = access; inherit (access) reload;};
+                mkSharedSecret s3hosts "garage" ["garage-bootstrap.service"]  (utils.s3_root access) {provider = "s3"; installArgs = {owner = access.owner;}; generateArgs = access; inherit (access) reload;};
         in utils.mergeAll (
                 map processLDAP ldap ++
                 map processPostgres postgres ++
