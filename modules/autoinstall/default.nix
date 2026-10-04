@@ -62,7 +62,7 @@ let
 
 				echo "Deploying $HOST configuration"
 
-                export $PREFIX=/mnt
+                export PREFIX=/mnt
                 nix run /etc/nixos#install-assets-"$HOST" /tmp
 
                 

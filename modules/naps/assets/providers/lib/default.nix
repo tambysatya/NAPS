@@ -22,7 +22,7 @@ let
         filename: 
         type: # if type == dir, the directory will be in 111 and the permissions specified in 'mode' will be applied to all files
         {path, owner, group ? null, mode ? "0400",  ...}: 
-        let mnttgt = "$PREFIX${path}";
+        let mnttgt = ''"$PREFIX"${path}'';
             group' = if group == null then owner else group;
         in ''
            cp -R "$1/${filename}" ${mnttgt}
