@@ -37,5 +37,5 @@ let
 in {
     #naps.secrets.allSecrets = lib.concatMap mkSecret (builtins.attrNames loggingVMs);
     #naps.secrets.perVM = lib.mapAttrs (vmname: _: mkSecret vmname) loggingVMs;
-    naps.outputs.systems = lib.mapAttrs enableLogging loggingVMs;
+    #naps.outputs.systems = lib.mapAttrs enableLogging loggingVMs;
 }
