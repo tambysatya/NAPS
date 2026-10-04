@@ -235,7 +235,7 @@ let
                         };
         compileNixos =
             args: utils.mergeAll [(nixos-generator args) 
-                                  {iso = compileIso exampleArgs;}];
+                                  {iso = compileIso args;}];
 
          compileIso = args:
             let naps = compileNAPS args;
