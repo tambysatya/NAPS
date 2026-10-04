@@ -9,7 +9,7 @@ let
         vmname:
         let crt_basename= "vm-${vmname}";
         in ''
-            curl --cert ${utils.ssl_crt_path crt_basename} \
+            ${lib.getExe pkgs.curl} --cert ${utils.ssl_crt_path crt_basename} \
                  --key  ${utils.ssl_key_path crt_basename} \
                  --cacert /etc/nixos/root_ca.crt \
                  --output /root/assets.tar.gz \
@@ -17,7 +17,7 @@ let
                  > /tmp/assets.tar.gz
                 
             install -d -o root -g root -m 700 /tmp/assets
-            tar -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
+            ${lib.getExe pkgs.tar} -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
 
             ${config.naps.assets.scripts.install.${vmname}} /tmp/assets
         '';
@@ -53,6 +53,8 @@ let
 
                     /* While true because we always check if there is a neww version of the assets */
                     script = ''
+
+                        set -euo pipefail
                         while true; do
                             if
                                !  ${fetchAssetsScript vmname}
@@ -108,6 +110,7 @@ let
                             wantedBy = ["nixos-rebuild-switch-to-configuration.service"]; # we let the service start: it will be restarted whenever the secrets are reached 
                             before = ["nixos-rebuild-switch-to-configuration.service"]; #restart at every rebuild
                             script = ''
+                                  set -euo pipefail
                                   if ! [[ ${mkCondition allassets} ]] then
                                       echo "Waiting for assets being downloaded."
                                       until ([[ ${condition} ]]); do
