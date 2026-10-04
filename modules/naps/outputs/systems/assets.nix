@@ -17,7 +17,7 @@ let
                  > /tmp/assets.tar.gz
                 
             install -d -o root -g root -m 700 /tmp/assets
-            ${lib.getExe pkgs.tar} -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
+            tar -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
 
             ${config.naps.assets.scripts.install.${vmname}} /tmp/assets
         '';
