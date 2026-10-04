@@ -202,6 +202,10 @@ let
                     '';
                 };
             in {
+                packages.${system} = {
+                    provisioner-tokens = provisionerTokens;
+                    provisioner-mtls = provisionerMTLS;
+                };
                 apps.${system} = {
                     provisioner-tokens = {
                         type = "app";
