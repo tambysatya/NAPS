@@ -35,7 +35,7 @@ let
         lib.concatMapStringsSep "&&"
             ({installArgs, ...}:
                 let path = installArgs.path;
-                in ''-e "${path}"'')
+                in '' -e "${path} "'')
             allassets;
     mkFetchAll =
         vmname:
