@@ -32,12 +32,13 @@ let
 
     installNixStore = 
         keyname:
-        installArgs@{path, owner, mode,...}:
+        installArgs@{path, owner, group ? null, mode,...}:
         let tgt = "/mnt${path}";
+            group' = if group == null then owner else group;
         in ''
            cp -R "$1/${utils.store_base_name keyname}" ${tgt}
            chmod 711 ${tgt}
-           chown -R ${owner} ${tgt}
+           chown -R ${owner}:${group'} ${tgt}
            chmod ${mode} ${tgt}/*
         '';
 
