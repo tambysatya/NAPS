@@ -23,10 +23,11 @@ let
             ${lib.getExe pkgs.gnutar} -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
 
             ${installScript} /tmp/assets 
-            rm -R /tmp/assets
+            #rm -R /tmp/assets #TODO
         '';
     checkAssetsScript = 
         srvname:
+        srvconf@{deployement, endpoints,...}:
         env:
         assets: # map of assets (without the plain assets) 
         let 
@@ -117,7 +118,7 @@ let
 
 
         mkCheckService = 
-            srvname: srvconf@{assets,...}:
+            srvname: srvconf@{assets, endpoints, ...}:
             envname: env:
             let
                 secrets = lib.filterAttrs (_: asset: asset.provider != "plain")  assets;
@@ -133,7 +134,7 @@ let
 
                             wantedBy = ["nixos-rebuild-switch-to-configuration.service"]; # we let the service start: it will be restarted whenever the secrets are reached 
                             before = ["nixos-rebuild-switch-to-configuration.service"]; #restart at every rebuild
-                            script = checkAssetsScript srvname env secrets;
+                            script = checkAssetsScript srvname srvconf env secrets;
                         };
               };
 
