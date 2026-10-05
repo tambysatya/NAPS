@@ -130,8 +130,8 @@ let
                             };
                             wants = ["assets-fetch-all.service"]; #starts assets-fetch-all in parallel. Useful to have a single fetch-all per VM, but a check per service
 
-                            after = lib.optionalAttrs (env.type == "container") ["container@${envname}.service"];
-                            requires = lib.optionalAttrs (env.type == "container") ["container@${envname}.service"];
+                            after = lib.optionals (env.type == "container") ["container@${envname}.service"];
+                            requires = lib.optionals (env.type == "container") ["container@${envname}.service"];
 
                             wantedBy = ["nixos-rebuild-switch-to-configuration.service"]; # we let the service start: it will be restarted whenever the secrets are reached 
                             before = ["nixos-rebuild-switch-to-configuration.service"]; #restart at every rebuild
