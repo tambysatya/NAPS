@@ -20,7 +20,7 @@ let
                 
             install -d -o root -g root -m 700 /tmp/assets
             ${pkgs.gzip}/bin/gunzip /tmp/assets.tar.gz
-            ${lib.getExe pkgs.gnutar} -xvf /tmp/assets.tar -C /tmp/assets # && rm /tmp/assets.tar.gz #TODO
+            ${lib.getExe pkgs.gnutar} -xvf /tmp/assets.tar -C /tmp/assets && rm /tmp/assets.tar.gz
 
             ${installScript} /tmp/assets 
             rm -R /tmp/assets 
@@ -58,8 +58,7 @@ let
               if [[ "$OLD_HASH" != "$NEW_HASH" ]]; then
                 echo "Assets have changed. Restarting ${srvname}."
                 ${ if env.type == "container"
-                   then "${lib.getExe pkgs.nixos-container} run ${utils.envUID env} -- \
-                             systemctl restart ${lib.concatStringsSep " " reload}"
+                   then "${lib.getExe pkgs.nixos-container} run ${utils.envUID env} -- systemctl restart ${lib.concatStringsSep " " reload}"
                    else "systemctl restart ${lib.concatStringsSep " " reload}"
                 }
 
