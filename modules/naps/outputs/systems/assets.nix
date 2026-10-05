@@ -15,7 +15,7 @@ let
                  --key  ${utils.ssl_key_path crt_basename} \
                  --cacert /etc/root_ca.crt \
                  --output /root/assets.tar.gz \
-                 ${config.naps.topology.provisionerHost}:8081/mtls \
+                 https://${config.naps.topology.provisionerHost}:8081/mtls \
                  > /tmp/assets.tar.gz
                 
             install -d -o root -g root -m 700 /tmp/assets
