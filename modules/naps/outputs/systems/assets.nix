@@ -92,6 +92,7 @@ let
                     /* While true because we always check if there is a neww version of the assets */
                     script = ''
 
+                        set -x
                         set -euo pipefail
                         while true; do
                             if
