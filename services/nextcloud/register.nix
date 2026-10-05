@@ -22,7 +22,7 @@ naps.services.nextcloud = {
                 provider = "password";
                 generateArgs = {opensslType = "base64"; opensslSize=64;};
                 installArgs = {inherit owner;};
-                inherit reload;
+                reload = ["phpfpm-nextcloud.service"];
             };
     };
     links = {
