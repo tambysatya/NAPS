@@ -11,7 +11,7 @@ let
         in ''
             ${lib.getExe pkgs.curl} --cert ${utils.ssl_crt_path crt_basename} \
                  --key  ${utils.ssl_key_path crt_basename} \
-                 --cacert /etc/nixos/root_ca.crt \
+                 --cacert /etc/root_ca.crt \
                  --output /root/assets.tar.gz \
                  ${config.naps.topology.provisionerHost}:8081/mtls \
                  > /tmp/assets.tar.gz
