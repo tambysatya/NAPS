@@ -27,7 +27,6 @@ let
         '';
     checkAssetsScript = 
         srvname:
-        srvconf@{deployement, endpoints,...}:
         env:
         assets: # map of assets (without the plain assets) 
         let 
@@ -134,7 +133,7 @@ let
 
                             wantedBy = ["nixos-rebuild-switch-to-configuration.service"]; # we let the service start: it will be restarted whenever the secrets are reached 
                             before = ["nixos-rebuild-switch-to-configuration.service"]; #restart at every rebuild
-                            script = checkAssetsScript srvname srvconf env secrets;
+                            script = checkAssetsScript srvname env secrets;
                         };
               };
 
