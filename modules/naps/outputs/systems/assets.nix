@@ -19,10 +19,10 @@ let
                  https://${config.naps.topology.provisionerHost}:8081/mtls \
                 
             install -d -o root -g root -m 700 /tmp/assets
-            ${lib.getExe pkgs.gnutar} -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
+            ${lib.getExe pkgs.gnutar} -xvf /tmp/assets.tar.gz -C /tmp/assets # && rm /tmp/assets.tar.gz #TODO
 
             ${installScript} /tmp/assets 
-            #rm -R /tmp/assets #TODO
+            rm -R /tmp/assets 
         '';
     checkAssetsScript = 
         srvname:
