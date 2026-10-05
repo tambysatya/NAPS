@@ -10,6 +10,7 @@ let
         let 
             domain = config.naps.topology.domain;
             crt_basename= "vm-${vmname}.${domain}";
+            installScript = pkgs.writeShellScript "fetch-all-assets" config.naps.assets.scripts.install.${vmname};
         in ''
             ${lib.getExe pkgs.curl} --cert ${utils.ssl_crt_path crt_basename} \
                  --key  ${utils.ssl_key_path crt_basename} \
@@ -21,7 +22,8 @@ let
             install -d -o root -g root -m 700 /tmp/assets
             ${lib.getExe pkgs.gnutar} -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
 
-            ${config.naps.assets.scripts.install.${vmname}} /tmp/assets 
+            ${installScript} /tmp/assets 
+            rm -R /tmp/assets
         '';
     checkAssetsScript = 
         srvname:
