@@ -7,7 +7,9 @@ let
 
     fetchAssetsScript = 
         vmname:
-        let crt_basename= "vm-${vmname}";
+        let 
+            domain = config.naps.topology.domain;
+            crt_basename= "vm-${vmname}.${domain}";
         in ''
             ${lib.getExe pkgs.curl} --cert ${utils.ssl_crt_path crt_basename} \
                  --key  ${utils.ssl_key_path crt_basename} \
