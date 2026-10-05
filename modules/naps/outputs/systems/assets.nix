@@ -15,9 +15,8 @@ let
             ${lib.getExe pkgs.curl} --cert ${utils.ssl_crt_path crt_basename} \
                  --key  ${utils.ssl_key_path crt_basename} \
                  --cacert /etc/root_ca.crt \
-                 --output /root/assets.tar.gz \
+                 --output /tmp/assets.tar.gz \
                  https://${config.naps.topology.provisionerHost}:8081/mtls \
-                 > /tmp/assets.tar.gz
                 
             install -d -o root -g root -m 700 /tmp/assets
             ${lib.getExe pkgs.gnutar} -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
