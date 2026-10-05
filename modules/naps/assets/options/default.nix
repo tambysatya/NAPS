@@ -52,6 +52,7 @@ let
                             type = types.raw;
                             default = types.submodule {
                                 options = {inherit (types) owner;};
+                                freeformType = types.attrs;
                             };
                             defaultText = lib.literalExpression #to avoid stack overflow during doc generation
                                 ''

@@ -1,6 +1,7 @@
 /* Exposed API to register modules informations */
 {flakeRoot, lib,inputs, ...}:
 let libtypes = lib.types;
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
     napstypes = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     types = libtypes // napstypes;
     service = types.submodule {
@@ -28,6 +29,14 @@ let libtypes = lib.types;
                     description = "Files placed in the store (config files, strings, encrypted password). Should be of the form <filename/dirname> = {...}";
                     type = types.attrsOf types.asset;
                     default = {};
+                    apply =
+                        lib.mapAttrs 
+                            (assetname: asset@{installArgs ? {}, ...}:  #sets the default value of path
+                                let installArgs' = if builtins.hasAttr "path" installArgs 
+                                                   then installArgs
+                                                   else installArgs // {path = "${utils.paths.secrets}/${assetname}";};
+                                in asset // {installArgs = installArgs';});
+
                 };
                 deployements = lib.mkOption {
                     description = "AttrSet of serviceuid => environment where the service is currently deployed";

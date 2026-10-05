@@ -134,6 +134,7 @@ in {
                 options = {
                     inherit (types) owner sslFormat;
                 };
+                freeformType = types.attrs;
             };
         };
         apply = {

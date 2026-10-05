@@ -17,25 +17,63 @@ let
                  > /tmp/assets.tar.gz
                 
             install -d -o root -g root -m 700 /tmp/assets
-            tar -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
+            ${lib.getExe pkgs.gnutar} -xvf /tmp/assets.tar.gz -C /tmp/assets && rm /tmp/assets.tar.gz
 
-            ${config.naps.assets.scripts.install.${vmname}} /tmp/assets
+            ${config.naps.assets.scripts.install.${vmname}} /tmp/assets 
+        '';
+    checkAssetsScript = 
+        srvname:
+        env:
+        assets: # map of assets (without the plain assets) 
+        let 
+            hashPath = "/var/lib/secrets/${srvname}.hash";
+            reload = lib.concatLists (lib.mapAttrsToList (_: builtins.getAttr "reload") assets);
+            paths = map (lib.getAttrFromPath ["installArgs" "path"]) (builtins.attrValues assets);
+            sortedpaths = builtins.sort builtins.lessThan paths;
+        in ''
+              set -euo pipefail
+              if ! [[ ${mkCondition (builtins.attrValues assets)} ]]; then
+                  echo "Waiting for assets being downloaded."
+                  until ([[ ${mkCondition (builtins.attrValues assets)} ]]); do
+                    sleep 2
+                  done
+              fi
+              NEW_HASH=$(for f in ${lib.concatStringsSep " " sortedpaths}; do
+                            if [[ -f "$f" ]]; then
+                                printf '%s\0' "$f"
+                                cat "$f"
+                            elif [[ -d "$f" ]]; then
+                                find "$f" -type f -print0 | sort -z | xargs -0 cat
+                            fi
+                         done | sha256sum | cut -d' ' -f1 ) 
+              OLD_HASH=""
+              if [[ -e "${hashPath}" ]]; then
+                OLD_HASH=$(<"${hashPath}")
+              fi
+              
+              if [[ "$OLD_HASH" != "$NEW_HASH" ]]; then
+                echo "Assets have changed. Restarting ${srvname}."
+                ${ if env.type == "container"
+                   then "${lib.getExe pkgs.nixos-container} run ${utils.envUID env} -- \
+                             systemctl restart ${lib.concatStringsSep " " reload}"
+                   else "systemctl restart ${lib.concatStringsSep " " reload}"
+                }
+
+                echo "$NEW_HASH" > ${hashPath}
+              fi
         '';
 
     processVM =
         vmname:
         vmassets: # type: AttrSet provider asset
         let allassets = utils.mergeAll (builtins.attrValues (builtins.removeAttrs vmassets ["plain"])); # we remove the plain assets (which are transmitted through the store)
-        in utils.mergeAll [
-                (mkFetchAll vmname (builtins.attrValues allassets))
-                (mkCheckService vmname (builtins.attrValues allassets))
-            ];
+        in mkFetchAll vmname (builtins.attrValues allassets);
 
     mkCondition = allassets:
         lib.concatMapStringsSep "&&"
             ({installArgs, ...}:
                 let path = installArgs.path;
-                in '' -e "${path} "'')
+                in '' -e "${path}" '')
             allassets;
     mkFetchAll =
         vmname:
@@ -74,31 +112,12 @@ let
 
 
         mkCheckService = 
-            vmname:
-            allassets:
+            srvname: srvconf@{assets,...}:
+            envname: env:
             let
-                splitAssets =
-                    lib.concatMap  
-                        (asset@{reload, installArgs, ...}: 
-                            map (srvname: {${srvname} =  [installArgs.path];}  ) reload) #plain assets are not download: they are installed directly in the store
-                        allassets;
-                assetsPerService = utils.mergeAll splitAssets; # {servicename = [path]}
-                servicesInContainers = map (srvuid: config.naps.topology.services.${srvuid}.is) config.naps.topology.vms.${vmname}.containers;
-
-                processService =
-                    srvname:
-                    assetslist:
-                    let sortedassets = builtins.sort builtins.lessThan assetslist;
-                        hashPath = "/var/lib/secrets/${srvname}.hash";
-                        condition = lib.concatMapStringsSep " && "
-                                        (path: 
-                                            ''
-                                                -e ${path}
-                                            '')
-                                        sortedassets;
-                        srvuid = lib.filter (uid: config.naps.topology.services.${uid}.is == srvname) (config.naps.topology.vms.${vmname}.containers ++ config.naps.topology.vms.${vmname}.services);
-                    in lib.optionalAttrs (assetslist != []) {
-                        ${vmname}.config.systemd.services."assets-check-${srvname}" = {
+                secrets = lib.filterAttrs (_: asset: asset.provider != "plain")  assets;
+            in lib.optionalAttrs (secrets != {}) {
+                        ${utils.envHost env}.config.systemd.services."assets-check-${srvname}" = {
                             description = "Checks if the assets of ${srvname} have changed";
                             serviceConfig = {
                                 Type = "oneshot";
@@ -109,47 +128,22 @@ let
 
                             wantedBy = ["nixos-rebuild-switch-to-configuration.service"]; # we let the service start: it will be restarted whenever the secrets are reached 
                             before = ["nixos-rebuild-switch-to-configuration.service"]; #restart at every rebuild
-                            script = ''
-                                  set -euo pipefail
-                                  if ! [[ ${mkCondition allassets} ]] then
-                                      echo "Waiting for assets being downloaded."
-                                      until ([[ ${condition} ]]); do
-                                        sleep 2
-                                      done
-                                  fi
-                                  NEW_HASH=$(for f in ${lib.concatStringsSep " " sortedassets}; do
-                                                if [[ -f "$f" ]]; then
-                                                    printf '%s\0' "$f"
-                                                    cat "$f"
-                                                elif [[ -d "$f" ]]; then
-                                                    find "$f" -type f -print0 | sort -z | xargs -0 cat
-                                                fi
-                                             done | sha256sum | cut -d' ' -f1 ) 
-                                  OLD_HASH=""
-                                  if [[ -e "${hashPath}" ]]; then
-                                    OLD_HASH=$(<"${hashPath}")
-                                  fi
-                                  
-                                  if [[ "$OLD_HASH" != "$NEW_HASH" ]]; then
-                                    echo "Assets have changed. Restarting ${srvname}."
-                                    ${ if builtins.elem srvname servicesInContainers
-                                       then "${lib.getExe pkgs.nixos-containers} run ${srvuid} -- systemctl restart ${srvname}"
-                                       else "systemctl restart ${srvname}"
-                                    }
-
-                                    echo "$NEW_HASH" > ${hashPath}
-                                  fi
-                            '';
+                            script = checkAssetsScript srvname env secrets;
                         };
-                    };
+              };
 
-            in utils.mergeAll (lib.mapAttrsToList processService assetsPerService);
+        processService = 
+            srvname: srvconf@{deployements,...}:
+            utils.mergeAll 
+                (lib.mapAttrsToList (mkCheckService srvname srvconf) deployements);
+
+
 
 
 
 in {
 
-    naps.outputs.systems = utils.mergeAll (lib.mapAttrsToList processVM (config.naps.assets.installer));
+    naps.outputs.systems = utils.mergeAll (lib.mapAttrsToList processVM (config.naps.assets.installer) ++ lib.mapAttrsToList processService config.naps.services);
 }
 
 

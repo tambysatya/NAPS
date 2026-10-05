@@ -104,7 +104,7 @@ Migration:
     + install scripts: need to handle the situation where a secret is already isntalled (e.g. removing the directory if it exists) => use an env variable like PATH_PREFIX=/mnt or PATH_PREFIX="" ?
     + PRIO: naps.assets.default: clean the code of the link processing, because the secrets passed to the hosts + secrets passed to the target may differ. Note that e.g. pgpass may be enabled for the target but not for the hosts;
 
-    + Assets created in makeSharedAsset should depends of the password initialization custom service (e.g. postgres-password, ...)
+    +TODO: assets scripts should be based on config.naps.services instead of config.naps.assets
 
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets

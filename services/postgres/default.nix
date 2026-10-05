@@ -41,6 +41,10 @@ config =
 
                 after = [ "postgresql-setup.service"];
                 requires = [ "postgresql-setup.service" ];
+
+                # mandatory to automatically refresh the passwords in place
+                before = ["postgresql.service"];
+                requiredBy = ["postgresql.service"];
                 wantedBy = ["multi-user.target"];
 
                 serviceConfig = {

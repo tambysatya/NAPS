@@ -87,6 +87,7 @@ naps.assets.providers.nix-store = {
                 inherit (types) owner;
                 mode = types.filemode;
             };
+            freeformType = types.attrs;
         };
     };
 
