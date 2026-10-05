@@ -174,6 +174,9 @@ CHECKS:
 - Assets: each asset type should have a provider
 
 
+SERVICES:
+-disabled forgejo-dump. Is it useful ??
+
 PROBLEMS:
 evaluation warning: autoinstall.service is ordered after 'network-online.target' but doesn't depend on it
 

@@ -5,7 +5,7 @@ let
     topology= config.naps.topology;
     hostname = "nextcloud.${topology.domain}";
     owner = "nextcloud";
-    reload = ["phpfpm.service" "nextcloud-setup.service"];
+    reload = ["phpfpm-nextcloud.service" "nextcloud-setup.service"];
 
     endpoints = [{
                    hostname = hostname;

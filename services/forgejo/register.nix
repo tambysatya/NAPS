@@ -2,7 +2,11 @@
 let
     topology= config.naps.topology;
     hostname = "git.${topology.domain}";
-    reload = ["forgejo.service" "forgejo-dump.service" "forgejo-init-password.service"];
+    reload = [
+        "forgejo.service" 
+        #"forgejo-dump.service"  # useful TODO ?
+        "forgejo-init-password.service"
+    ];
     owner = "forgejo";
 
 in
