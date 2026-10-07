@@ -1,7 +1,6 @@
 {flakeRoot, inputs, lib, pkgs, path, ...}:
 let 
 
-   vars = builtins.readFile ./scripts/vars.sh;
    utils = builtins.readFile ./scripts/utils.sh;
    naps = builtins.readFile ./scripts/naps.sh;
 
@@ -16,8 +15,6 @@ in pkgs.writeShellApplication {
     text = ''
         
         ${utils}
-        ${vars}
-
         ${naps}
     '';
 }

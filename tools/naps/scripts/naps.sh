@@ -22,7 +22,6 @@ naps_usage(){
 	EOF
 }
 
-SSH=$(nix eval .#naps.topology.provisioner.ssh --json | jq -r '. // empty')
 
 
 
@@ -105,8 +104,9 @@ naps_provisioner(){
         ;;
     esac
 }
+
 naps_deploy(){
-    case "${1:-}" in
+	case "${1:-}" in
         tofu)
             tofu apply
             ;;
@@ -123,11 +123,28 @@ naps_deploy(){
 }
 
 
+if [[ "$1" == "init" ]]; then
+	bold "Initializing a naps project"
+	nix flake init -t github:tambysatya/NAPS 
+	exit 0
+fi
+
+SSH=$(nix eval .#naps.topology.provisioner.ssh --json | jq -r '. // empty')
+ALL_VMS=$(nix eval .#naps.topology.vms --json | jq -r 'keys[]' | sort)
+VM_DEPLOYED=$(tofu state list | grep 'libvirt_domain' | sed 's/libvirt_domain.//' | sort)
+
+NEW_VMS=$(comm -23 \
+    <(printf '%s\n' "$ALL_VMS") \
+    <(printf '%s\n' "$VM_DEPLOYED"))
+DESTROYED_VMS=$(comm -13 \
+    <(printf '%s\n' "$ALL_VMS") \
+    <(printf '%s\n' "$VM_DEPLOYED"))
+REBUILT_VMS=$(comm -12 \
+    <(printf '%s\n' "$ALL_VMS") \
+    <(printf '%s\n' "$VM_DEPLOYED"))
+
+
 case "${1:-}" in
-	init)
-		shift
-		nix flake init -t github:tambysatya/NAPS 
-		;;
 	check)
 		shift
 		nix flake check
@@ -144,17 +161,10 @@ case "${1:-}" in
         shift
         naps_deploy "$@"
         ;;
-    provisioner )
+    provisioner)
         shift
         naps_provisioner "$@"
         ;;
-
-
-
-
-
-
-
     -h | help)
         naps_usage
         ;;
