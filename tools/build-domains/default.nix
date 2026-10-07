@@ -33,7 +33,7 @@ let
             #Replace the iso name
             ISO_NAME=$(ls result/iso/*.iso)
             echo "ISO_NAME=$ISO_NAME"
-            sed -i "s+ISO_NAME+result/iso/$ISO_NAME+" "terraform.tf.json" 
+            sed -i "s+ISO_NAME+$ISO_NAME+" "terraform.tf.json" 
 
             cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/
         '';
