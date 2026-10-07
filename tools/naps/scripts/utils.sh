@@ -27,7 +27,7 @@ print_vms(){
     ACTION=$1
     VMS=$2
     if [[ -n "$VMS" ]]; then
-        printf "%s" "$ACTION\n"
+        printf "%s\n" "$ACTION"
         printf "%s\n\n" "$VMS" |sed -s 's/^/ /'
     fi
 }
