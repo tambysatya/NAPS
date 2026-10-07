@@ -92,21 +92,13 @@ let
                         RestartSec = "30s";
                     };
 
-                    /* While true because we always check if there is a neww version of the assets */
+                    /* Always wait for a new version of the assets */
                     script = ''
 
                         set -x
                         set -euo pipefail
-                        while true; do
-                            if
-                               !  ${fetchAssetsScript vmname}
-                            then
+                        until ${fetchAssetsScript vmname}; do
                                 sleep 2
-                            fi
-
-                            if [[ ${mkCondition allassets} ]]; then
-                                break
-                            fi
                         done
                         echo "All assets are installed."
                     '';
