@@ -104,8 +104,8 @@ naps_provisioner(){
         upload)
             if [[ -n "$SSH" ]]; then
                 bold "Uploading secrets to $SSH ..."
-                run 'install -d -m 0700 .secrets && rm -rf .secrets/*'
-                run_local scp -r .secrets/provisioner "$SSH:.secrets/"
+                run 'install -d -m 0700 provisioner && rm -rf provisioner/*'
+                run_local scp -r .secrets/provisioner "$SSH:provisioner/"
             fi
             ;;
         *)
