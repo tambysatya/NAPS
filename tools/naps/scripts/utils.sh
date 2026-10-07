@@ -4,6 +4,7 @@
 RED="\e[31m"
 GREEN="\e[32m"
 BLUE="\e[34m"
+YELLOW="\e[33m"
 NC="\e[0m"   # No Color
 
 
@@ -16,6 +17,9 @@ blue(){
 }
 green(){
 	echo -e "${GREEN}${1}${NC}"
+}
+yellow(){
+	echo -e "${YELLOW}${1}${NC}"
 }
 
 bold() {

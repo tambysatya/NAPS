@@ -24,6 +24,7 @@ naps_usage(){
 
 
 
+DRY_RUN="${DRY_RUN:-false}"
 
 run_local(){
     if $DRY_RUN; then
@@ -39,6 +40,9 @@ run_local(){
 run() {
     if $DRY_RUN; then
         printf '+'
+		if [[ -n "$SSH" ]]; then
+			printf "%s" " ssh $SSH bash"
+		fi
         printf ' %q' "$@"
         printf "\n"
     elif [[ -n "$SSH" ]]; then
@@ -74,6 +78,7 @@ naps_build(){
             run_local nix run .#build-domains
             ;;
         iso)
+			run_local git add .secrets/git
             run_local nix build .#nixosConfigurations.iso.config.system.build.isoImage
             ;;
         *)
@@ -89,9 +94,10 @@ naps_provisioner(){
     case "${1:-}" in
         run)
 
+			yellow "$(bold "+ Install/Update the secret provisioner ($SSH)...)")"
 			# shellcheck disable=SC2119,2154,2029
 		    run_script <<-EOF
-				mkdir -p ~/.config/systemd/user
+				mkdir -p ~/.confg/systemd/user
 				nix build --refresh github:tambysatya/NAPS#provisioner-services
 				for service in result/*.service; do
 				    ln -sf "\$(readlink -f "\$service")" "\$HOME/.config/systemd/user/\$(basename "\$service")"
@@ -102,23 +108,24 @@ naps_provisioner(){
 				EOF
             ;;
         upload)
-            if [[ -n "$SSH" ]]; then
-                bold "Uploading secrets to $SSH ..."
-                run 'install -d -m 0700 .local/naps && rm -rf .local/naps/*'
-                run_local scp -r .secrets/provisioner "$SSH:.local/naps/"
-            fi
+                yellow "$(bold "+ Uploading secrets to $SSH ...")"
+                run install -d -m 0700 .local/naps && rm -rf .local/naps/*
+				if [[ -n "$SSH" ]]; then
+					run_local scp -r .secrets/provisioner "$SSH:.local/naps/"
+				fi
             ;;
         *)
             naps_provisioner upload
             naps_provisioner run
-        ;;
+			;;
     esac
 }
 
 naps_deploy(){
 	case "${1:-}" in
         tofu)
-            tofu apply
+			shift
+            run_local tofu apply 
             ;;
         rebuild)
             for vm in $REBUILT_VMS; do
@@ -126,10 +133,26 @@ naps_deploy(){
             done
             ;;
         *)
-            naps_deploy tofu
+            naps_deploy tofu 
             naps_deploy rebuild
-        ;;
+
+			;;
     esac
+}
+
+naps_apply(){
+
+	naps_plan 
+
+	yellow "$(bold "Building...")"
+	naps_build "$@"
+
+	yellow "$(bold "Provisioning...")"
+	naps_provisioner "$@"
+
+	yellow "$(bold "Deploying...")"
+	naps_deploy 
+
 }
 
 
@@ -164,6 +187,10 @@ case "${1:-}" in
         shift
         naps_plan
         ;;
+	apply)
+		shift
+		naps_apply "$@"
+		;;
     build)
         shift
         naps_build "$@"

@@ -154,7 +154,7 @@ Migration:
 -TLS: increase the lifetime of the certificates to 7d (in case of power cuts...)
 - we rely on ANYCORN which is not packaged by nixos so we have to maintain it ouerselve
 
--provisionign should shutdown itself after a certain moment
+-provisionign should shutdown itself after a certain moment + tokens should be erased after a certain deadline
 
 
 ### IDEAS
