@@ -68,13 +68,13 @@ run_script() {
 naps_build(){
     case "${1:-}" in
         assets)
-            run nix run .#gen-assets
+            run_local nix run .#gen-assets
             ;;
         domains)
-            run nix run .#build-domains
+            run_local nix run .#build-domains
             ;;
         iso)
-            run nix build .#nixosConfigurations.iso.config.system.build.isoImage
+            run_local nix build .#nixosConfigurations.iso.config.system.build.isoImage
             ;;
         *)
             naps_build assets
@@ -122,7 +122,7 @@ naps_deploy(){
             ;;
         rebuild)
             for vm in $REBUILT_VMS; do
-                run nixos-rebuild switch --flake .#"$vm" --target-host root@"$vm"
+                run_local nixos-rebuild switch --flake .#"$vm" --target-host root@"$vm"
             done
             ;;
         *)
