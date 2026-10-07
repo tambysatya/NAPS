@@ -161,6 +161,7 @@ in {
         utils.mergeAll (lib.mapAttrsToList (envname: envassets: { ${utils.envHost (getEnv envname)} = mkInstallerForEnv envname envassets;}) config.naps.assets.perEnv);
     naps.assets.scripts = {
         generate = ''
+            set -euo pipefail
             mkdir -p ${utils.paths.out} ${utils.paths.git}
 
             # Initializes the perVM repository
