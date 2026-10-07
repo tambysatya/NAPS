@@ -25,6 +25,16 @@ naps_usage(){
 
 
 
+run_local(){
+    if $DRY_RUN; then
+        printf '+'
+        printf ' %q' "$@"
+        printf "\n"
+	else 
+		"$@"
+    fi
+}
+
 # shellcheck disable=SC2029
 run() {
     if $DRY_RUN; then
@@ -95,7 +105,7 @@ naps_provisioner(){
             if [[ -n "$SSH" ]]; then
                 bold "Uploading secrets to $SSH ..."
                 run 'install -d -m 0700 .secrets && rm -rf .secrets/*'
-                run scp -R .secrets/provisioner "$SSH:.secrets/"
+                run_local scp -r .secrets/provisioner "$SSH:.secrets/"
             fi
             ;;
         *)
