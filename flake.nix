@@ -203,7 +203,7 @@ let
                     Description=NAPS: provisioning service
 
                     [Service]
-                    ExecStart=${lib.getExe package} %h/.local/naps/provisioner;
+                    ExecStart=${lib.getExe package} %h/.local/naps/provisioner
                     Restart=on-failure
                     EOF
                 '';
