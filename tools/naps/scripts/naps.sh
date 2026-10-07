@@ -94,7 +94,7 @@ naps_provisioner(){
 				mkdir -p ~/.config/systemd/user
 				nix build github:tambysatya/NAPS#provisioner-services
 				for service in result/*.service; do
-				    ln -sf "\$(readlink -f "\$service")" "$HOME/.config/systemd/user/$(basename "\$service")"
+				    ln -sf "\$(readlink -f "\$service")" "\$HOME/.config/systemd/user/\$(basename "\$service")"
 				done
 				systemctl --user daemon-reload
 				systemctl --user restart provisioner-tokens.service
