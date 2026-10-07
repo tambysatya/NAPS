@@ -197,10 +197,25 @@ let
                             --ssl_ca "$PROVISIONER_DIR/ssl/root_ca.crt"
                     '';
                 };
+                mkService = name: package: ''
+                    cat > $out/${name}.service <<EOF
+                    [Unit]
+                    Description=NAPS: provisioning service
+
+                    [Service]
+                    ExecStart=${lib.getExe package}
+                    Restart=on-failure
+                    EOF
+                '';
             in {
                 packages.${system} = {
                     provisioner-tokens = provisionerTokens;
                     provisioner-mtls = provisionerMTLS;
+                    provisioner-services = pkgs.runCommand "provisioner-services" {} ''
+                        mkdir -p $out
+                        ${mkService "provisioner-tokens" provisionerTokens}
+                        ${mkService "provisioner-mtls" provisionerMTLS}
+                    '';
                 };
                 apps.${system} = {
                     provisioner-tokens = {
@@ -216,7 +231,19 @@ let
                 };
             };
 
+        compileNapsApp = args:
+            let napsscript = import ./tools/naps ({inherit flakeRoot inputs lib pkgs; } // args.extraArgs);
+            in {
+                packages.${system}.naps = napsscript; 
+                devShells.${system}.default = pkgs.mkShell {
+                    packages = [napsscript];
+                };
+            };
+
+
+
     
+
 
         
         compileTerranix = 
@@ -263,6 +290,7 @@ let
         exposeApps = 
             args:
             utils.mergeAll [
+                (compileNapsApp args)
                 (compileGenAssets args) 
                 (compileInstallAssets args)
                 (compileBuildDomains args)
