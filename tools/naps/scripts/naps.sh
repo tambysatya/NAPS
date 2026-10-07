@@ -136,6 +136,7 @@ naps_deploy(){
 if [[ "$1" == "init" ]]; then
 	bold "Initializing a naps project"
 	nix flake init -t github:tambysatya/NAPS 
+	tofu init
 	exit 0
 fi
 

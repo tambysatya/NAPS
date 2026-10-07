@@ -192,8 +192,8 @@ let
                         export TOKEN_DIR="$PROVISIONER_DIR/mtls/"
                         ${provisionerExe} \
                             --port 8081 \
-                            --ssl_cert "$PROVISIONER_DIR/ssl/crt"\
-                            --ssl_key "$PROVISIONER_DIR/ssl/key"\
+                            --ssl_cert "$PROVISIONER_DIR/ssl/crt" \
+                            --ssl_key "$PROVISIONER_DIR/ssl/key" \
                             --ssl_ca "$PROVISIONER_DIR/ssl/root_ca.crt"
                     '';
                 };
