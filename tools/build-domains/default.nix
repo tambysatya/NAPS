@@ -14,7 +14,7 @@ let
 
             mkdir -p .secrets/provisioner/{ssl,secrets,mtls}
             
-            ${utils.gen_ssl_certificate naps.topology.provisionerHost}
+            ${utils.gen_ssl_certificate naps.topology.provisioner.hostname}
 
 
             ${lib.concatMapStringsSep "\n" utils.ship (builtins.attrNames naps.topology.vms)}
@@ -22,12 +22,18 @@ let
 
             # Generate the terranix configuration
             nix build ${path}#terranix -o terraform.tf.json.tmp
+
             cp terraform.tf.json.tmp terraform.tf.json
             chmod u+w terraform.tf.json
             rm terraform.tf.json.tmp
 
             #Replace the tokens with their value
             ${lib.concatMapStringsSep "\n" (utils.applyToken "terraform.tf.json") (builtins.attrNames naps.topology.vms)}
+
+            #Replace the iso name
+            ISO_NAME=$(ls result/iso/*.iso)
+            echo "ISO_NAME=$ISO_NAME"
+            sed -i "s+ISO_NAME+result/iso/$ISO_NAME+" "terraform.tf.json" 
 
             cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/
         '';

@@ -7,8 +7,12 @@
     secretsPath = ".secrets";
     caURL = "ca.local.fr";
 */
-    provisionerHost = "provisioning.local";
-    provisionerAddr = "192.168.1.200";
+
+    provisioner = {
+        hostname = "provisioning.local";
+        ip = "192.168.1.200";
+        ssh = null;
+    };
     domain = "local.fr";
     vmSubnet = "192.168.1.0/24";
     dns = ["8.8.8.8" "8.8.4.4"];
@@ -96,7 +100,8 @@
 
 
       };
-      logs  = {
+      
+      logs2  = {
         host = "cpuhost1";
         vcpu=1;
         memory=1024;

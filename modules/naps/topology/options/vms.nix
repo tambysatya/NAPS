@@ -26,7 +26,7 @@ in
                 description = "Address of the provisioning server. It will be used to reach the secrets.";
                 type = types.str;
                 example = "192.168.1.200";
-              default = config.naps.topology.provisionerAddr;
+              default = config.naps.topology.provisioner.ip;
             };
             
             vcpu = lib.mkOption {

@@ -171,7 +171,7 @@ let
             let naps= compileNAPS args;
                 pkg = provisioner.packages.${system};
 
-                host = naps.topology.provisionerHost;
+                host = naps.topology.provisioner.hostname;
                 provisionerExe = lib.getExe provisioner.packages.${system}.default;
 
                 provisionerTokens = pkgs.writeShellApplication {

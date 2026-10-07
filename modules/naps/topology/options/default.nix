@@ -25,6 +25,28 @@ let
         };
     };
 
+    provisioner = types.submodule {
+        options = {
+            hostname = lib.mkOption {
+                description = "Hostname of the provisioner, must be reachable by the VMs";
+                type = types.str;
+                example = "provisioner.local";
+                default = "provisioner.${config.naps.topology.domain}";
+            };
+            ip = lib.mkOption {
+                description = "Default Address of the provisioning server. It will be used to reach the secrets. This ip can be overrided in each vm configuration.";
+                type = types.str;
+                example = "192.168.1.200";
+            };
+            ssh = lib.mkOption {
+                description = "If set, the provisioner will run on the specified machine instead of localhost";
+                type = types.nullOr types.str;
+                example = "naps@192.168.1.151";
+                default = null;
+            };
+        };
+    };
+
     topology = types.submodule {
         options = {
             smtpHost = lib.mkOption {
@@ -33,16 +55,9 @@ let
                 default = null;
                 example = "mail.local.fr";
             };
-            provisionerHost = lib.mkOption {
-                description = "Address of the provisioning server. It will be used to reach the secrets.";
-                type = types.str;
-                example = "provisioner.local";
-                default = "provisioner.${config.naps.topology.domain}";
-            };
-            provisionerAddr = lib.mkOption {
-                description = "Default Address of the provisioning server. It will be used to reach the secrets.";
-                type = types.str;
-                example = "192.168.1.200";
+            provisioner = lib.mkOption {
+                description = "Configuration of the provisioner";
+                type = provisioner;
             };
             domain = lib.mkOption {
                 description = "Domain of the napsstructure";

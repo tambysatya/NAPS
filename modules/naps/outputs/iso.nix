@@ -37,7 +37,7 @@ in {
         };
         users = utils.mergeAll (lib.mapAttrsToList mkUser config.naps.deploy.users);
 
-        networking.hosts = {"127.0.0.1" = ["${config.naps.topology.provisionerHost}"];};
+        networking.hosts = {"127.0.0.1" = ["${config.naps.topology.provisioner.hostname}"];};
         services.haproxy = {
             enable = true;
             config = ''

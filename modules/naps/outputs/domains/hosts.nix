@@ -24,7 +24,7 @@ let
     resource.libvirt_volume."iso_${hostName}" = {
       name = "nixos-autoinstall.iso";
       pool = "\${resource.libvirt_pool.iso_${hostName}.name}";
-      create.content.url = "bootstrap.iso";
+      create.content.url = "ISO_NAME";
       provider = "libvirt.${hostName}";
     };
 
