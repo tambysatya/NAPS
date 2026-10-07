@@ -179,6 +179,9 @@ REBUILT_VMS=$(comm -12 \
 
 
 case "${1:-}" in
+    -h | help)
+        naps_usage
+        ;;
 	check)
 		shift
 		nix flake check
@@ -203,9 +206,7 @@ case "${1:-}" in
         shift
         naps_provisioner "$@"
         ;;
-    -h | help)
-        naps_usage
-        ;;
+
     *)
         echo "Unknown command: $1" >&2
         echo
