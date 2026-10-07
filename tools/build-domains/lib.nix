@@ -46,9 +46,9 @@ let
                     --provisioner ca \
                     --password-file "$STEPPATH/ca-password.key" \
                     --san ${crtname} \
-                    ${crtname} "$TARGET_PATH/${crtname}.crt.tmp" "$TARGET_PATH/${crtname}.key" 
+                    ${crtname} "$TARGET_PATH/${crtname}.crt.tmp" "$TARGET_PATH/key" 
 
-               cat "$TARGET_PATH/${crtname}.crt.tmp" "$STEPPATH/certs/intermediate_ca.crt" > "$TARGET_PATH/${crtname}.crt" #adding full-chain
+               cat "$TARGET_PATH/${crtname}.crt.tmp" "$STEPPATH/certs/intermediate_ca.crt" > "$TARGET_PATH/crt" #adding full-chain
                rm "$TARGET_PATH/${crtname}.crt.tmp";
             '';
 
