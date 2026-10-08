@@ -176,6 +176,7 @@ CHECKS:
 - Two services are not listening simultaneously on the same port (at least on the same system)
 - Assets: TLS certificates must have a reload part
 - Assets: each asset type should have a provider
+- check if there is no clash in the endpoints ports/hostnames (across all the registered services)
 
 
 SERVICES:

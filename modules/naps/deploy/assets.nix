@@ -38,8 +38,8 @@ in
                         map extractCert (builtins.attrValues tls); 
 
                     proxy.tcp = {
-                        "8080" = mkProvisionerProxy 8080 provisionerips;
-                        "8081" = mkProvisionerProxy 8081 provisionerips;
+                        "38421" = mkProvisionerProxy 38421 provisionerips;
+                        "38422" = mkProvisionerProxy 38422 provisionerips;
                     };
                 })
             config.naps.assets.installer;

@@ -14,7 +14,7 @@ let
             }
             {
                 hostname = "cache.${domain}";
-                port = 8080;
+                port = 3001;
                 tls = true;
             }
         ];

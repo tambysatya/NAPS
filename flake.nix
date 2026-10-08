@@ -180,7 +180,7 @@ let
                         PROVISIONER_DIR=$1
                         export TOKEN_DIR="$PROVISIONER_DIR/secrets"
                         ${provisionerExe} \
-                            --port 8080 \
+                            --port 38421 \
                             --ssl_cert "$PROVISIONER_DIR/ssl/crt" \
                             --ssl_key "$PROVISIONER_DIR/ssl/key"
                     '';
@@ -191,7 +191,7 @@ let
                         PROVISIONER_DIR=$1
                         export TOKEN_DIR="$PROVISIONER_DIR/mtls/"
                         ${provisionerExe} \
-                            --port 8081 \
+                            --port 38422 \
                             --ssl_cert "$PROVISIONER_DIR/ssl/crt" \
                             --ssl_key "$PROVISIONER_DIR/ssl/key" \
                             --ssl_ca "$PROVISIONER_DIR/ssl/root_ca.crt"

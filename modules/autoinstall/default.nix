@@ -39,7 +39,7 @@ let
 				set -euo pipefail
 				echo "Downloading the secrets"
 				TOKEN=$(cat /sys/class/dmi/id/chassis_serial)
-                URL="https://${naps.topology.provisioner.hostname}:8080/$TOKEN.tar.gz"
+                URL="https://${naps.topology.provisioner.hostname}:38421/$TOKEN.tar.gz"
 				set -x
 				#curl --cacert /etc/nixos/.secrets/git/root_ca.crt "https://${naps.topology.provisioner.hostname}:8080/$TOKEN.tar.gz" > /tmp/"$TOKEN".tar.gz
                 until curl --cacert /etc/nixos/.secrets/git/root_ca.crt "$URL" > /tmp/"$TOKEN".tar.gz; do
