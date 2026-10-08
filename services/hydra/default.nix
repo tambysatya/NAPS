@@ -56,7 +56,7 @@ config.systemd.services.darkhttpd = {
     serviceConfig = {
         ExecStart = [
             "" #standard darkhttpd package seems to use a malformed --addr
-            "${lib.getExe pkgs.darkhttpd} /var/lib/hydra/cache --port 8080 --addr 127.0.0.1 --no-server-id"
+            "${lib.getExe pkgs.darkhttpd} /var/lib/hydra/cache --port 3001 --addr 127.0.0.1 --no-server-id"
         ];
         ReadOnlyPath = ["/var/lib/hydra/cache"];
         SupplementaryGroups = ["hydra"];
