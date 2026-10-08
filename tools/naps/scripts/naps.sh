@@ -122,10 +122,8 @@ naps_provisioner(){
 				fi
             ;;
 		*)
-			echo "Unknown command: naps provisioner $1" >&2
-			echo
-			naps_usage
-			exit 1
+			naps_provisioner upload
+			naps_provisioner run
 			;;
 
     esac
