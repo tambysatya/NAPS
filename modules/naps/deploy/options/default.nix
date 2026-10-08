@@ -151,6 +151,11 @@ let
                 description = "Where the backend is deployed";
                 type = types.deployementEnvironment;
             };
+            priority = lib.mkOption {
+                description = "The priority of this backend. Highest priority are selected before lowest priority backends";
+                type = types.int;
+                default = 100;
+            };
         };
     };
 

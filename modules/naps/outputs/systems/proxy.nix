@@ -12,7 +12,7 @@ let
 
     generateBackends = 
         mode: frontport: name: backends:
-        let sortedBackends = builtins.sort (b: b': b.env.priority >= b'.env.priority) backends; #sorted by decreasing priority
+        let sortedBackends = builtins.sort (b: b': b.priority >= b'.priority) backends; #sorted by decreasing priority
             mkBackendEntry = i: {ip, port, ...}:
             ''
                 server ${mkBackendI name i} ${ip}:${lib.toString port} check ${if i == 1 then "" else "backup"}
