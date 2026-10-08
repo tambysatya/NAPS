@@ -19,6 +19,7 @@ naps_usage(){
 		build <assets|domains|iso>: Generates the assets, terraform domains or self-install iso
 		provisioner <upload|run>: Uploads the secrets on the provisioning server or starts the services
 		deploy [tofu| rebuild]: Deploys the terraform or the nixos config (both if empty)
+		update <vm>: build and deploy the configuration of a specific vm
 	EOF
 }
 
@@ -82,8 +83,11 @@ naps_build(){
             run_local nix build .#nixosConfigurations.iso.config.system.build.isoImage
             ;;
         *)
+			yellow "$(bold "+ Building assets...")"
             naps_build assets
+			yellow "$(bold "+ Building iso...")"
             naps_build iso
+			yellow "$(bold "+ Building kvm configurations...")"
             naps_build domains
         ;;
     esac
@@ -94,7 +98,7 @@ naps_provisioner(){
     case "${1:-}" in
         run)
 
-			yellow "$(bold "+ Install/Update the secret provisioner $SSH...")"
+			yellow "$(bold "+ Install/Update the secret provisioner...")"
 			# shellcheck disable=SC2119,2154,2029
 		    run_script <<-EOF
 				mkdir -p ~/.confg/systemd/user
@@ -117,10 +121,13 @@ naps_provisioner(){
 					run_local cp -r .secrets/provisioner "$HOME/.local/naps/"
 				fi
             ;;
-        *)
-            naps_provisioner upload
-            naps_provisioner run
+		*)
+			echo "Unknown command: naps provisioner $1" >&2
+			echo
+			naps_usage
+			exit 1
 			;;
+
     esac
 }
 
@@ -128,17 +135,21 @@ naps_deploy(){
 	case "${1:-}" in
         tofu)
 			shift
-            run_local tofu apply 
+			yellow "$(bold "+ Applying tofu...")"
+            run_local tofu apply --auto-approve #TODO
             ;;
         rebuild)
+			yellow "$(bold "+ Applying nixos-rebuild (in-place)")"
             for vm in $REBUILT_VMS; do
+				yellow "$(bold "Building $vm")"
                 run_local nixos-rebuild switch --flake .#"$vm" --target-host root@"$vm"
             done
             ;;
-        *)
-            naps_deploy tofu 
-            naps_deploy rebuild
-
+		*)
+			echo "Unknown command: naps deploy $1" >&2
+			echo
+			naps_usage
+			exit 1
 			;;
     esac
 }
@@ -154,7 +165,8 @@ naps_apply(){
 	naps_provisioner "$@"
 
 	yellow "$(bold "Deploying...")"
-	naps_deploy 
+	naps_deploy tofu
+	naps_deploy rebuild
 
 }
 
@@ -218,6 +230,12 @@ case "${1:-}" in
         shift
         naps_provisioner "$@"
         ;;
+    update)
+        shift
+		yellow "$(bold "Rebuilding $@")"
+		run_local nixos-rebuild switch --flake .#"$@" --target-host root@"$@"
+        ;;
+
 
     *)
         echo "Unknown command: $1" >&2
