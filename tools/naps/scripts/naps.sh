@@ -108,10 +108,13 @@ naps_provisioner(){
 				EOF
             ;;
         upload)
-                yellow "$(bold "+ Uploading secrets to $SSH ...")"
-                run install -d -m 0700 .local/naps && rm -rf .local/naps/*
+                yellow "$(bold "+ Uploading / Installing secrets ...")"
 				if [[ -n "$SSH" ]]; then
+					run install -d -m 0700 .local/naps && rm -rf .local/naps/*
 					run_local scp -r .secrets/provisioner "$SSH:.local/naps/"
+				else
+					run_local install -d -m 0700 "$HOME/.local/naps" && rm -rf "$HOME/.local/naps/*"
+					run_local cp -r .secrets/provisioner "$HOME/.local/naps/"
 				fi
             ;;
         *)
