@@ -16,7 +16,6 @@ let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
                                 env = {
                                     host = provisionerHost;
                                     type = "vm";
-                                    priority = 100;
                                 };
                                 inherit ip port;
                             };
