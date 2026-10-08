@@ -11,7 +11,7 @@
     */
     provisioner = {
         hostname = "provisioning.local";
-        ip = "192.168.1.200";
+        ips = ["192.168.1.200"];
         ssh = null; #can be a ssh host in the form user@ip
     };
 

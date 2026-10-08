@@ -27,6 +27,7 @@ description = "Automatic generation of Terraform and NixOS configurations for a 
         };
         nixosConfigurations = naps.lib.compileNixos args;
         terranix = naps.lib.compileTerranix args;
+        naps = naps.lib.compileNAPS args;
 
         checks.${system} = naps.lib.gen-config-checks inputs;
   };

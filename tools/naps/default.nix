@@ -13,8 +13,6 @@ in pkgs.writeShellApplication {
         opentofu
     ];
     text = ''
-        set -x
-        
         ${utils}
         ${naps}
     '';

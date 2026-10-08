@@ -163,6 +163,9 @@ if [[ "$1" == "init" ]]; then
 	git init
 	git add flake.nix inventory.nix
 	exit 0
+elif [[ "$1" == "help" || "$1" == "-h" || "$1" == "--help" ]]; then
+	naps_usage
+	exit 0
 fi
 
 SSH=$(nix eval .#naps.topology.provisioner.ssh --json | jq -r '. // empty')
