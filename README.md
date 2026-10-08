@@ -124,6 +124,8 @@ Migration:
 
 ### Prio
 
+- WHY THE TOKEN PROVISIONER SERVICE SHUTS DOWN ?
+
 - Use UserID instead of proper user creation (for the secrets and files within the containers)
 - containerMount non-shared persistent volumes
 - config: use deploy.<name>.reverseProxy and deploy.<name>.proxy to handle clearly both directions of the proxy and resolves conflicts ?
@@ -157,6 +159,7 @@ Migration:
 -provisionign should shutdown itself after a certain moment + tokens should be erased after a certain deadline
 - /!\ the provisioning service relies on DNS: need to generate a haproxy entry => MANDATORY
 - the provisioning services should follow the standard declaration (endpoints, secrets,...)
+- disable healthcheck on the haproxy backend pointing to the provisioning
 
 
 ### IDEAS
