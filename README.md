@@ -110,6 +110,7 @@ Migration:
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets
     + write a script that uploads the secrets to the provisioner using ssh and launch the secret provisioner automatically (based on the topology description)
     + tofu --auto-aprove (bad practice ?)
+    + the provisioner ports cannot be parametrized since the secret provisioner derivation is pulled from the public github. SOlution => should pass the ports as an argument
 
 
 ### Notes

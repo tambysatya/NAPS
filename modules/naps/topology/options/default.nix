@@ -45,12 +45,12 @@ let
                         tokens = lib.mkOption {
                             description = "Port reachable with single-use token";
                             type = libtypes.port;
-                            default = 38421;
+                            default = 38421; #TODO do not change (not configured yet)
                         };
                         mtls = lib.mkOption {
                             description = "Port reachable by mTLS";
                             type = libtypes.port;
-                            default = 38422;
+                            default = 38422; # TODO do not change (not configured yet)
                         };
                     };
                 };

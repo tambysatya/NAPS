@@ -17,7 +17,7 @@ let
                  --key  ${utils.ssl_key_path crt_basename} \
                  --cacert /etc/root_ca.crt \
                  --output /tmp/assets.tar.gz \
-                 https://${provisioner.hostname}:${provisioner.ports.mtls}/mtls \
+                 https://${provisioner.hostname}:${lib.toString provisioner.ports.mtls}/mtls \
                 
             install -d -o root -g root -m 700 /tmp/assets
             ${pkgs.gzip}/bin/gunzip /tmp/assets.tar.gz
