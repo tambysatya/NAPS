@@ -172,6 +172,7 @@ let
                 pkg = provisioner.packages.${system};
 
                 host = naps.topology.provisioner.hostname;
+                ports = naps.topology.provisioner.ports;
                 provisionerExe = lib.getExe provisioner.packages.${system}.default;
 
                 provisionerTokens = pkgs.writeShellApplication {
@@ -180,7 +181,7 @@ let
                         PROVISIONER_DIR=$1
                         export TOKEN_DIR="$PROVISIONER_DIR/secrets"
                         ${provisionerExe} \
-                            --port 38421 \
+                            --port ${lib.toString ports.tokens} \
                             --ssl_cert "$PROVISIONER_DIR/ssl/crt" \
                             --ssl_key "$PROVISIONER_DIR/ssl/key"
                     '';
@@ -191,7 +192,7 @@ let
                         PROVISIONER_DIR=$1
                         export TOKEN_DIR="$PROVISIONER_DIR/mtls/"
                         ${provisionerExe} \
-                            --port 38422 \
+                            --port ${lib.toString ports.mtls} \
                             --ssl_cert "$PROVISIONER_DIR/ssl/crt" \
                             --ssl_key "$PROVISIONER_DIR/ssl/key" \
                             --ssl_ca "$PROVISIONER_DIR/ssl/root_ca.crt"

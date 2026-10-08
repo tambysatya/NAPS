@@ -38,6 +38,23 @@ let
                 type = types.listOf types.str;
                 example = "192.168.1.200";
             };
+            ports = lib.mkOption {
+                description = "TCP ports selection";
+                type = types.submodule {
+                    options = {
+                        tokens = lib.mkOption {
+                            description = "Port reachable with single-use token";
+                            type = libtypes.port;
+                            default = 38421;
+                        };
+                        mtls = lib.mkOption {
+                            description = "Port reachable by mTLS";
+                            type = libtypes.port;
+                            default = 38422;
+                        };
+                    };
+                };
+            };
             ssh = lib.mkOption {
                 description = "If set, the provisioner will run on the specified machine instead of localhost";
                 type = types.nullOr types.str;

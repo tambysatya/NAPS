@@ -12,6 +12,7 @@ let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
 
     provisionerHost = config.naps.topology.provisioner.hostname;
     provisionerips = config.naps.topology.provisioner.ips;
+    provisionermtls = config.naps.topology.provisioner.ports.mtls;
     mkBackendEnv = port: ip: {
                                 env = {
                                     host = provisionerHost;
@@ -39,7 +40,7 @@ in
                         map extractCert (builtins.attrValues tls); 
 
                     proxy.tcp = {
-                        "38422" = mkProvisionerProxy 38422 provisionerips;  #we add the mTLS endpoint
+                        "${lib.toString provisionermtls}" = mkProvisionerProxy provisionermtls provisionerips;  #we add the mTLS endpoint
                     };
                 })
             config.naps.assets.installer;

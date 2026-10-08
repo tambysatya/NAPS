@@ -11,12 +11,13 @@ let
             domain = config.naps.topology.domain;
             crt_basename= "vm-${vmname}.${domain}";
             installScript = pkgs.writeShellScript "fetch-all-assets" config.naps.assets.scripts.install.${vmname};
+            provisioner = config.naps.topology.provisioner;
         in ''
             ${lib.getExe pkgs.curl} --cert ${utils.ssl_crt_path crt_basename} \
                  --key  ${utils.ssl_key_path crt_basename} \
                  --cacert /etc/root_ca.crt \
                  --output /tmp/assets.tar.gz \
-                 https://${config.naps.topology.provisioner.hostname}:38422/mtls \
+                 https://${provisioner.hostname}:${provisioner.ports.mtls}/mtls \
                 
             install -d -o root -g root -m 700 /tmp/assets
             ${pkgs.gzip}/bin/gunzip /tmp/assets.tar.gz
