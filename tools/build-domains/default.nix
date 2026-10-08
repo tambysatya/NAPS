@@ -13,6 +13,7 @@ let
             fi
 
             mkdir -p .secrets/provisioner/{ssl,secrets,mtls}
+            rm -Rf .secrets/provisioner/ssl/* #clean the repository
             
             ${utils.gen_ssl_certificate naps.topology.provisioner.hostname}
 
