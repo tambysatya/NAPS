@@ -97,7 +97,7 @@ let
 
                         set -x
                         set -euo pipefail
-                        until ${fetchAssetsScript vmname}; do
+                        until ${fetchAssetsScript vmname} do
                                 sleep 2
                         done
                         echo "All assets are installed."
