@@ -40,7 +40,7 @@ let
         in ''
             frontend ${name}_${mode}_${lib.toString port}
                 mode ${mode}
-                bind ${bind} ${extraConfig.frontend.bind}
+                bind ${bind} ${lib.optionalString (lib.hasAttrByPath ["frontend" "bind"] extraConfig) extraConfig.frontend.bind}
                 default_backend be_${name}_${mode}_${lib.toString port}
             ${generateBackends mode port name backends}
         '';
