@@ -155,6 +155,8 @@ Migration:
 - we rely on ANYCORN which is not packaged by nixos so we have to maintain it ouerselve
 
 -provisionign should shutdown itself after a certain moment + tokens should be erased after a certain deadline
+- /!\ the provisioning service relies on DNS: need to generate a haproxy entry => MANDATORY
+- the provisioning services should follow the standard declaration (endpoints, secrets,...)
 
 
 ### IDEAS

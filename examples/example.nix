@@ -10,7 +10,7 @@
 
     provisioner = {
         hostname = "provisioning.local";
-        ip = "192.168.1.200";
+        ips = ["192.168.1.200"];
         ssh = "naps@192.168.1.200";
     };
     domain = "local.fr";

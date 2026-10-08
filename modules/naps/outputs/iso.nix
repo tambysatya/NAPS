@@ -57,7 +57,7 @@ in {
                         (lib.imap
                          (i: ip:
                           "     server provisioner_${lib.toString i} ${ip}:8080 check ${if i ==1 then "" else "backup"}")
-                         provisionersAddrs)}
+                         config.naps.topology.provisioner.ips)}
 
             '';
         };

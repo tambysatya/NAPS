@@ -22,13 +22,6 @@ in
               description = "Gateway of the VM";
               default = config.naps.topology.gateway;
             };
-            provisionerAddr = lib.mkOption {
-                description = "Address of the provisioning server. It will be used to reach the secrets.";
-                type = types.str;
-                example = "192.168.1.200";
-              default = config.naps.topology.provisioner.ip;
-            };
-            
             vcpu = lib.mkOption {
               type = types.ints.unsigned;
               description = "The number of vCPUS allocated to the VM";
@@ -65,14 +58,6 @@ in
                 type = types.bool;
                 default = true;
             };
-
-            /*
-            test = lib.mkOption {
-                type = types.bool;
-                description = "The machine is used for tests and will belong to a specific zone";
-                default = false;
-            };
-            */
           };
         };
 
