@@ -170,7 +170,11 @@ fi
 
 SSH=$(nix eval .#naps.topology.provisioner.ssh --json | jq -r '. // empty')
 ALL_VMS=$(nix eval .#naps.topology.vms --json | jq -r 'keys[]' | sort)
-VM_DEPLOYED=$(tofu state list |  sed -n 's/libvirt_domain.//p' | sort)
+
+VM_DEPLOYED=""
+if [[ -e "terraform.tfstate" ]]; then
+	VM_DEPLOYED=$(tofu state list |  sed -n 's/libvirt_domain.//p' | sort)
+fi
 
 NEW_VMS=$(comm -23 \
     <(printf '%s\n' "$ALL_VMS") \
