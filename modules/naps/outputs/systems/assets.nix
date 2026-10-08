@@ -20,7 +20,7 @@ let
                 
             install -d -o root -g root -m 700 /tmp/assets
             ${pkgs.gzip}/bin/gunzip /tmp/assets.tar.gz
-            ${lib.getExe pkgs.gnutar} -xvf /tmp/assets.tar -C /tmp/assets && rm /tmp/assets.tar
+            ${lib.getExe pkgs.gnutar} -xf /tmp/assets.tar -C /tmp/assets && rm /tmp/assets.tar
 
             ${installScript} /tmp/assets 
             rm -R /tmp/assets 
