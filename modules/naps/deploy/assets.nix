@@ -39,8 +39,7 @@ in
                         map extractCert (builtins.attrValues tls); 
 
                     proxy.tcp = {
-                        "38421" = mkProvisionerProxy 38421 provisionerips;
-                        "38422" = mkProvisionerProxy 38422 provisionerips;
+                        "38422" = mkProvisionerProxy 38422 provisionerips;  #we add the mTLS endpoint
                     };
                 })
             config.naps.assets.installer;

@@ -311,7 +311,7 @@ let
           };
 
 
-          naps = compileNAPS exampleArgs;
+          infra = compileNAPS exampleArgs;
           terranix = compileTerranix exampleArgs;
 
           checks.${system} = gen-config-checks inputs;

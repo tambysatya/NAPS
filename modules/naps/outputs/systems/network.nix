@@ -27,8 +27,9 @@ let
         let proxyAddr = if deploy.env.type == "vm" then "127.0.0.1" else "192.168.100.1";
             endpoints = config.naps.deploy.endpoints;
             allEndpoints = lib.concatMap builtins.attrNames [endpoints.tcp endpoints.udp endpoints.http];
+            extraEndpoints = [ config.naps.topology.provisioner.hostname ];
         in {
-            ${proxyAddr} = lib.unique allEndpoints; #all endpoints are routed to the proxy
+            ${proxyAddr} = lib.unique (allEndpoints ++ extraEndpoints); #all endpoints are routed to the proxy
         };
 
 

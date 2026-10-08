@@ -94,7 +94,7 @@ naps_provisioner(){
     case "${1:-}" in
         run)
 
-			yellow "$(bold "+ Install/Update the secret provisioner ($SSH)...)")"
+			yellow "$(bold "+ Install/Update the secret provisioner $SSH...")"
 			# shellcheck disable=SC2119,2154,2029
 		    run_script <<-EOF
 				mkdir -p ~/.confg/systemd/user
