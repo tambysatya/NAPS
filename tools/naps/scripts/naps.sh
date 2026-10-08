@@ -231,6 +231,8 @@ case "${1:-}" in
     update)
         shift
 		yellow "$(bold "Rebuilding $1")"
+		naps_provisioner upload
+		naps_provisioner run
 		run_local nixos-rebuild switch --flake .#"$1" --target-host root@"$1"
         ;;
 
