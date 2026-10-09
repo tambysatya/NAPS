@@ -20,8 +20,11 @@ let
                 secret:
                 let uid = utils.envUID env;
                     override = {
-                        installArgs = {owner = hostsOwner;}; #note that pgpass is set to false by default
-                        reload = hostsReload;
+                        installArgs = {
+                            group = hostsOwner;
+                            mode = "410";
+                            reload = hostsReload;
+                        };
                     };
                     mkHostSecret = host: {${utils.envUID host}.${secretname} =(secret // override);}; #replace the owner of the secret transmitted to the hosts
                     dsts = lib.filter (name: name != uid) hosts;

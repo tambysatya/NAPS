@@ -168,11 +168,21 @@ Migration:
 - disable healthcheck on the haproxy backend pointing to the provisioning
 
 
+- add an interface to define "constant services" services that are deployed by default. Now its handled manually. Ideas of "constant services"
+    - journald-remote (logging service)
+    - step-renew (handled differently now)
+    - assets-* (services fetchings the assets at each rebuild)
+    - step-ca for ssh keys could be a great addition
+   The services will then have a register.nix and a configuraiton as a function taking {config, deploy, ...} in argument
+- see if instead of passing every attribute of naps, we can pass naps // {outputs={}} to avoid having an infinite recursion.
+
+
 ### IDEAS
 
 - add a "why" option in the persistent directory declaration in register to add a message describing why the repository is useful whenever the user does not declare it. E.G "/nix: used for hydra to cache builds. Should be consequent enough to handle multiple versions of the same project"
 
 - add a naps.predicate that summarizes characteristics of the network like have_ca, have_hydra, have_postgres,...
+
 
 
 CHECKS:
@@ -197,3 +207,5 @@ evaluation warning: autoinstall.service is ordered after 'network-online.target'
 
 EXPERIMENTS:
 - check multiple containers running on the same VM
+- check if instead of having the specified domain we works with "naps.domain". Should work out of the boxe. Should also with test.domain (=> would allow to do loadbalancing during testing)
+
