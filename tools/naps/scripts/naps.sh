@@ -83,13 +83,11 @@ naps_build(){
             run_local nix build .#nixosConfigurations.iso.config.system.build.isoImage
             ;;
         *)
-			yellow "$(bold "+ Building assets...")"
-            naps_build assets
-			yellow "$(bold "+ Building iso...")"
-            naps_build iso
-			yellow "$(bold "+ Building kvm configurations...")"
-            naps_build domains
-        ;;
+			echo "Unknown command: naps build $1" >&2
+			echo
+			naps_usage
+			exit 1
+			;;
     esac
 }
 
@@ -121,6 +119,7 @@ naps_provisioner(){
 					run_local cp -r .secrets/provisioner "$HOME/.local/naps/"
 				fi
             ;;
+
 		*)
 			naps_provisioner upload
 			naps_provisioner run
@@ -156,11 +155,16 @@ naps_apply(){
 
 	naps_plan 
 
-	yellow "$(bold "Building...")"
-	naps_build "$@"
+	yellow "$(bold "Building assets")"
+	naps_build assets "$@"
 
 	yellow "$(bold "Provisioning...")"
 	naps_provisioner "$@"
+
+	yellow "$(bold "Building iso...")"
+	naps_build iso
+	yellow "$(bold "Building kvm configurations...")"
+	naps_build domains
 
 	yellow "$(bold "Deploying...")"
 	naps_deploy tofu
