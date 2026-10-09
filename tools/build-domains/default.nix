@@ -12,10 +12,7 @@ let
                 exit 1
             fi
 
-            mkdir -p .secrets/provisioner/{ssl,secrets,mtls}
-            rm -Rf .secrets/provisioner/ssl/* #clean the repository
-            
-            ${utils.gen_ssl_certificate naps.topology.provisioner.hostname}
+           
 
 
             ${lib.concatMapStringsSep "\n" utils.ship (builtins.attrNames naps.topology.vms)}
@@ -35,8 +32,6 @@ let
             ISO_NAME=$(ls result/iso/*.iso)
             echo "ISO_NAME=$ISO_NAME"
             sed -i "s+ISO_NAME+$ISO_NAME+" "terraform.tf.json" 
-
-            cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/
         '';
 
 
