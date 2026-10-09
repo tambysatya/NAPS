@@ -190,7 +190,7 @@ in {
                     [] "vm-provisioning.${domain}"
                     {hostname=config.naps.topology.provisioner.hostname;})}
             cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/
-            mv .secrets/${config.naps.topology.provisioner.hostname}.* .secrets/provisioner/ssl/
+            mv .secrets/out/${config.naps.topology.provisioner.hostname}/* .secrets/provisioner/ssl/
 
         '';
         install = installScript;
