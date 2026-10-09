@@ -1,8 +1,8 @@
 
-{flakeRoot, inputs, config, lib, pkgs, topology, path, ... }:
+{flakeRoot, inputs, config, lib, pkgs, naps, path, ... }:
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
-    domain = topology.domain;
+    domain = naps.topology.domain;
     hostname = "hydra.${domain}";
     secretkeypath = "/var/lib/secrets/hydra-cache/hydra-cache.key";
     /* 
@@ -46,7 +46,7 @@ config.services.hydra = {
     extraConfig = ''
       store_uri = file:///var/lib/hydra/cache?secret-key=${secretkeypath}
     '';
-    smtpHost = topology.smtpHost;
+    smtpHost = naps.topology.smtpHost;
 };
 config.services.darkhttpd = {
     enable = true;

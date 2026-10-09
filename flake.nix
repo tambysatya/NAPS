@@ -73,9 +73,7 @@ let
                                     inherit system; 
                                     specialArgs = {
                                         inherit inputs flakeRoot vmname;
-                                        inherit (naps) topology;
-                                        deploy = naps.deploy.systems.${vmname};
-                                        services = naps.services;
+                                        naps = naps // {outputs = {systems = {}; domains = {};}; };
                                         extraArgs = extraArgs // view conf; # passing extraArgs as well (to transmit to the containers)
                                     } // extraArgs // view conf;
                                     modules = [

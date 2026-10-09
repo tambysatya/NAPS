@@ -1,17 +1,18 @@
-{flakeRoot, lib, inputs, pkgs, config, topology, services, deploy, ...}:
+{flakeRoot, lib, inputs, pkgs, config, naps, vmname, ...}:
 
 let 
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
+
     s3lib = import ./lib.nix {inherit lib inputs pkgs flakeRoot;};
-    accesses = lib.concatMap ({links,...}: links.s3) (builtins.attrValues services);
+    accesses = lib.concatMap ({links,...}: links.s3) (builtins.attrValues naps.services);
     
 
 
 in {
 config = 
     { 
-        networking.firewall.allowedTCPPorts = lib.optionals (deploy.env.type == "container") [3900 3903]; #TODO rpc bind ??
+        networking.firewall.allowedTCPPorts = [3900 3903]; #TODO rpc bind ??
         services.garage = 
         {
             enable = true;
@@ -24,9 +25,9 @@ config =
                 rpc_secret_file = "/var/lib/secrets/garage-rpc.key";
                 replication_factor = 1;
                 s3_api = {
-                    api_bind_addr = if deploy.env.type == "container" then "0.0.0.0:3900" else "127.0.0.1:3900"; # localhost because not encrypted
+                    api_bind_addr = "0.0.0.0:3900"; # localhost because not encrypted
                     s3_region = "garage";
-                    root_domain = "s3.${topology.domain}";
+                    root_domain = "s3.${naps.topology.domain}";
                 };
                 admin = {
                     api_bind_addr = "127.0.0.1:3903"; # localhost because not encrypted

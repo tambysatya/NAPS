@@ -1,9 +1,9 @@
 
-{flakeRoot, lib, inputs, pkgs, config, path, topology, ...}:
+{flakeRoot, lib, inputs, pkgs, config, path, naps, ...}:
 
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
-    domain = topology.domain;
+    domain = naps.topology.domain;
     domainToLdapSuffix = domain:
         let parts = lib.reverseList (lib.splitString "." domain);
         in lib.concatStringsSep "," (lib.map (x: "dc=${x}") parts);

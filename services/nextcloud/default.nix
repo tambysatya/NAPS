@@ -1,16 +1,16 @@
-{flakeRoot, inputs, config, lib, pkgs, topology, path, deploy, ... }:
+{flakeRoot, inputs, config, lib, pkgs, path, naps, ... }:
 
 # https://danubedata.ro/blog/nextcloud-s3-compatible-primary-storage-2026
 
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
-    domain = topology.domain;
+    domain = naps.topology.domain;
     hostname = "nextcloud.${domain}";
 in {
 
     config = 
     {
-        networking.firewall.allowedTCPPorts = lib.optionals (deploy.env.type == "container") [443 80];
+        networking.firewall.allowedTCPPorts = [443 80];
         services.nextcloud = {
             enable = true;	
             #https = true; /*IMPORTANT IF HTTPS*/
@@ -53,7 +53,7 @@ in {
                 ];
                 trusted_proxies = [
                     #"162.38.243.60"
-                    topology.vmSubnet
+                    naps.topology.vmSubnet
                     "192.168.100.0" #containers proxy TODO
                     
                 ];

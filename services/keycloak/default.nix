@@ -1,10 +1,10 @@
-{flakeRoot, lib, inputs, config, pkgs, path, topology,...}:
+{flakeRoot, lib, inputs, config, pkgs, path, naps,...}:
 
 
 
 let
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
-    servicevhost = "auth.${topology.domain}";
+    servicevhost = "auth.${naps.topology.domain}";
     serviceaddr = "127.0.0.1";
     serviceport = 8000;
 in {
@@ -18,7 +18,7 @@ in {
                   database = {
                     passwordFile = "/var/lib/secrets/db-keycloak.key";
                     useSSL = true;
-                    host = "postgres.${topology.domain}";
+                    host = "postgres.${naps.topology.domain}";
                     caCert = "/etc/intermediate_ca.crt";
                   };
                   settings = {

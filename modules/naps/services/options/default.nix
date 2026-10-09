@@ -47,6 +47,11 @@ let libtypes = lib.types;
                     description = "Dependencies across the other services of the napsstructure";
                     type = types.links;
                 };
+                default = lib.mkOption {
+                    description = "If set to true, this service is enabled by default and can be disabled using a specific flag"; #TODO explain which flag
+                    type = types.bool;
+                    default = false;
+                };
             };
     };
 in

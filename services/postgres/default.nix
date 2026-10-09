@@ -1,9 +1,10 @@
-{flakeRoot, lib, inputs, config, pkgs, topology, services, ...}:
+{flakeRoot, lib, inputs, config, pkgs, naps, ...}:
 
 let 
 
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
-    domain = topology.domain;
+    domain = naps.topology.domain;
+    services = naps.services;
     dbaccesses = lib.concatMap ({links,...}: links.postgres) (builtins.attrValues services); #list of dbAccesses in the napsstructure
     users = lib.map (access: 
                         {
