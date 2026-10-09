@@ -185,9 +185,10 @@ in {
             # Generates the provisioner tls certificates
             mkdir -p .secrets/provisioner/{ssl,secrets,mtls}
             rm -Rf .secrets/provisioner/ssl/* #clean the repository
-            ${config.naps.assets.providers.tls.apply.generate
-                [] "vm-provisioning.${domain}"
-                {hostname=config.naps.topology.provisioner.hostname;}}
+            ${lib.concatStringsSep "\n" 
+                (config.naps.assets.providers.tls.apply.generate
+                    [] "vm-provisioning.${domain}"
+                    {hostname=config.naps.topology.provisioner.hostname;})}
             cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/
             mv .secrets/${config.naps.topology.provisioner.hostname}.* .secrets/provisioner/ssl/
 
