@@ -22,7 +22,7 @@ let
                     override = {
                         installArgs = {
                             group = hostsOwner;
-                            mode = "410";
+                            mode = "440";
                             reload = hostsReload;
                         };
                     };
