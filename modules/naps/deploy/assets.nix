@@ -43,5 +43,5 @@ in
                         "${lib.toString provisionermtls}" = mkProvisionerProxy provisionermtls provisionerips;  #we add the mTLS endpoint
                     };
                 })
-            config.naps.assets.installer;
+            config.naps.internal.assets.installer;
 }

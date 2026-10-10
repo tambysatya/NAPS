@@ -2,11 +2,11 @@
 
 
 let types = lib.types;
-    allDefaults = builtins.attrNames (lib.filterAttrs (_: {default, ...}: default) config.naps.services);
+    allDefaults = lib.filterAttrs (_: {defaultOn, ...}: defaultOn != null) config.naps.services;
 in {
 options.naps.global.services.defaults = lib.mkOption {
-    description = "The list of services deployed by default";
-    type = types.listOf types.str;
-    default = allDefaults;
+    description = "The description of the services deployed by default";
+    type = types.attrsOf types.str;
+    default = lib.mapAttrs (_: builtins.getAttr "defaultOn") allDefaults;
 };
 }

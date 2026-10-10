@@ -51,10 +51,10 @@ let
                     description = "Dependencies across the other services of the napsstructure";
                     type = types.links;
                 };
-                default = lib.mkOption {
-                    description = "If set to true, this service is deployed by default everywhere, but can be disabled explicitely in each vm configuration";
-                    type = types.bool;
-                    default = false;
+                defaultOn = lib.mkOption {
+                    description = "If set, this service is deployed by default everywhere, but can be disabled explicitely in each vm configuration";
+                    type = types.nullOr (types.enum ["containers" "vms" "all"]);
+                    default = null;
                 };
             };
     };

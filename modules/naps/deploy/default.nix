@@ -50,5 +50,5 @@ in {
                ./endpoints.nix
                ];
     naps.deploy.systems = utils.mergeAll (lib.mapAttrsToList processVM config.naps.topology.vms);
-    naps.deploy.endpoints = utils.mergeAll (lib.mapAttrsToList processService config.naps.services);
+    naps.deploy.endpoints = utils.mergeAll (lib.mapAttrsToList processService config.naps.internal.services);
 }

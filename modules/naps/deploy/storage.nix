@@ -38,7 +38,7 @@ let
         envuid:
         assetname:
         asset@{installArgs, ...}:
-        let env = config.naps.envs.all.${envuid};
+        let env = config.naps.internal.envs.all.${envuid};
             path = installArgs.path;
         in lib.optionalAttrs (env.type == "container") {
             ${utils.envHost env}.storage.containers.${utils.envUID env}.${path} = {
@@ -54,7 +54,7 @@ in
 {
     imports = [./options];
     naps.deploy.systems = utils.mergeAll 
-                                (lib.mapAttrsToList generateMappings config.naps.volumes.perVM
-                                ++ lib.mapAttrsToList generateBinds config.naps.volumes.perDirectory
-                                ++ lib.mapAttrsToList processAssets config.naps.assets.perEnv);
+                                (lib.mapAttrsToList generateMappings config.naps.internal.volumes.perVM
+                                ++ lib.mapAttrsToList generateBinds config.naps.internal.volumes.perDirectory
+                                ++ lib.mapAttrsToList processAssets config.naps.internal.assets.perEnv);
 }

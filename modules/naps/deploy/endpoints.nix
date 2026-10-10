@@ -7,7 +7,7 @@ let
 
 
     processVM = # For each VM, all the endpoints are registered
-        vmname: utils.mergeAll (lib.mapAttrsToList (processService vmname) config.naps.services);
+        vmname: utils.mergeAll (lib.mapAttrsToList (processService vmname) config.naps.internal.services);
 
     processService = 
         vmname: srvname: {deployements, endpoints,...}:

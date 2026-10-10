@@ -42,5 +42,7 @@ naps.services.forgejo = {
         {path = "/var/lib/forgejo"; shared=false; inherit owner reload;}
     ];
 
+    defaultOn = "all"; #TODO
+
 };
 }
