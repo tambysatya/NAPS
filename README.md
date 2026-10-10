@@ -116,6 +116,16 @@ Migration:
     + the provisioner ports cannot be parametrized since the secret provisioner derivation is pulled from the public github. SOlution => should pass the ports as an argument
     + should perform lazy rebuilds whose configuration (or secrets have changed)
 
+- naps.lib: an interface to register actions that can do naps (based on keys)
+    + should contains assets providers (instead of naps.assets.providers)
+    + should contain all "links providers" (need a formalism to declare new links, the same way we can declare new assets)
+- naps.global (or naps.override): all global configuration and/or modifications of the standard config by the user
+    + should contain the list of defaults services
+    + should contain overrides of the default service configuration
+    + naps.global.adopt should contain the list of existing links/services available in the infra
+
+- having an API to declare "default services": => should amount to add a deployement environment for each vm that does not disable it explicitely
+
 
 ### Notes
 
@@ -130,7 +140,7 @@ Migration:
 
 ### Prio
 
-- WHY THE TOKEN PROVISIONER SERVICE SHUTS DOWN ?
+- naps.services.<name>.deployement should be in naps.deploy.services.<name> instead
 
 - Use UserID instead of proper user creation (for the secrets and files within the containers)
 - containerMount non-shared persistent volumes

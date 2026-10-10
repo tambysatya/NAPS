@@ -53,10 +53,10 @@ in
               example = ["ldap"];
               default = [];
             };
-            centralizeLogs = lib.mkOption {
-                description = "Logs of this machine should be centralized using journald-upload/journald-remote"; 
-                type = types.bool;
-                default = true;
+            without = lib.mkOption {
+                description = "List of default services that should not be deployed.";
+                type = types.listOf types.str;
+                default = [];
             };
           };
         };

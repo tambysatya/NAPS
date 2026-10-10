@@ -41,5 +41,6 @@ naps.services.forgejo = {
     persistent = [
         {path = "/var/lib/forgejo"; shared=false; inherit owner reload;}
     ];
+
 };
 }
