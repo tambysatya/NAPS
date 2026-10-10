@@ -3,7 +3,7 @@
 let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
 in {
-options.naps.envs = lib.mkOption {
+options.naps.internal.envs = lib.mkOption {
     description = "All deployement environments";
     type = types.submodule {
         options = {

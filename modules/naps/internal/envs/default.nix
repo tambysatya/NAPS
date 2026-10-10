@@ -35,7 +35,7 @@ let
             
 
     allEnvs = # uid => env
-        let servicesEnvs = lib.mapAttrsToList (srvuid: {deployement, ...}: {${srvuid} = deployement;}) config.naps.envs.services;
+        let servicesEnvs = lib.mapAttrsToList (srvuid: {deployement, ...}: {${srvuid} = deployement;}) config.naps.internal.envs.services;
             vms = map (vmname: {${vmname}=mkVMEnv vmname;}) (builtins.attrNames config.naps.topology.vms) ; 
         in #servicesEnvs;
            utils.mergeAll (servicesEnvs ++ vms); # we need to do this because some vms only have containers
@@ -45,8 +45,8 @@ let
 in {
     imports = [./options.nix];
 
-    naps.envs.services = utils.mergeAll (lib.mapAttrsToList processVM config.naps.topology.vms);
-    naps.envs.vms = extractNames parts.right;
-    naps.envs.containers = extractNames parts.wrong;
-    naps.envs.all = extractNames allEnvs;
+    naps.internal.envs.services = utils.mergeAll (lib.mapAttrsToList processVM config.naps.topology.vms);
+    naps.internal.envs.vms = extractNames parts.right;
+    naps.internal.envs.containers = extractNames parts.wrong;
+    naps.internal.envs.all = extractNames allEnvs;
 }

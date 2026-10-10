@@ -12,8 +12,9 @@ let
     users = import ./users.nix {inherit lib inputs;};
     volumes = import ./volumes.nix {inherit lib inputs;};
     assets = import ./assets.nix {inherit lib inputs;};
+    services = import ./services.nix {inherit lib inputs;};
 
-    types = libtypes // files // deployement // links // networktypes // endpointstypes // users // volumes // assets;
+    types = libtypes // files // deployement // links // networktypes // endpointstypes // users // volumes // assets // services;
 
 
 

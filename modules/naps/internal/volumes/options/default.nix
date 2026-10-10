@@ -76,12 +76,12 @@ let
 in
 
 {
-    options.naps.volumes.perDirectory = lib.mkOption {
+    options.naps.internal.volumes.perDirectory = lib.mkOption {
        description  = "Summary of storage allocations across the napsstructure, each directory being referred using an unique deterministic identifier.";
        type = types.attrsOf dirInfos;
        default = {};
     };
-    options.naps.volumes.perVM = lib.mkOption {
+    options.naps.internal.volumes.perVM = lib.mkOption {
        description  = "Summary of disks allocated to each VM. Will be of the form disk => vmDisk";
        type = types.attrsOf (types.attrsOf vmDisk);
        default = {};

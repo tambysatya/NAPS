@@ -70,7 +70,7 @@ let
             dupVMMntPoint = utils.getFirstDupplicate (map mkMountPoint disks);
             dupSrvPersistent = utils.getFirstDupplicate 
                                     (lib.concatMap 
-                                        (srvid: config.naps.services.${utils.serviceName config srvid}.persistent) (vmconf.services ++ vmconf.containers));
+                                        (srvid: config.naps.internal.services.${utils.serviceName config srvid}.persistent) (vmconf.services ++ vmconf.containers));
         in [
             { assertion = dupVMMntPoint == null; message = "${dupVMMntPoint} is declared multiple times on ${vmname}";}
             { assertion = dupSrvPersistent == null; message = "${dupSrvPersistent} is declared by multiple services.";}
@@ -79,7 +79,7 @@ let
 in {
     imports = [./options];
     assertions = lib.concatLists (lib.mapAttrsToList checkVM config.naps.topology.vms);
-    naps.volumes = utils.mergeAll (map processService (builtins.attrValues config.naps.services));
+    naps.internal.volumes = utils.mergeAll (map processService (builtins.attrValues config.naps.internal.services));
     /*
     config.naps.volumes = {
         perDirectory = utils.mergeAll (libsmapAttrsToList processVM config.naps.topology.vms);

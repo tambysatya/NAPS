@@ -68,19 +68,19 @@ let
 
 in {
 
-naps.assets.providers.plain = {
+naps.internal.assets.providers.plain = {
     apply = {
         generate = acc: assetname: args: acc ++ [(generatePlain assetname args)];
         install = assetname: args: ""; #no installation script since the file goes in the store
     };
 };
-naps.assets.providers.password = {
+naps.internal.assets.providers.password = {
     apply = {
         generate = acc: assetname: args: acc ++ [(utils.generateSSLString assetname args)];
         install = assetname: args: utils.install assetname "file" args.installArgs;
     };
 };
-naps.assets.providers.postgres = {
+naps.internal.assets.providers.postgres = {
 /*
     inputs = {
         installArgs = types.submodule {
@@ -101,13 +101,13 @@ naps.assets.providers.postgres = {
         install = assetname: args: installDB assetname args.generateArgs args.installArgs;
     };
 };
-naps.assets.providers.s3 = {
+naps.internal.assets.providers.s3 = {
     apply = {
         generate = acc: assetname: args: acc ++ [(generateS3 assetname args)];
         install = assetname: args: installS3 assetname args.generateArgs args.installArgs;
     };
 };
-naps.assets.providers.ldapssha = {
+naps.internal.assets.providers.ldapssha = {
     apply = {
         generate = acc: assetname: args: acc ++ [(generateLDAP assetname args)];
         install = assetname: args: installLDAP assetname args.generateArgs args.installArgs;

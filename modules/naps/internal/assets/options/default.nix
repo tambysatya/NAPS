@@ -103,7 +103,7 @@ let
 in 
 
 {
-    options.naps.assets = lib.mkOption {
+    options.naps.internal.assets = lib.mkOption {
         description = "Assets dispatched across the infrastructure";
         type = types.submodule {
             options = {

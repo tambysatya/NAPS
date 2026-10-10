@@ -4,61 +4,11 @@ let libtypes = lib.types;
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
     napstypes = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     types = libtypes // napstypes;
-    service = types.submodule {
-            options = {
-                path = lib.mkOption {
-                    description = "Path to the configuration file";
-                    type = types.path;
-                    example = "./default.nix";
-                };
-                users = lib.mkOption {
-                    description = "Attrset of service users";
-                    type = types.attrsOf types.user;
-                    default ={};
-                };
-                persistent = lib.mkOption {
-                    description = "Persistent directories, managed by the service. The napsstructure must explicitely declare a persistent storage for each of them";
-                    type = types.listOf types.volume;
-                    default = [];
-                };
-                endpoints = lib.mkOption {
-                    description = "Various endpoints exposed by the service";
-                    type = types.endpoints;
-                };
-                assets = lib.mkOption {
-                    description = "Files placed in the store (config files, strings, encrypted password). Should be of the form <filename/dirname> = {...}";
-                    type = types.attrsOf types.asset;
-                    default = {};
-                    apply =
-                        lib.mapAttrs 
-                            (assetname: asset@{installArgs ? {}, ...}:  #sets the default value of path
-                                let installArgs' = if builtins.hasAttr "path" installArgs 
-                                                   then installArgs
-                                                   else installArgs // {path = "${utils.paths.secrets}/${assetname}";};
-                                in asset // {installArgs = installArgs';});
-
-                };
-                deployements = lib.mkOption {
-                    description = "AttrSet of serviceuid => environment where the service is currently deployed";
-                    type = types.attrsOf types.deployementEnvironment;
-                    default = {};
-                };
-                links = lib.mkOption {
-                    description = "Dependencies across the other services of the napsstructure";
-                    type = types.links;
-                };
-                default = lib.mkOption {
-                    description = "If set to true, this service is enabled by default and can be disabled using a specific flag"; #TODO explain which flag
-                    type = types.bool;
-                    default = false;
-                };
-            };
-    };
 in
 {
    options.naps.services = lib.mkOption {
         description = "Services resources";
-        type = lib.types.attrsOf service;
+        type = lib.types.attrsOf types.serviceOptions;
    };
 
 }

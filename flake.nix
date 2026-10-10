@@ -129,7 +129,7 @@ let
                             meta.description = "Install assets for ${name}";
                         };
                     };
-            in utils.mergeAll (lib.mapAttrsToList build naps.assets.scripts.install);
+            in utils.mergeAll (lib.mapAttrsToList build naps.internal.assets.scripts.install);
 
 
         compileBuildDomains = 

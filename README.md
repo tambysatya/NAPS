@@ -123,6 +123,16 @@ Migration:
     + should contain the list of defaults services
     + should contain overrides of the default service configuration
     + naps.global.adopt should contain the list of existing links/services available in the infra
+- move the intermediate representations into naps.internal:
+    + user API is still exposed under naps. (i.e. naps.topology, naps.services, naps.global)
+    + internal represnetation are built e.g.:
+        - naps.internal.services (essentially naps.services decorated with some metadatas like the deployement)
+        - naps.inernal.assets: as designed previously
+        - naps.internal.volumes: should be refactored to allow easier migrations
+        - naps.internal.links: should be refactored the same way as naps.assets: with a proper API to declare new links. Will be helpful, bc step-renew and journald are essentially links too
+        - naps.internal.endpoints: should be refactored to generate a complete map and allow easy network piping
+        - naps.internal.deploy (useful ??)
+   + naps.outputs.{systems, domains}: contains the (terranix)configurations
 
 - having an API to declare "default services": => should amount to add a deployement environment for each vm that does not disable it explicitely
 

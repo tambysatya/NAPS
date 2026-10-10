@@ -8,9 +8,9 @@ let
 
     processLinks = env: links@{ldap, postgres, s3}:
         let 
-            ldaphosts = builtins.attrValues config.naps.services.openldap.deployements;
-            s3hosts = builtins.attrValues config.naps.services.garage.deployements;
-            dbhosts = builtins.attrValues config.naps.services.postgres.deployements;
+            ldaphosts = builtins.attrValues config.naps.internal.services.openldap.deployements;
+            s3hosts = builtins.attrValues config.naps.internal.services.garage.deployements;
+            dbhosts = builtins.attrValues config.naps.internal.services.postgres.deployements;
 
             mkSharedSecret =
                 hosts: 
@@ -79,14 +79,14 @@ let
         let 
             applyMerge =
                 type: value:
-                if type == null then value else type.merge [] [{inherit value; file = "modules.naps.assets.default";}];
-            inputs = config.naps.assets.providers.${provider}.inputs;
+                if type == null then value else type.merge [] [{inherit value; file = "modules.naps.internal.assets.default";}];
+            inputs = config.naps.internal.assets.providers.${provider}.inputs;
             generateArgs' = applyMerge inputs.generateArgs generateArgs;
             installArgs' = applyMerge inputs.installArgs installArgs;
         in {inherit provider reload; generateArgs=generateArgs'; installArgs=installArgs';};
 
     perEnv = 
-        let assetattrs = utils.mergeAll (lib.mapAttrsToList processService config.naps.services); # envUID => assetName => asset
+        let assetattrs = utils.mergeAll (lib.mapAttrsToList processService config.naps.internal.services); # envUID => assetName => asset
             addTLSIdentity = 
                 vmname:
                 {
@@ -103,10 +103,10 @@ let
                     ++ (map addTLSIdentity (builtins.attrNames config.naps.topology.vms)));
         in lib.mapAttrs (_: lib.mapAttrs (_: checkAsset)) allassets; 
 
-    getEnv = uid: config.naps.envs.all.${uid}; 
+    getEnv = uid: config.naps.internal.envs.all.${uid}; 
     allAssets = # [{uid, assetname, asset}]
         let processEnv = uid: assetsattr: lib.mapAttrsToList (assetname: asset: asset // {name=assetname; env = getEnv uid;} ) assetsattr;
-        in lib.concatLists (lib.mapAttrsToList processEnv config.naps.assets.perEnv);
+        in lib.concatLists (lib.mapAttrsToList processEnv config.naps.internal.assets.perEnv);
     assetsPerType = builtins.groupBy (builtins.getAttr "provider") allAssets; # provider => [{uid, assetname, asset}]
 
     mkInstallerForEnv = 
@@ -129,10 +129,10 @@ let
                     genFun acc assetname args ++ [(utils.give assetname recipients)];
             processProvider =
                 acc: providername: assets:
-                let provider = config.naps.assets.providers.${providername};
+                let provider = config.naps.internal.assets.providers.${providername};
                     genFun = provider.apply.generate;
                 in lib.foldlAttrs (generateAsset genFun) acc assets;
-        in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.assets.generator);
+        in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.internal.assets.generator);
 
     installScript = 
         let 
@@ -140,7 +140,7 @@ let
                 lib.concatMapStringsSep "\n" installFun args;
             processProvider = 
                 providername: assets:
-                let provider = config.naps.assets.providers.${providername};
+                let provider = config.naps.internal.assets.providers.${providername};
                     installFun = provider.apply.install;
                 in lib.concatStringsSep "\n"
                         (lib.mapAttrsToList installFun assets);
@@ -151,18 +151,18 @@ let
                     install -d -m 0711 -o root -g root "$PREFIX"${utils.paths.secrets}
                     ${lib.concatStringsSep "\n" scriptsPerProviders}
                 '';
-        in lib.mapAttrs processVM config.naps.assets.installer;
+        in lib.mapAttrs processVM config.naps.internal.assets.installer;
 
 in {
     imports = [./options ./providers];
-    naps.assets.perEnv = perEnv;
-    naps.assets.generator = lib.mapAttrs  
-                                (_: assets: # {uid, assetname, env} => uid = {assetname, recipient=[env]}
-                                    utils.mergeAll (map ({name, generateArgs, env, ...}: {${name} = {args = generateArgs; recipients=[env];}; }) assets) )
-                                assetsPerType;
-    naps.assets.installer = 
-        utils.mergeAll (lib.mapAttrsToList (envname: envassets: { ${utils.envHost (getEnv envname)} = mkInstallerForEnv envname envassets;}) config.naps.assets.perEnv);
-    naps.assets.scripts = {
+    naps.internal.assets.perEnv = perEnv;
+    naps.internal.assets.generator = lib.mapAttrs  
+                                          (_: assets: # {uid, assetname, env} => uid = {assetname, recipient=[env]}
+                                                utils.mergeAll (map ({name, generateArgs, env, ...}: {${name} = {args = generateArgs; recipients=[env];}; }) assets) )
+                                            assetsPerType;
+    naps.internal.assets.installer = 
+        utils.mergeAll (lib.mapAttrsToList (envname: envassets: { ${utils.envHost (getEnv envname)} = mkInstallerForEnv envname envassets;}) config.naps.internal.assets.perEnv);
+    naps.internal.assets.scripts = {
         generate = ''
             set -euo pipefail
             mkdir -p ${utils.paths.out} ${utils.paths.git}
@@ -177,7 +177,7 @@ in {
                     mkdir -p ${utils.paths.perVM}/${vmname}
                     echo ${vmname} > ${utils.paths.perVM}/${vmname}/FLAKE
                     '')
-                (builtins.attrNames config.naps.assets.installer)}
+                (builtins.attrNames config.naps.internal.assets.installer)}
             
             # Generates the secrets
             ${generateScript}
@@ -186,7 +186,7 @@ in {
             mkdir -p .secrets/provisioner/{ssl,secrets,mtls}
             rm -Rf .secrets/provisioner/ssl/* #clean the repository
             ${lib.concatStringsSep "\n" 
-                (config.naps.assets.providers.tls.apply.generate
+                (config.naps.internal.assets.providers.tls.apply.generate
                     [] "vm-provisioning.${domain}"
                     {hostname=config.naps.topology.provisioner.hostname;})}
             cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/
