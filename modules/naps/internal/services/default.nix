@@ -12,7 +12,7 @@ let
         srvuid: {deployement, is, ...}:{ 
             ${is}.deployements.${srvuid} = deployement;
         };
-    copyService = 
+    copyService =  #copy the service declaration (from naps.services to naps.internal.services)
         srvname: srvconf: {${srvname} = srvconf;};
 
 
