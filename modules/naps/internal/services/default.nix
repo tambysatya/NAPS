@@ -6,35 +6,23 @@ let
     /* Should be replaced by a function consulting config.naps.envs.service.<serviceuid> */
 
 
-    alldefaults = config.naps.global.services.defaults;
-    mkDefaultServiceUID = 
-        vmname: srvname: "def_${vmname}_${srvname}";
-    mkDefaultServiceEnvs =
-        vmname: vmconf: srvname: defaultOn: 
-        lib.optionals (! builtins.elem srvname vmconf.without) (
-            if defaultOn == "vm" then [{type = "vm"; host=vmname;}]
-            else if defaultOn == "containers"
-            then map (srvuid: {type="container"; host={vm=vmname; container=srvuid;};}) vmconf.containers
-            else if defaultOn == "all"
-            then mkDefaultServiceEnvs vmname vmconf srvname "containers" ++ mkDefaultServiceEnvs vmname vmconf srvname "vms"
-            else throw "Wrong defaultOn value for ${srvname} [vmname=${vmname} defaultOn=${defaultOn}]"
-        );
 
-    computeHosts = 
-        vmname: vmconf:
-            with utils;
-            let 
-                getServiceEnv = srvid: config.naps.internal.envs.services.${srvid}.deployement;
-                vmdefaults = vmDefaultsServices vmconf;
-            in
-            utils.mergeAll
-                    (map 
-                        (srvid: 
-                            {${utils.serviceName config srvid}.deployements.${srvid} = getServiceEnv srvid;})
-                        (vmconf.services ++ vmconf.containers ++ map (mkDefaultServiceUID vmname) vmdefaults)); #TODO add them in naps.topology.services
+
+    processInstance =
+        srvuid: {deployement, is, ...}:{ 
+            ${is}.deployements.${srvuid} = deployement;
+        };
+    copyService = 
+        srvname: srvconf: {${srvname} = srvconf;};
+
 
 in {
-   imports = [./options];
+    imports = [./options];
+    config.naps.internal.services = lib.mkMerge (
+            (lib.mapAttrsToList processInstance config.naps.internal.envs.instances)
+            ++ (lib.mapAttrsToList copyService config.naps.services)
+    );
+}
    /*
    #config.naps.internal.envs.services = 
    config.naps.internal.services = utils.mergeAll [
@@ -52,4 +40,3 @@ in {
                                 (vmname: vmconf: map (srvname: {${mkDefaultServiceUID vmname srvname}.is = srvname;}) (vmDefaultsServices vmconf))
                                 config.naps.topology.vms));
     */
-}
