@@ -35,7 +35,7 @@ in rec {
         };
     };
 
-    serviceEnvironment = types.submodule {
+    serviceInstance = types.submodule {
         options = {
             deployement = lib.mkOption {
                 description = "Deployement environment of this service";
@@ -50,6 +50,11 @@ in rec {
                 description = "Specific tags to trigger specific behvavior";
                 type = types.listOf (types.oneOf [deployementTag types.str]);
                 default = [];
+            };
+            is = lib.mkOption {
+                description = "What is the service name.";
+                type = types.str;
+                example = "nextcloud";
             };
         };
     };

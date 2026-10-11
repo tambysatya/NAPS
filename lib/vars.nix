@@ -16,6 +16,7 @@ let
     ssl_key_path = name: "${paths.secrets}/${name}/${name}.key";
 
     #naming conventions
+    default_service_id = hostname: service: "def-${hostname}-${service}"; # hostname is a vmname or a ctname
     container_id = vmname: service: "${vmname}-${service}"; #returns the containers ID
     s3_root = access@{bucket, ...}: "s3-${bucket}";
     s3_key_id = access@{bucket,...}: "s3-${bucket}.id";
@@ -42,6 +43,7 @@ let
 
 in {
     inherit paths;
+    inherit default_service_id;
     inherit ssh_base_name store_base_name store_key_name;
     inherit ssl_crt_path ssl_key_path;
     inherit s3_root s3_key s3_key_id db_key ldap_key;

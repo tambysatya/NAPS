@@ -17,7 +17,7 @@ let
             then map (srvuid: {type="container"; host={vm=vmname; container=srvuid;};}) vmconf.containers
             else if defaultOn == "all"
             then mkDefaultServiceEnvs vmname vmconf srvname "containers" ++ mkDefaultServiceEnvs vmname vmconf srvname "vms"
-            else throw "Wrong defaultOn value for ${srvname} [vmname=${vmname} defaultOn=${defaultOn}]";
+            else throw "Wrong defaultOn value for ${srvname} [vmname=${vmname} defaultOn=${defaultOn}]"
         );
 
     computeHosts = 
@@ -35,8 +35,8 @@ let
 
 in {
    imports = [./options];
-   config.naps.internal.envs.services = 
    /*
+   #config.naps.internal.envs.services = 
    config.naps.internal.services = utils.mergeAll [
                                         config.naps.services  
                                         (utils.mergeAll (lib.mapAttrsToList computeHosts config.naps.topology.vms))

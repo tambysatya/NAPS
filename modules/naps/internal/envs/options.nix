@@ -7,9 +7,9 @@ options.naps.internal.envs = lib.mkOption {
     description = "All deployement environments";
     type = types.submodule {
         options = {
-            services = lib.mkOption {
+            instances = lib.mkOption {
                 description = "All service declarations, with the priority and the tags";
-                type = types.attrsOf types.serviceEnvironment;
+                type = types.attrsOf types.serviceInstance;
                 default = {};
             };
             all = lib.mkOption {
