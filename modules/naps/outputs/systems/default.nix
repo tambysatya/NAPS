@@ -59,6 +59,6 @@ in
         utils.mergeAll [
             (lib.mapAttrs processUsers config.naps.deploy.systems)
             (lib.mapAttrs mkRoot config.naps.deploy.systems)
-            (utils.mergeAll (lib.mapAttrsToList addServices config.naps.services))
+            (utils.mergeAll (lib.mapAttrsToList addServices config.naps.internal.services))
         ];
 }

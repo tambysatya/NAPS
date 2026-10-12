@@ -14,7 +14,8 @@ in {
              # Intermediate representations
              ####
              ./internal
-
+            
+             ./assets # assets generation
              ./links    # Summary of the links per vm
              ./deploy # Summary of the requirements (per vm and per container) [source of truth: services, assets, volumes]
              ./outputs];

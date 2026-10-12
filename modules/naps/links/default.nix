@@ -18,5 +18,5 @@ let
 in {
     imports = [./options];
     naps.links =
-        utils.mergeAll (lib.mapAttrsToList processService config.naps.services);
+        utils.mergeAll (lib.mapAttrsToList processService config.naps.internal.services);
 }

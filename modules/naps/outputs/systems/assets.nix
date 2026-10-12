@@ -10,7 +10,7 @@ let
         let 
             domain = config.naps.topology.domain;
             crt_basename= "vm-${vmname}.${domain}";
-            installScript = pkgs.writeShellScript "fetch-all-assets" config.naps.assets.scripts.install.${vmname};
+            installScript = pkgs.writeShellScript "fetch-all-assets" config.naps.internal.assets.scripts.install.${vmname};
             provisioner = config.naps.topology.provisioner;
         in ''
             ${lib.getExe pkgs.curl} --cert ${utils.ssl_crt_path crt_basename} \
@@ -143,7 +143,7 @@ let
 
 in {
 
-    naps.outputs.systems = utils.mergeAll (lib.mapAttrsToList processVM (config.naps.assets.installer) ++ lib.mapAttrsToList processService config.naps.services);
+    naps.outputs.systems = utils.mergeAll (lib.mapAttrsToList processVM (config.naps.internal.assets.installer) ++ lib.mapAttrsToList processService config.naps.internal.services);
 }
 
 

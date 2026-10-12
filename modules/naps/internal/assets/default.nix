@@ -1,7 +1,7 @@
 {flakeRoot, lib, inputs, config, path, pkgs,...}:
 let
 
-    utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import ./providers/lib {inherit flakeRoot lib inputs path pkgs;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import "${flakeRoot}/providers/lib" {inherit flakeRoot lib inputs path pkgs;};
    
             
     domain = config.naps.topology.domain;
@@ -80,7 +80,7 @@ let
             applyMerge =
                 type: value:
                 if type == null then value else type.merge [] [{inherit value; file = "modules.naps.internal.assets.default";}];
-            inputs = config.naps.internal.assets.providers.${provider}.inputs;
+            inputs = config.naps.assets.${provider}.inputs;
             generateArgs' = applyMerge inputs.generateArgs generateArgs;
             installArgs' = applyMerge inputs.installArgs installArgs;
         in {inherit provider reload; generateArgs=generateArgs'; installArgs=installArgs';};
@@ -129,7 +129,7 @@ let
                     genFun acc assetname args ++ [(utils.give assetname recipients)];
             processProvider =
                 acc: providername: assets:
-                let provider = config.naps.internal.assets.providers.${providername};
+                let provider = config.naps.assets.${providername};
                     genFun = provider.apply.generate;
                 in lib.foldlAttrs (generateAsset genFun) acc assets;
         in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.internal.assets.generator);
@@ -140,7 +140,7 @@ let
                 lib.concatMapStringsSep "\n" installFun args;
             processProvider = 
                 providername: assets:
-                let provider = config.naps.internal.assets.providers.${providername};
+                let provider = config.naps.assets.${providername};
                     installFun = provider.apply.install;
                 in lib.concatStringsSep "\n"
                         (lib.mapAttrsToList installFun assets);
@@ -154,7 +154,9 @@ let
         in lib.mapAttrs processVM config.naps.internal.assets.installer;
 
 in {
-    imports = [./options ./providers];
+    imports = [
+        ./options  
+    ];
     naps.internal.assets.perEnv = perEnv;
     naps.internal.assets.generator = lib.mapAttrs  
                                           (_: assets: # {uid, assetname, env} => uid = {assetname, recipient=[env]}
@@ -186,7 +188,7 @@ in {
             mkdir -p .secrets/provisioner/{ssl,secrets,mtls}
             rm -Rf .secrets/provisioner/ssl/* #clean the repository
             ${lib.concatStringsSep "\n" 
-                (config.naps.internal.assets.providers.tls.apply.generate
+                (config.naps.assets.tls.apply.generate
                     [] "vm-provisioning.${domain}"
                     {hostname=config.naps.topology.provisioner.hostname;})}
             cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/

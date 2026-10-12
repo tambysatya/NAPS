@@ -54,6 +54,7 @@ let
                modules = [
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/naps
+                  ./providers
                 ] ++ modules ++ services;
            });
     compileConfig = args: (compileModule args).config;
@@ -99,7 +100,7 @@ let
                                     pkgs.step-cli
                                     pkgs.gzip
                                 ];
-                                text = naps.assets.scripts.generate;
+                                text = naps.internal.assets.scripts.generate;
                            };
                 in {
                     packages.${system}."gen-assets"= pkg;

@@ -13,9 +13,9 @@ let
         in {world = map builtins.fromJSON (builtins.attrNames parts.right);
             local = map builtins.fromJSON (builtins.attrNames parts.wrong);};
 
-    tcp = getPorts naps.deploy.systems.${vmname}.proxy.tcp;
-    udp =  getPorts naps.deploy.systems.${vmname}.proxy.udp;
-    http = if lib.filterAttrs (_: {public,...}: public) naps.deploy.systems.${vmname}.proxy.http != {} # HTTP is opened publicly only if at least one service is hosted.
+    tcp = getPorts naps.internal.deploy.systems.${vmname}.proxy.tcp;
+    udp =  getPorts naps.internal.deploy.systems.${vmname}.proxy.udp;
+    http = if lib.filterAttrs (_: {public,...}: public) naps.internal.deploy.systems.${vmname}.proxy.http != {} # HTTP is opened publicly only if at least one service is hosted.
            then [443] else [];
 
     generateFirewall =
@@ -32,7 +32,7 @@ let
 
 in {
 
-    config.networking.firewall = if naps.envs.all.${vmname}.type == "vm"
+    config.networking.firewall = if naps.internal.envs.all.${vmname}.type == "vm"
                                  then {interfaces = lib.mapAttrs generateFirewall allInterfaces;}
                                  else {enable = false;}; #on containers, the firewall is disabled
 

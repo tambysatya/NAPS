@@ -68,46 +68,31 @@ let
 
 in {
 
-naps.internal.assets.providers.plain = {
+naps.assets.plain = {
     apply = {
         generate = acc: assetname: args: acc ++ [(generatePlain assetname args)];
         install = assetname: args: ""; #no installation script since the file goes in the store
     };
 };
-naps.internal.assets.providers.password = {
+naps.assets.password = {
     apply = {
         generate = acc: assetname: args: acc ++ [(utils.generateSSLString assetname args)];
         install = assetname: args: utils.install assetname "file" args.installArgs;
     };
 };
-naps.internal.assets.providers.postgres = {
-/*
-    inputs = {
-        installArgs = types.submodule {
-            options = {
-                inherit (types) owner;
-                pgpass = lib.mkOption {
-                    description = "If specified, a pgpass file will be created at this location.";
-                    type = types.nullOr types.str;
-                    default = null;
-                };
-            };
-            freeformType = types.attrs;
-        };
-    };
-*/
+naps.assets.postgres = {
     apply = {
         generate = acc: assetname: args: acc ++ [(generateDB assetname args)];
         install = assetname: args: installDB assetname args.generateArgs args.installArgs;
     };
 };
-naps.internal.assets.providers.s3 = {
+naps.assets.s3 = {
     apply = {
         generate = acc: assetname: args: acc ++ [(generateS3 assetname args)];
         install = assetname: args: installS3 assetname args.generateArgs args.installArgs;
     };
 };
-naps.internal.assets.providers.ldapssha = {
+naps.assets.ldapssha = {
     apply = {
         generate = acc: assetname: args: acc ++ [(generateLDAP assetname args)];
         install = assetname: args: installLDAP assetname args.generateArgs args.installArgs;
