@@ -19,13 +19,15 @@ let
     default_service_id = hostname: service: "def-${hostname}-${service}"; # hostname is a vmname or a ctname
     container_id = vmname: service: "${vmname}-${service}"; #returns the containers ID
     s3_root = access@{bucket, ...}: "s3-${bucket}";
-    s3_key_id = access@{bucket,...}: "s3-${bucket}.id";
-    s3_key = access@{bucket,...}: "s3-${bucket}.key";
-    db_key = access@{database, ...}: "db-${database}.key";
+    s3_key_id = access@{bucket,...}: "${s3_root access}.id";
+    s3_key = access@{bucket,...}: "${s3_root access}.key";
+    db_root = access@{database,...}: "db-${database}";
+    db_key = access@{database, ...}: "${db_root access}.key";
     ssh_base_name = name: "${name}-ssh";
     store_base_name = name: "${name}-cache";
     store_key_name = name: "${name}-cache.key";
-    ldap_key = access@{olcRootDN,...}: "ldap-${olcRootDN}.key"; #TODO
+    ldap_root = access@{olcRootDN,...}: "ldap-${olcRootDN}";
+    ldap_key = access@{olcRootDN,...}: "${ldap_root access}.key"; #TODO
     
     directory_id = serviceuid: path: "${serviceuid}:${path}";
     envUID = env: if builtins.isString env then env
@@ -46,7 +48,7 @@ in {
     inherit default_service_id;
     inherit ssh_base_name store_base_name store_key_name;
     inherit ssl_crt_path ssl_key_path;
-    inherit s3_root s3_key s3_key_id db_key ldap_key;
+    inherit s3_root s3_key s3_key_id db_root db_key ldap_root ldap_key;
     inherit directory_id;
     inherit envUID envHost hostDeployementEnv;
     inherit mkVMEnv mkCTEnv;

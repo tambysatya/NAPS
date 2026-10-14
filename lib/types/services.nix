@@ -48,8 +48,9 @@ let
 
                 };
                 links = lib.mkOption {
-                    description = "Dependencies across the other services of the napsstructure";
-                    type = types.links;
+                    description = "Dependencies across the other services of the napsstructure: Map Type  [Access]";
+                    type = types.attrsOf (types.listOf types.access) ;
+                    default = {};
                 };
                 defaultOn = lib.mkOption {
                     description = "If set, this service is deployed by default everywhere, but can be disabled explicitely in each vm configuration";

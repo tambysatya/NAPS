@@ -16,6 +16,15 @@ in rec {
                 description = "Name of the hosting virtual machine";
                 type = types.str; # TODO check if exists
             };
+            publicHostAddress = lib.mkOption {
+                description = "public IP Address of the host"; 
+                type = types.str; 
+            };
+            /* TODO: can be done using --extra-args ? */
+            veth = lib.mkOption {
+                description = "Virtual interface of the container";
+                type = types.str;
+            };
         };
     };
     deployementHostType = types.enum ["vm" "container"];
@@ -31,6 +40,10 @@ in rec {
             host = lib.mkOption {
                 description = "Which environment hosts the service";
                 type = deployementHost;
+            };
+            ip = lib.mkOption {
+                description = "IP address of the environment. This IP belongs to a private network if the environment is a container";
+                type = types.str;
             };
         };
     };

@@ -5,23 +5,16 @@ let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     
 
-    accessType = lib.types.submodule {
-        options = {
-            reload = lib.mkOption {
-                description = "List of services depending on this link";
-                type = types.listOf types.str;
-                default = [];
-                apply = x: if x == [] then throw "No service depend on this link." else x;
-            };
-        };
-        freeformType = types.attrsOf types.raw;
-    };
     linkProvider = types.submodule {
         options = {
             access = lib.mkOption {
                 description = "The type of the access. Is a submodule containing at least the field reload";
-                type = accessType;
+                type = types.access;
                 default = null;
+            };
+            accessuid = lib.mkOption {
+                description = "Construct a unique ID from the access";
+                type = types.functionTo types.str;
             };
             assets = lib.mkOption {
                 description = "A function that produces the set of assets consumed by the link: Access -> Map Asset";

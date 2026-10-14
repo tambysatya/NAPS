@@ -8,53 +8,17 @@ in
 with types;
 rec {
 
-    s3access = types.submodule {
-            options = {
-                inherit owner reload;
-                bucket = lib.mkOption{
-                    description = "Name of the bucket";
-                    type = types.str;
-                    example = "nextcloud-bucket";
-                };
-            };
-    };
-    postgresAccess = types.submodule {
-            options = {
-                inherit owner reload; 
-                database = lib.mkOption {
-                    description = "Name of the database. So far, the role (= user) name does necessarily match the database"; #TODO
-                    type = types.str;
-                    example = "nextcloud";
-                };
-            };
-    };
-    ldapSSHA = types.submodule {
-            options = {
-                olcRootDN = lib.mkOption {
-                    description = "Root DN";
-                    type = types.str;
-                };
-                inherit owner reload;
-            };
-    };
-    links = types.submodule{
+
+    access = lib.types.submodule {
         options = {
-            postgres = lib.mkOption {
-                description = "PostgresSQL access";
-                type = types.listOf postgresAccess;
+            reload = lib.mkOption {
+                description = "List of services depending on this link";
+                type = types.listOf types.str;
                 default = [];
-            };
-            s3 = lib.mkOption {
-                description = "S3 buckets";
-                type = types.listOf s3access;
-                default = [];
-            };
-            ldap = lib.mkOption {
-                description = "Hashed LDAP passwords";
-                type = types.listOf ldapSSHA;
-                default = [];
+                apply = x: if x == [] then throw "No service depend on this link." else x;
             };
         };
+        freeformType = types.attrsOf types.raw;
     };
 
 

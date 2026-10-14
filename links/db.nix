@@ -24,6 +24,7 @@ naps.links.postgres = {
             inherit (access) reload;
         };
     };
+    accessuid = utils.db_root;
     match = srvuid: srvuid == "postgres";
     waitLinkUp =  
         ''

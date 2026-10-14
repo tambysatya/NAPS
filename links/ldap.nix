@@ -26,6 +26,7 @@ in {
                 inherit (access) reload;
             };
         };
+        accessuid = utils.ldap_root;
         match = srvuid: srvuid == "openldap";
         waitLinkUp = ""; #TODO
     };

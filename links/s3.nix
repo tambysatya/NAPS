@@ -29,6 +29,7 @@ naps.links.s3 = {
             inherit (access) reload;
         };
     };
+    accessuid = utils.s3_root;
     match = srvuid: srvuid == "garage";
     waitLinkUp = 
         ''

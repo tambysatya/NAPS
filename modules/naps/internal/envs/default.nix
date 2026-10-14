@@ -5,8 +5,39 @@ let
 
 
     
+    /* Generates all envs (for vm + containers) */
+    generateEnvs =  
+        vmname: vmconf:
+        let
+            containers = vmconf.containers;
+            mkCTEnv = 
+                i: ctname: {
+                    ${ctname} = {
+                        type = "container";
+                        host = {
+                           container = ctname;
+                           vm = vmname;
+                           publicHostAddress = vmconf.ip;
+                           veth = "veth${lib.toString i}";
+                        };
+                        ip = "192.168.1.${lib.toString (i+50)}";
+                    };
+                };
+            ctenvs = lib.imap mkCTEnv containers;
+        in {
+            vms.${vmname} = {
+                type = "vm";
+                host = vmname;
+                ip = vmconf.ip;
+            };
+            containers = lib.mkMerge ctenvs;
+        };
+
+
    
 
+    /* Generates the services instances + adds instances for the default services.
+       The deployement environment points to a vm or a container env defined above  (or in naps.internal.envs.{vms,containers} */
     allDefaults = lib.filterAttrs (_: default: default != null) config.naps.global.services.defaults; # map: Name -> DefaultType
     vmDefaults = builtins.attrNames (lib.filterAttrs (_: default: default == "all" || default == "vms") allDefaults);
     ctDefaults = builtins.attrNames (lib.filterAttrs (_: default: default == "all" || default == "containers") allDefaults);
@@ -16,7 +47,7 @@ let
                 lib.subtractLists vmconf.without vmDefaults; # we remove the default services that are explicitely disabled
             mkDefaultInstance = vmname: vmconf: srv: {
                     ${utils.default_service_id vmname srv} = {
-                        deployement = utils.mkVMEnv vmname;
+                        deployement = config.naps.internal.envs.vms.${vmname};
                         priority = 100; #TODO
                         tags = [];
                         is = srv;
@@ -28,7 +59,7 @@ let
     ctDefaultInstances = 
         let processCT = ctname: env: srvname: {
                 ${utils.default_service_id ctname srvname} = {
-                    deployement = env;
+                    deployement = config.naps.internal.envs.containers.${ctname};
                     priority = 100; # TODO
                     tags = [];
                     is = srvname;
@@ -41,13 +72,13 @@ let
         let processSrv = vmname: srvuid: {
                 ${srvuid} = {
                     inherit (config.naps.topology.services.${srvuid}) priority tags is;
-                    deployement = utils.mkVMEnv vmname;
+                    deployement = config.naps.internal.envs.vms.${vmname};
                 };
             };
             processCT = vmname: srvuid: {
                 ${srvuid} = {
                     inherit (config.naps.topology.services.${srvuid}) priority tags is;
-                    deployement = utils.mkCTEnv vmname srvuid;
+                    deployement = config.naps.internal.envs.containers.${srvuid};
                 };
             };
             ret = utils.concatMapAttrsToList
@@ -56,23 +87,18 @@ let
                      config.naps.topology.vms;
         in lib.mkMerge ret; 
 
-    vmContainers = 
-        let processVM = vmname: vmconf: map (srvuid: { ${srvuid} = utils.mkCTEnv vmname srvuid; }) vmconf.containers;
-        in lib.mkMerge (utils.concatMapAttrsToList processVM config.naps.topology.vms);
-    vmEnvs = 
-        let processVM = vmname: vmconf: map (srvuid: { ${srvuid} = utils.mkCTEnv vmname srvuid; }) vmconf.services;
-        in lib.mkMerge (utils.concatMapAttrsToList processVM config.naps.topology.vms);
-
 
 in {
     imports = [./options.nix];
 
-    naps.internal.envs.instances = lib.mkMerge [
-        vmDefaultInstances 
-        ctDefaultInstances 
-        declaredInstances
+    naps.internal.envs = lib.mkMerge [
+        (lib.mkMerge (lib.mapAttrsToList generateEnvs config.naps.topology.vms))
+        {
+            instances = lib.mkMerge [
+                vmDefaultInstances 
+                ctDefaultInstances 
+                declaredInstances
+            ];
+        }
     ]; 
-    naps.internal.envs.vms = lib.mkMerge (lib.mapAttrsToList (vmname: _: {${vmname} = utils.mkVMEnv vmname;}) config.naps.topology.vms);
-    naps.internal.envs.containers = vmContainers; #extractNames parts.wrong;
-    naps.internal.envs.all = lib.mkMerge [config.naps.internal.envs.vms config.naps.internal.envs.containers];
 }
