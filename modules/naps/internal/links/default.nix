@@ -32,8 +32,8 @@ let
         vmname: vmconf:
         let
             processLinkType = 
-                linktype: envs:
-                let listen = lib.mapAttrsToList (env: _: {}) envs;
+                linktype: envs: # for each link type, we have a set of environment associated to a set of accesses they request
+                let listen = lib.mapAttrsToList (env: _: config.naps.internal.envs) envs;
                 in {};
         in {};
 

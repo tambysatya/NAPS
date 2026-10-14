@@ -99,6 +99,7 @@ in {
                 ctDefaultInstances 
                 declaredInstances
             ];
+            all = lib.mkMerge [config.naps.internal.envs.vms config.naps.internal.envs.containers];
         }
     ]; 
 }
