@@ -55,6 +55,7 @@ let
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/naps
                   ./providers
+                  ./links
                 ] ++ modules ++ services;
            });
     compileConfig = args: (compileModule args).config;

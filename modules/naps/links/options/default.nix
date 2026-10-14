@@ -4,55 +4,50 @@ let
     utils = import ../lib {inherit inputs lib flakeRoot;};    
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     
-    s3link = types.submodule {
-        options = {
-            env = lib.mkOption {
-                description = "Environment of the service requesting this link";
-                type = types.deployementEnvironment;
-            };
-            access = lib.mkOption {
-                description = "Access details";
-                type = types.s3access;
-            };
-        };
-    };
 
-    dblink = types.submodule {
+    accessType = lib.types.submodule {
         options = {
-            env = lib.mkOption {
-                description = "Environment of the service requesting this link";
-                type = types.deployementEnvironment;
-            };
-            access = lib.mkOption {
-                description = "Access details";
-                type = types.postgresAccess;
-            };
-
-
-        };
-    };
-    systemLinks = types.submodule {
-        options = {
-            s3 = lib.mkOption {
-                description = "S3 buckets";
-                type = types.listOf s3link;
+            reload = lib.mkOption {
+                description = "List of services depending on this link";
+                type = types.listOf types.str;
                 default = [];
+                apply = x: if x == [] then throw "No service depend on this link." else x;
             };
-            postgres = lib.mkOption {
-                description = "Databases";
-                type = types.listOf dblink;
-                default = [];
+        };
+        freeformType = types.attrsOf types.raw;
+    };
+    linkProvider = types.submodule {
+        options = {
+            access = lib.mkOption {
+                description = "The type of the access. Is a submodule containing at least the field reload";
+                type = accessType;
+                default = null;
+            };
+            assets = lib.mkOption {
+                description = "A function that produces the set of assets consumed by the link: Access -> Map Asset";
+                type = types.functionTo (types.attrsOf types.asset);
+                default = _: {};
+            };
+            match = lib.mkOption {
+                description = "A function that returns true if a service provides the link: ServiceName -> Bool";
+                type = types.functionTo types.bool;
+            };
+            waitLinkUp = lib.mkOption {
+                description = "A script that should wait until the link is up";
+                type = types.str;
             };
 
         };
     };
+
 
     #TODO LDAP links
 in {
 
 options.naps.links = lib.mkOption {
-    description = "Summary of the links in the napsstructure per real virtual machine (containers are excluded)" ;
-    type = types.attrsOf systemLinks;
+    description = "Links providers";
+    type = types.attrsOf linkProvider;
+    default = {};
 
 };
 
