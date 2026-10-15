@@ -6,8 +6,8 @@ let
     getHosts = 
         let
             processType = type: _:
-                let match = config.naps.links.${type}.match;
-                    services = lib.filterAttrs (srvname: _: match srvname)  config.naps.internal.services; 
+                let match = config.naps.links.${type}.service;
+                    services = lib.filterAttrs (srvname: _: match == srvname)  config.naps.internal.services; 
                 in utils.concatMapAttrsToList (_: {deployements,...}: builtins.attrValues deployements) services;
         in lib.mapAttrs processType config.naps.links;
     
@@ -33,7 +33,12 @@ let
         let
             processLinkType = 
                 linktype: envs: # for each link type, we have a set of environment associated to a set of accesses they request
-                let listen = lib.mapAttrsToList (env: _: config.naps.internal.envs) envs;
+                let listen = lib.mapAttrsToList
+                                (env: _: 
+                                 if (utils.isContainer env.type) 
+                                 then config.naps.internal.envs.${env}.ip
+                                 else "127.0.0.1") envs; # TODO: what to do if the service is hosted locally ?
+                    hosts  = map utils.hostIP config.naps.internal.links.hosts.${linktype};
                 in {};
         in {};
 

@@ -4,8 +4,8 @@ let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     proxy = types.submodule {
         options = {
-            inherit (types) port;
-            ips = lib.mkOption {
+            inherit (types) endpoint;
+            endpoints = lib.mkOption {
                 description = "List of Backend IPs";
                 type = types.listOf types.str;
                 default = [];
@@ -15,7 +15,7 @@ let
                 description = "List of interface to listen";
                 type = types.listOf types.str;
                 default = [];
-                apply = ips: if ips == [] then throw "No listenning ip for this proxy" else lib.uniq ips;
+                apply = ips: if ips == [] then throw "No listening ip for this proxy" else lib.uniq ips; 
             };
         };
     };

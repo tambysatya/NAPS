@@ -25,7 +25,7 @@ naps.links.postgres = {
         };
     };
     accessuid = utils.db_root;
-    match = srvuid: srvuid == "postgres";
+    service = "postgres";
     waitLinkUp =  
         ''
         until ${pkgs.postgresql}/bin/pg_isready -h postgres.${config.naps.topology.domain} -p 5432; do

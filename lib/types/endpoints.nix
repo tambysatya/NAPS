@@ -76,7 +76,7 @@ rec {
                 default = [];
             };
             http = lib.mkOption {
-                description = "TCP endpoints.";
+                description = "HTTP endpoints.";
                 type = types.listOf httpEndpoint;
                 default = [];
             };

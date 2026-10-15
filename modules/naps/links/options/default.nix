@@ -7,6 +7,10 @@ let
 
     linkProvider = types.submodule {
         options = {
+            service = lib.mkOption {
+                description = "Service name";
+                type = types.str;
+            };
             access = lib.mkOption {
                 description = "The type of the access. Is a submodule containing at least the field reload";
                 type = types.access;
@@ -20,10 +24,6 @@ let
                 description = "A function that produces the set of assets consumed by the link: Access -> Map Asset";
                 type = types.functionTo (types.attrsOf types.asset);
                 default = _: {};
-            };
-            match = lib.mkOption {
-                description = "A function that returns true if a service provides the link: ServiceName -> Bool";
-                type = types.functionTo types.bool;
             };
             waitLinkUp = lib.mkOption {
                 description = "A script that should wait until the link is up";

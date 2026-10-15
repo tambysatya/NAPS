@@ -30,7 +30,7 @@ naps.links.s3 = {
         };
     };
     accessuid = utils.s3_root;
-    match = srvuid: srvuid == "garage";
+    service = "garage";
     waitLinkUp = 
         ''
         until ${pkgs.netcat}/bin/nc -z s3.${config.naps.topology.domain} 443; do

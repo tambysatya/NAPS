@@ -36,9 +36,12 @@ let
     envHost = env: if builtins.isString env then env
                    else if env.type == "vm" then env.host
                    else env.host.vm;
+    isContainer = env: env.type == "container";
+    isVM = env: env.type == "vm";
 
     hostDeployementEnv = # get the hosting deployement environment
         env: {inherit (env) priority tags; type="vm"; host=envHost env;};
+    hostIP = env: if isContainer env then env.host.hostPublicAddress else env.ip;
 
 
 in {
@@ -48,5 +51,6 @@ in {
     inherit ssl_crt_path ssl_key_path;
     inherit s3_root s3_key s3_key_id db_root db_key ldap_root ldap_key;
     inherit directory_id;
-    inherit envUID envHost hostDeployementEnv;
+    inherit isContainer isVM;
+    inherit envUID envHost hostDeployementEnv hostIP;
 }
