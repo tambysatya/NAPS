@@ -14,7 +14,7 @@
         ssh = "naps@192.168.1.200";
     };
     domain = "local.fr";
-    vmSubnet = "192.168.1.0/24";
+    vmSubnet = "10.0.0.0/24";
     dns = ["8.8.8.8" "8.8.4.4"];
     gateway = "192.168.1.1"; #default gateway
     rootSSHPublicKeys = [
@@ -40,7 +40,7 @@
         host = "cpuhost1";
         vcpu = 4;
         memory = 8000;
-        ip = "192.168.1.200";
+        ip = "10.0.0.50";
         #services = ["step-ca" "openldap"];
         services = ["keycloak-main" "stepca-main" "ldap-main"];
         disks = [
@@ -52,23 +52,23 @@
         host = "cpuhost1";
         vcpu = 4;
         memory = 8000;
+        ip = "10.0.0.51";
         disks = [
             {type="disk"; path="/dev/pvhdd/s3"; mount="/srv/data"; fs="xfs"; options=["nofail"];}
             {type="disk"; path="/dev/pvhdd/s3_metadatas"; mount="/srv/meta"; fs="xfs"; options=["nofail"];}
         ];
 
-        ip = "192.168.1.201";
         services = ["s3-main"]; 
       };
       postgres = {
         host = "cpuhost1";
         vcpu = 4;
         memory = 8000;
+        ip = "10.0.0.52";
         disks = [
             {type="disk"; path="/dev/ssd/postgres"; mount="/var/lib/postgresql"; fs="xfs"; options=["nofail"];}
         ];
 
-        ip = "192.168.1.202";
         #containers = ["pg-main"]; 
         services = ["pg-main"]; 
       };
@@ -77,7 +77,7 @@
         vcpu = 8;
         memory = 16000;
 
-        ip = "192.168.1.203";
+        ip = "10.0.0.53";
         #services = ["nc-main"]; 
         containers = ["nc-main" "git-main"]; 
         disks = [
@@ -91,7 +91,7 @@
         vcpu = 8;
         memory = 8000;
 
-        ip = "192.168.1.204";
+        ip = "10.0.0.54";
         services = ["hydra-main"];
         disks = [
             {type="disk"; path="/dev/ssd/hydra"; mount="/nix"; fs="xfs"; options=["noatime"];}
@@ -101,11 +101,11 @@
 
       };
       
-      logs2  = {
+      logs  = {
         host = "cpuhost1";
         vcpu=1;
         memory=1024;
-        ip = "192.168.2.205";
+        ip = "10.0.0.55";
         services = ["log-main"];
         disks = [
             {type="disk"; path="/dev/pvhdd/logs"; mount="/var/log/journal/remote"; fs="xfs"; options=["noatime"];}

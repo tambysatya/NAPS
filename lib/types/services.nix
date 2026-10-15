@@ -13,7 +13,7 @@ let
     assets = import ./assets.nix {inherit lib inputs;};
     types = lib.types // filestypes // nettypes // endpointstypes // volumes // assets // links // deployement // users;
 
-    serviceOptions = {...}: {
+    serviceOptions = config: {...}: {
             options = {
                 path = lib.mkOption {
                     description = "Path to the configuration file";
@@ -32,7 +32,7 @@ let
                 };
                 endpoints = lib.mkOption {
                     description = "Various endpoints exposed by the service";
-                    type = types.endpoints;
+                    type = types.endpoints config;
                 };
                 assets = lib.mkOption {
                     description = "Files placed in the store (config files, strings, encrypted password). Should be of the form <filename/dirname> = {...}";
@@ -61,8 +61,8 @@ let
     };
 
     # a simple decoration of serviceOptions
-    internalServiceOptions = {...}: {
-        imports = [serviceOptions];
+    internalServiceOptions = config: {...}: {
+        imports = [(serviceOptions config)]; #TODO good practice ? Or config is implicit ?
         options = {
             deployements = lib.mkOption {
                 description = "AttrSet of serviceuid => environment where the service is currently deployed";
@@ -73,6 +73,6 @@ let
     };
 
 in {
-    serviceOptions = types.submodule serviceOptions;
-    internalServiceOptions = types.submodule internalServiceOptions;
+    serviceOptions = config: types.submodule (serviceOptions config);
+    internalServiceOptions = config: types.submodule (internalServiceOptions config);
 }

@@ -7,9 +7,12 @@ let
     network = import ./network.nix {inherit lib inputs;};
     types = libtypes // network;
 
-in
-rec {
-
+    link = config: lib.mkOption {
+        description = "If not null, this endpoint corresponds to a link";
+        type = types.nullOr types.str;
+        default = null;
+        apply = x: if x != null && ! builtins.hasAttr x config.naps.links then throw "${x} is not a valid link." else x;
+    };
 
     proxyExtraConfig = types.submodule {
         options = {
@@ -34,9 +37,10 @@ rec {
         };
     };
     
-    httpEndpoint = types.submodule {
+    httpEndpoint = config:  types.submodule {
         options = {
             inherit (types) hostname port;
+            link = link config;
             tls = lib.mkOption {
                 description = "If set to true, a proxy performing TLS termination will be set up. Use this option if your server does not support TLS natively."; 
                 type = types.bool;
@@ -46,11 +50,13 @@ rec {
                 description = "Extra attrset transfered to the proxy configuration";
                 type = proxyExtraConfig;
             };
+
         };
     };
-    tcpEndpoint = types.submodule {
+    tcpEndpoint = config: types.submodule {
         options = {
             inherit (types) hostname port;
+            link = link config;
             extraConfig = lib.mkOption {
                 description = "Extra attrset transfered to the proxy configuration";
                 type = proxyExtraConfig;
@@ -58,28 +64,35 @@ rec {
         };
     };
 
-    udpEndpoint = types.submodule {
+    udpEndpoint = config: types.submodule {
         options = {
+            link = link config;
             inherit (types) hostname port;
         };
     };  
-    endpoints = types.submodule {
+    endpoints = config: types.submodule {
         options = {
             udp = lib.mkOption {
                 description = "UDP endpoints.";
-                type = types.listOf udpEndpoint; # endpoints are list because the same hostname can lead to multiple ports
+                type = types.listOf (udpEndpoint config); # endpoints are list because the same hostname can lead to multiple ports
                 default = [];
             };
             tcp = lib.mkOption {
                 description = "TCP endpoints.";
-                type = types.listOf tcpEndpoint;
+                type = types.listOf (tcpEndpoint config);
                 default = [];
             };
             http = lib.mkOption {
                 description = "HTTP endpoints.";
-                type = types.listOf httpEndpoint;
+                type = types.listOf (httpEndpoint config);
                 default = [];
             };
         };
     };
+
+
+
+in
+rec {
+    inherit endpoints;
 }

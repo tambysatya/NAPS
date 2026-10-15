@@ -42,6 +42,7 @@ let
     hostDeployementEnv = # get the hosting deployement environment
         env: {inherit (env) priority tags; type="vm"; host=envHost env;};
     hostIP = env: if isContainer env then env.host.hostPublicAddress else env.ip;
+    envIP = env: env.ip;
 
 
 in {
@@ -52,5 +53,5 @@ in {
     inherit s3_root s3_key s3_key_id db_root db_key ldap_root ldap_key;
     inherit directory_id;
     inherit isContainer isVM;
-    inherit envUID envHost hostDeployementEnv hostIP;
+    inherit envUID envHost hostDeployementEnv hostIP envIP;
 }

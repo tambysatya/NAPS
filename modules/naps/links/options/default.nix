@@ -7,10 +7,6 @@ let
 
     linkProvider = types.submodule {
         options = {
-            service = lib.mkOption {
-                description = "Service name";
-                type = types.str;
-            };
             access = lib.mkOption {
                 description = "The type of the access. Is a submodule containing at least the field reload";
                 type = types.access;

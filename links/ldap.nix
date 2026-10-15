@@ -27,7 +27,6 @@ in {
             };
         };
         accessuid = utils.ldap_root;
-        service = "openldap";
         waitLinkUp = ""; #TODO
     };
 }

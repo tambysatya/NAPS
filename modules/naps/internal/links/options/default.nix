@@ -2,31 +2,53 @@
 
 let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
-    proxy = types.submodule {
+
+    linkEndpoint = types.submodule {
         options = {
-            inherit (types) endpoint;
-            endpoints = lib.mkOption {
-                description = "List of Backend IPs";
-                type = types.listOf types.str;
-                default = [];
-                apply = ips: if ips == [] then throw "No backends for this link" else ips;
+            type = lib.mkOption {
+                description = "Protocol";
+                type = types.enum ["tcp" "http" "udp"];
             };
-            listen = lib.mkOption {
-                description = "List of interface to listen";
-                type = types.listOf types.str;
-                default = [];
-                apply = ips: if ips == [] then throw "No listening ip for this proxy" else lib.uniq ips; 
+            inherit (types) hostname port;
+        };
+    };
+    hostLink = types.submodule {
+        options = {
+            env = lib.mkOption {
+                description = "Deployement environment of the host of the link";
+                type = types.deployementEnvironment;
+            };
+            endpoint = lib.mkOption {
+                description = "Endpoint to reach the link";
+                type = linkEndpoint;
             };
         };
     };
+    proxy = types.submodule {
+        options = {
+            bind = lib.mkOption {
+                description = "List of IP address to listen";
+                type = types.listOf types.str;
+                default = [];
+                apply = ips: if ips == [] then throw "No listening ip for this proxy" else lib.unique ips; 
+            };
+            backends = lib.mkOption {
+                description = "List of Backends";
+                type = types.listOf hostLink;
+                default = [];
+                apply = eps: if eps == [] then throw "No backends for this link" else lib.unique eps;
+            };
+        };
+    };
+
 in {
 options.naps.internal.links = lib.mkOption {
     description = "All deployement environments";
     type = types.submodule {
         options = {
             hosts = lib.mkOption {
-                description = "All hosts providing each links (e.g. postgres, s3,...). Map Type [Env]";
-                type = types.attrsOf (types.listOf types.deployementEnvironment);
+                description = "All hosts providing each links (e.g. postgres, s3,...). Map Type [HostLink]";
+                type = types.attrsOf (types.listOf hostLink);
                 default = {};
             };
             perEnv = lib.mkOption {
@@ -40,8 +62,8 @@ options.naps.internal.links = lib.mkOption {
                 default = {};
             };
             proxy = lib.mkOption {
-                description = "Proxy configuration of each VM.";
-                type = types.attrsOf proxy;
+                description = "Proxy configuration of each VM:  VMName -> LinkType -> Proxy = ([Bind], [Backends])";
+                type = types.attrsOf (types.attrsOf proxy);
                 default = {};
             };
         };

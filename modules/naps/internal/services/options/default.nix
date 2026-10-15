@@ -1,5 +1,5 @@
 /* Exposed API to register modules informations */
-{flakeRoot, lib,inputs, ...}:
+{flakeRoot, lib,inputs, config, ...}:
 let libtypes = lib.types;
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
     napstypes = import "${flakeRoot}/lib/types" {inherit lib inputs;};
@@ -9,7 +9,7 @@ in
 {
    options.naps.internal.services = lib.mkOption {
         description = "Services resources";
-        type = lib.types.attrsOf types.internalServiceOptions;
+        type = lib.types.attrsOf (types.internalServiceOptions config);
    };
 
 }
