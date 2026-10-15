@@ -2,18 +2,6 @@
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import "${flakeRoot}/providers/lib" {inherit flakeRoot lib inputs path pkgs;};
 
-    
-    /*
-    getHosts = 
-        let
-            processType = type: _:
-                let srvname = config.naps.links.${type}.service;
-                    srvconf = config.naps.internal.services.${srvname}; 
-                    allendpoints = utils.concatMapAttrsToList (type: eps: map (val: val // {type=val;}) eps) srvconf.endpoints;
-                    link = lib.filter ({link,...}: link == type) allendpoints;
-                in utils.concatMapAttrsToList (_: {deployements,...}: builtins.attrValues deployements) services;
-        in lib.mapAttrs processType config.naps.links;
-    */
     getHosts = 
         let
             processSrv =
@@ -47,34 +35,6 @@ let
                 };
         in utils.concatMapAttrsToList processEnv deployements;
 
-    /*
-    generateProxy = 
-        vmname: vmconf:
-        let
-            processLinkType = 
-                linktype: envs: # for each link type, we have a set of environment associated to a set of accesses they request
-                let 
-                    getEnv = envname: config.naps.internal.env.all.${envname};
-                    allEnvs = map getEnv (builtins.attrNames envs);
-                    listen = map 
-                                (env:
-                                 if (utils.isContainer env) 
-                                 then config.naps.internal.envs.${env}.ip
-                                 else "127.0.0.1") allEnvs; 
-                    endpoints = map (builtins.getAttr "env") config.naps.internal.links.hosts.${linktype};
-                    srvname = config.naps.links.${linktype}.service;
-                    srvconf = config.naps.internal.services.${srvname};
-                    isLocal = builtins.elem vmname (map (env: utils.envHost env) (builtins.attrValues srvconf.deployements));
-                in {
-                        ${vmname} =  [{
-                            listen = if isLocal then ["0.0.0.0"] else listen;
-                            endpoints = endpoints;
-                        }];
-
-                };
-
-        in lib.mapAttrsToList processLinkType vmconf;
-    */
     generateProxy =
         srvname: {deployements, links, ...}:
         let
@@ -84,7 +44,7 @@ let
                     (_: env: 
                         { 
                             ${utils.envHost env}.${linktype} = {
-                                bind = if utils.isContainer env then [(utils.envIP env)] else ["127.0.0.1"];
+                                bind = if utils.isContainer env then [(utils.envIP env)] else ["127.0.0.1"]; # TODO; hanlde the case where the service is hosted here
                                 backends = config.naps.internal.links.hosts.${linktype};
                             };
                         }
@@ -95,7 +55,6 @@ let
                 lib.mkMerge [
                     (lib.mkMerge (bindAddrs linktype))
                 ];
-                
         in lib.mkMerge (lib.mapAttrsToList processLink links);
 
 in {
