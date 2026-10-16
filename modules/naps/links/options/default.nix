@@ -7,6 +7,12 @@ let
 
     linkProvider = types.submodule {
         options = {
+            endpoints = lib.mkOption {
+                description = "Which endpoints are necessarily exposed by a service providing the link";
+                type = types.listOf types.linkEndpoint;
+                default = [];
+                apply = eps: if eps == [] then throw "Link unreachable: some endpoints must be specified" else eps;
+            };
             access = lib.mkOption {
                 description = "The type of the access. Is a submodule containing at least the field reload";
                 type = types.access;

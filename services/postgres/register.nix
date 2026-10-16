@@ -10,6 +10,7 @@ in {
 
 naps.services.postgres = {
     path = ./.;
+    provides = ["postgres"];
     users.postgres = {service = "postgresql"; uid=10005;};
     assets = {
         ${hostname} = {
@@ -20,7 +21,7 @@ naps.services.postgres = {
         };
     };
     endpoints.tcp = [
-        {link = "postgres"; inherit hostname; port = 5432;}
+        {inherit hostname; port = 5432;}
     ];
     persistent = [
         {path = "/var/lib/postgresql"; inherit owner reload;}

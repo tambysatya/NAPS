@@ -3,15 +3,6 @@
 let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
 
-    linkEndpoint = types.submodule {
-        options = {
-            type = lib.mkOption {
-                description = "Protocol";
-                type = types.enum ["tcp" "http" "udp"];
-            };
-            inherit (types) hostname port;
-        };
-    };
     hostLink = types.submodule {
         options = {
             env = lib.mkOption {
@@ -20,7 +11,7 @@ let
             };
             endpoint = lib.mkOption {
                 description = "Endpoint to reach the link";
-                type = linkEndpoint;
+                type = types.linkEndpoint;
             };
         };
     };

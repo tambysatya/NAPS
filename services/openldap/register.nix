@@ -9,11 +9,12 @@ let
 in {
 
 naps.services.openldap = {
+    provides = ["ldap"];
     path = ./.;
     users.openldap = {service="openldap"; uid=10004;};
     endpoints.tcp = [
-        {link = "ldap"; inherit hostname; port=389;}
-        {link = "ldap"; inherit hostname; port=636;} 
+        {inherit hostname; port=389;}
+        {inherit hostname; port=636;} 
     ];
     assets = {
         ${hostname} = {

@@ -109,6 +109,7 @@ Migration:
 - naps.endpoints:
     + should generate the proxy of each vm (the minimum number of endpoints required to be connected) based on the links
     + thus it would not be required to update all the infra when a new endpoints appears / disappears.
+    + services providing a link should not specify the corresponding endpoints: these endpoints should be automatically added.
 
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets

@@ -15,9 +15,15 @@ let
         };
     };
 
+    hostname = "ldap.${config.naps.topology.domain}";
+
 in {
     naps.links.ldap = {
         inherit access;
+        endpoints = [
+            {type = "tcp"; inherit hostname; port=389;}
+            {type = "tcp"; inherit hostname; port=636;} 
+        ];
         assets = access:{
             ${utils.ldap_key access} = {
                 provider = "ldapssha";

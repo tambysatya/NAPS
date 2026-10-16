@@ -13,8 +13,20 @@ let
     assets = import ./assets.nix {inherit lib inputs;};
     types = lib.types // filestypes // nettypes // endpointstypes // volumes // assets // links // deployement // users;
 
+
+    link = config: lib.mkOption {
+        description = "List of links provided by this service";
+        type = types.listOf types.str;
+        default = [];
+        apply = ls: if ls != [] && ! builtins.all (l: builtins.hasAttr l config.naps.links) ls then throw "${ls} contains invalid links" else lib.unique ls;
+    };
+
+
+
     serviceOptions = config: {...}: {
             options = {
+                provides = link config;
+
                 path = lib.mkOption {
                     description = "Path to the configuration file";
                     type = types.path;
@@ -32,7 +44,7 @@ let
                 };
                 endpoints = lib.mkOption {
                     description = "Various endpoints exposed by the service";
-                    type = types.endpoints config;
+                    type = types.endpoints;
                 };
                 assets = lib.mkOption {
                     description = "Files placed in the store (config files, strings, encrypted password). Should be of the form <filename/dirname> = {...}";
