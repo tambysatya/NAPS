@@ -9,7 +9,6 @@ in rec {
     ip = lib.mkOption {
         description = "Ip address";
         type = types.str;
-        default = "127.0.0.1";
     };
     hostname = lib.mkOption {
         description = "Host domain";
