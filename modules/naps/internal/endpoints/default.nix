@@ -1,15 +1,21 @@
 {flakeRoot, lib, inputs, config, path, pkgs,...}:
 let
-    utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import "${flakeRoot}/providers/lib" {inherit flakeRoot lib inputs path pkgs;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
     processService = 
         srvname: {deployements, endpoints,...}:
         let 
+           processEndpointType = 
+            env: type: endpoints:
+                {
+                    ${type} = lib.mkMerge (map ({hostname, port, ...}: {"${hostname}:${lib.toString port}" = [env];} ) endpoints);
+                };
            processDeployement =
             envname: env:
             {
                 perEnv.${utils.envUID env} = endpoints;
                 perVM.${utils.envHost env}.${utils.envUID env} = endpoints;
+                hosts = lib.mkMerge (lib.mapAttrsToList (processEndpointType env) endpoints);
             };
         in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
 

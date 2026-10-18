@@ -2,22 +2,26 @@
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import "${flakeRoot}/providers/lib" {inherit flakeRoot lib inputs path pkgs;};
 
+/*
     getHosts = 
         let
             processSrv =
-                srvname: srvconf@{deployements, endpoints,...}: 
+                srvname: srvconf@{provides, deployements, endpoints,...}: 
                 utils.concatMapAttrsToList 
                     (eptype: eps:
-                        map
+                        lib.concatMap
                             ({link, hostname, port,...}:
-                             lib.optionalAttrs (link != null){
-                               ${link} = lib.mapAttrsToList (_: env: {inherit env; endpoint = {type=eptype; inherit hostname port;};}) deployements;
-                             }
+                             lib.optionals (link != null)
+                                (map 
+                                 {
+                                   ${link} = lib.mapAttrsToList (_: env: {inherit env; endpoint = {type=eptype; inherit hostname port;};}) deployements;
+                                 }
+                                 provides )
                             ) 
                             eps)
                     endpoints;
         in utils.concatMapAttrsToList processSrv config.naps.internal.services;
-    
+*/    
     processService = 
         srvname: {deployements, links, ...}:
         let processEnv = 
@@ -60,7 +64,7 @@ let
 in {
     imports = [./options];
     naps.internal.links = lib.mkMerge [
-        {hosts = lib.mkMerge getHosts;}
+        #{hosts = lib.mkMerge getHosts;}
         (lib.mkMerge (utils.concatMapAttrsToList processService config.naps.internal.services))
         {proxy = lib.mkMerge (lib.mapAttrsToList generateProxy config.naps.internal.services);}
     ];

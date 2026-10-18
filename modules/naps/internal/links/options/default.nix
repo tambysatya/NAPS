@@ -1,18 +1,19 @@
-{flakeRoot, lib, inputs,...}:
+{flakeRoot, lib, inputs, config,...}:
 
 let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
 
-    hostLink = types.submodule {
+    hostsLink = types.submodule {
         options = {
-            env = lib.mkOption {
-                description = "Deployement environment of the host of the link";
-                type = types.deployementEnvironment;
-            };
             endpoint = lib.mkOption {
                 description = "Endpoint to reach the link";
-                type = types.linkEndpoint;
+                type = types.endpoint;
             };
+            envs = lib.mkOption {
+                description = "Deployement environment of the host of the link";
+                type = types.listOf types.deployementEnvironment;
+            };
+
         };
     };
     proxy = types.submodule {
@@ -25,7 +26,7 @@ let
             };
             backends = lib.mkOption {
                 description = "List of Backends";
-                type = types.listOf hostLink;
+                type = types.listOf hostsLink;
                 default = [];
                 apply = eps: if eps == [] then throw "No backends for this link" else lib.unique eps;
             };
@@ -38,8 +39,8 @@ options.naps.internal.links = lib.mkOption {
     type = types.submodule {
         options = {
             hosts = lib.mkOption {
-                description = "All hosts providing each links (e.g. postgres, s3,...). Map Type [HostLink]";
-                type = types.attrsOf (types.listOf hostLink);
+                description = "All hosts providing each links (e.g. postgres, s3,...). Type -> EndpointType -> HostsLink = (Endpoint, [Env])";
+                type = types.attrsOf (types.attrsOf hostsLink);
                 default = {};
             };
             perEnv = lib.mkOption {

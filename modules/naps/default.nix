@@ -11,12 +11,15 @@ in {
              ./services # Requirements of each available service
              ./global # Global configuration 
 
+             ./endpoints # Endpoints providers
+             ./links     # Links providers
+             ./assets    # Assets providers
+
+
              # Intermediate representations
              ####
              ./internal
             
-             ./assets # assets generation
-             ./links    # Summary of the links per vm
              ./deploy # Summary of the requirements (per vm and per container) [source of truth: services, assets, volumes]
              ./outputs];
 

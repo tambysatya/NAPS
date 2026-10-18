@@ -86,6 +86,15 @@ let
 in
 rec {
     inherit endpoints;
+
+    /* Basic endpoint */
+    endpoint = types.submodule {
+        options = {
+            inherit (types) hostname port;
+        };
+    };
+
+    /* Endpoint decorated with the type of the protocol */
     linkEndpoint = types.submodule {
         options = {
             type = lib.mkOption {
@@ -95,6 +104,5 @@ rec {
             inherit (types) hostname port;
         };
     };
-
 
 }

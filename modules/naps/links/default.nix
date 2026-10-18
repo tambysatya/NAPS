@@ -1,9 +1,9 @@
-{flakeRoot, lib, inputs, config, ...}:
-
-let
-    utils = import ./lib {inherit lib inputs flakeRoot;};
-
-in {
-    imports = [./options];
-    naps.links = {};
+{...}:
+{
+    imports = [
+        ./options
+        ./s3.nix
+        ./db.nix
+        ./ldap.nix
+    ];
 }
