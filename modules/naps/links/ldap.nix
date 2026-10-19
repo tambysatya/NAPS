@@ -20,9 +20,9 @@ let
 in {
     naps.links.ldap = {
         inherit access;
-        endpoints = [
-            {type = "tcp"; inherit hostname; port=389;}
-            {type = "tcp"; inherit hostname; port=636;} 
+        endpoints.tcp = [
+            {inherit hostname; port=389;}
+            {inherit hostname; port=636;} 
         ];
         assets = access:{
             ${utils.ldap_key access} = {

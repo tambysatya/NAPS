@@ -10,12 +10,10 @@ let
             {
                 hostname = "hydra.${domain}";
                 port = 3000;
-                tls = true;
             }
             {
                 hostname = "cache.${domain}";
                 port = 3001;
-                tls = true;
             }
         ];
     };

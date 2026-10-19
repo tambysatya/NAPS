@@ -32,7 +32,7 @@ naps.services.forgejo = {
     };
     endpoints = {
         http = [{
-           inherit hostname; port = 3000; tls = true; 
+           inherit hostname; port = 3000;
         }];
         tcp = [{
            inherit hostname; port = 5022; #SSH connection

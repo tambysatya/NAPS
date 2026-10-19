@@ -10,7 +10,6 @@ let
     endpoints = [{
                    hostname = hostname;
                    port = 80; 
-                   tls = true;
                  }];
 in {
 

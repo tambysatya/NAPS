@@ -28,7 +28,7 @@ naps.services.keycloak = {
         ];  
     };
     endpoints.http = [
-        {inherit hostname port; tls=true;}
+        {inherit hostname port;}
     ];
 };
 

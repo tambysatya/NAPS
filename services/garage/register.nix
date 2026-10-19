@@ -41,8 +41,8 @@ config.naps.services.garage = {
         {path="/srv/meta"; inherit owner reload; mode = "0700";}
     ];
     endpoints.http= [
-        {hostname="s3.${domain}"; port=3900; tls = true;}
-        {hostname="s3-admin.${domain}";port=3903; tls = true;}
+        {hostname="s3.${domain}"; port=3900;}
+        {hostname="s3-admin.${domain}";port=3903;}
     ];
 };
 }

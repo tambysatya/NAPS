@@ -20,8 +20,8 @@ naps.services.step-ca = {
             reload = ["step-ca.service"];
         };
     };
-    endpoints.http = [
-        {inherit hostname port; tls=false;}
+    endpoints.https = [
+        {inherit hostname port;}
     ];
 };
 }

@@ -9,12 +9,14 @@ let
             {
                 inherit hostname;
                 port = 19532;
+                /*
                 extraConfig = {
                     frontend  = {
                         bind = "verify required ca-file /etc/root_ca.crt";
                     };
                 };
                 tls = true;
+                */
             }
         ];
     };

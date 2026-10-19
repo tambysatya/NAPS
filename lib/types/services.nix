@@ -44,7 +44,7 @@ let
                 };
                 endpoints = lib.mkOption {
                     description = "Various endpoints exposed by the service";
-                    type = types.endpoints;
+                    type = types.attrsOf (types.listOf types.endpoint);
                 };
                 assets = lib.mkOption {
                     description = "Files placed in the store (config files, strings, encrypted password). Should be of the form <filename/dirname> = {...}";

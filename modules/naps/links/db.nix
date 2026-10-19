@@ -16,8 +16,8 @@ in {
 
 naps.links.postgres = {
     inherit access;
-    endpoints = [
-        {type = "tcp"; hostname = "postgres.${config.naps.topology.domain}"; port = 5432;}
+    endpoints.tcp = [
+        {hostname = "postgres.${config.naps.topology.domain}"; port = 5432;}
     ];
     assets = access: {
         "${utils.db_key access}" = {

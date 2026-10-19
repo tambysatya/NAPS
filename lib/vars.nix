@@ -44,6 +44,8 @@ let
     hostIP = env: if isContainer env then env.host.hostPublicAddress else env.ip;
     envIP = env: env.ip;
 
+    epToString = {hostname, port, ...}: "${hostname}:${lib.toString port}";
+
 
 in {
     inherit paths;
@@ -54,4 +56,5 @@ in {
     inherit directory_id;
     inherit isContainer isVM;
     inherit envUID envHost hostDeployementEnv hostIP envIP;
+    inherit epToString;
 }

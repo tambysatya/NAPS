@@ -3,19 +3,44 @@ let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
     processService = 
-        srvname: {deployements, endpoints,...}:
+        srvname: {deployements, provides, endpoints, links,...}:
         let 
-           processEndpointType = 
-            envname: type: endpoints:
-                {
-                    ${type} = lib.mkMerge (map ({hostname, port, ...}: {"${hostname}:${lib.toString port}".${envname} = config.naps.internal.envs.instances.${envname};} ) endpoints);
-                };
+           
+           generateLinksEndpoints =
+                insname: env: linktype: 
+                let
+                    linkendpoints = config.naps.links.${linktype}.endpoints; # EndpointType -> [Endpoint]
+                in
+                    lib.mapAttrsToList 
+                        (eptype: eps:
+                            {
+                                ${eptype} = lib.mkMerge (map (ep: {${utils.epToString ep} = ep;}) eps);
+                            }) 
+                        linkendpoints;
+
            processDeployement =
-            envname: env:
-            {
-                perEnv.${utils.envUID env} = endpoints;
-                perVM.${utils.envHost env}.${utils.envUID env} = endpoints;
-                hosts = lib.mkMerge (lib.mapAttrsToList (processEndpointType envname) endpoints);
+            insname: env:
+            let
+                reaches = lib.mkMerge
+                            (lib.concatMap
+                                (generateLinksEndpoints insname env)
+                                (builtins.attrNames links));
+                exposes = lib.mkMerge  [
+                              # endpoints associated with the link of the service
+                              (lib.mkMerge (lib.concatMap (generateLinksEndpoints insname env) provides)) 
+
+                              # other endpoints
+                              (lib.mkMerge 
+                                    (lib.mapAttrsToList 
+                                        (eptype: eps: 
+                                            lib.mkMerge (map (ep: { ${eptype}.${utils.epToString ep} = ep;}) eps)) 
+                                        endpoints))
+                          ];
+            in {
+                perEnv.${utils.envUID env} = {
+                    inherit exposes reaches;
+                };
+                perVM.${utils.envHost env}.${utils.envUID env} = {inherit exposes reaches;};
             };
         in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
 
