@@ -20,9 +20,6 @@ naps.services.postgres = {
             inherit reload;
         };
     };
-    endpoints.tcp = [
-        {inherit hostname; port = 5432;}
-    ];
     persistent = [
         {path = "/var/lib/postgresql"; inherit owner reload;}
     ];
