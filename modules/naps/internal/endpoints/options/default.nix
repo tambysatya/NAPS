@@ -6,12 +6,12 @@ let
     endpoints = types.submodule {
         options = {
             exposes = lib.mkOption {
-                description = "Set of exposed endpoints. EndpointType -> hostname:port -> [Endpoint]";
+                description = "Set of exposed endpoints. EndpointType -> hostname:port -> Endpoint";
                 type = types.attrsOf (types.attrsOf types.endpoint);
                 default = {};
             };
             reaches = lib.mkOption {
-                description = "Set of reached endpoints. EndpointType -> hostname:port -> [Endpoint]";
+                description = "Set of reached endpoints. EndpointType -> hostname:port -> Endpoint";
                 type = types.attrsOf (types.attrsOf types.endpoint);
                 default = {};
             };
@@ -21,6 +21,11 @@ let
     
 
 in {
+    options.naps.internal.endpoints.hosts = lib.mkOption {
+        description = "Endpoints hosts: EndpointType -> hostname:port -> ServiceID -> ServiceInstance";
+        type = types.attrsOf (types.attrsOf (types.attrsOf types.serviceInstance));
+        default = {};
+    };
     options.naps.internal.endpoints.perEnv = lib.mkOption {
         description = "Endpoints of each environment: Env -> Endpoints";
         type = types.attrsOf endpoints;
