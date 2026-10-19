@@ -17,6 +17,7 @@ let
                     extraArgs = lib.mkOption {
                         description = "Extra args appened to the bind line";
                         type = types.str;
+                        default = "";
                     };
                 };
             };
@@ -32,7 +33,7 @@ let
             extraConfig = lib.mkOption {
                 description = "Extra config appened in the section";
                 type = types.listOf types.str;
-                default = []:
+                default = [];
             };
         };
     };
@@ -61,7 +62,7 @@ in
     };
     options.services.haproxy.backends = lib.mkOption {
         description = "(Partially) structured configuration of HAProxy backends";
-        type = types.attrsOf backends;
+        type = types.attrsOf backend;
         default = {};
     };
 }
