@@ -6,65 +6,62 @@ let
     types = lib.types // import "${flakeRoot}/lib/types" {inherit lib inputs;};
     utils = import "${flakeRoot}/lib" {inherit lib inputs;}; 
    
-    bind = lib.mkOption {
-        description = "List of ip addresses to listen on"; 
-        type = types.listOf types.str;
-        default = [];
-        apply = x: if x == [] then "HAProxy: the frontend has no assigned IP addresses" else lib.unique x;
-    };
-    backend = types.submodule {
+    frontend = types.submodule {
         options = {
-            inherit (types) ip port;
-        };
-    };
-
-    tcpProxy = types.submodule {
-        options = {
-            inherit bind;
-            backends = lib.mkOption {
-                description = "List of backends";
-                type = types.listOf backend;
-                default = [];
-                apply = x: if x == [] then "HAProxy: no backend assigned" else lib.unique x;
+            bind = types.submodules {
+                options = {
+                    listen = lib.mkOption {
+                        description = "List of IP addresses to listen on";
+                        type = types.listOf types.str;
+                    };
+                    extraArgs = lib.mkOption {
+                        description = "Extra args appened to the bind line";
+                        type = types.str;
+                    };
+                };
+            };
+            mode = lib.mkOption {
+                description = "Frontend mode";
+                type = types.enum ["tcp" "http"];
+            };
+            backend = lib.mkOption {
+                description = "Backend section";
+                type = types.str;
+                example = "default_backend be_postgres.local.fr";
+            };
+            extraConfig = lib.mkOption {
+                description = "Extra config appened in the section";
+                type = types.listOf types.str;
+                default = []:
             };
         };
     };
 
-    
+    backend = types.submodule {
+        options = {
+            mode = lib.mkOption {
+                description = "Frontend mode";
+                type = types.enum ["tcp" "http"];
+            };
+            config = lib.mkOption {
+                description = "Remaining of the config lines of the section";
+                type = types.listOf types.str;
+                default = [];
+            };
+        };
+    };
+   
 in 
 
 {
-    options.services.haproxy.http = lib.mkOption {
-        description = "HTTPS frontend with HAproxy terminating the TLS connection. Map Hostname [Backend]";
-        type = types.submodule {
-            options = {
-                inherit bind;
-                proxy = lib.mkOption {
-                    description = "Proxy configuration, indexed by hostname";
-                    type = types.attrsOf (types.listOf backend);
-                    default = {};
-                };
-            };
-        };
-    };
-    options.services.haproxy.https = lib.mkOption {
-        description = "HTTPS frontend with HAproxy propagating the TLS connection. Map Hostname [Backend]";
-        type = types.submodule {
-            options = {
-                inherit bind;
-                proxy = lib.mkOption {
-                    description = "Proxy configuration, indexed by hostname";
-                    type = types.attrsOf (types.listOf backend);
-                    default = {};
-                };
-            };
-        };
-    };
-
-    options.services.haproxy.tcp = lib.mkOption {
-        description = "TCP Proxy. Map Port Proxy= ([Bind], [Backend])";
-        type = types.attrsOf tcpProxy;
+    options.services.haproxy.frontends = lib.mkOption {
+        description = "(Partially) structured configuration of HAProxy frontends";
+        type = types.attrsOf frontend;
         default = {};
     };
-
+    options.services.haproxy.backends = lib.mkOption {
+        description = "(Partially) structured configuration of HAProxy backends";
+        type = types.attrsOf backends;
+        default = {};
+    };
 }
