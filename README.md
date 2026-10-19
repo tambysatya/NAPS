@@ -46,6 +46,12 @@ Main module: config.infra
 - infra.services.name : API for services to register what are their needs
 - ... others are internal structures which are essentially views of the infrastructure to simplify secret generation, visualization, coherence verification...
 
+## IRs:
+
+### naps.internal.links
+    - all: providers and requesters of each link type
+    - perEnv / perVM: aggregation of each requester
+
 # TODO
 
 - step-renew: use a service user instead of root

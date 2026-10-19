@@ -3,33 +3,17 @@
 let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
 
-    hostsLink = types.submodule {
+    links = types.submodule {
         options = {
-            endpoint = lib.mkOption {
-                description = "Endpoint to reach the link";
-                type = types.endpoint;
+            requesters = lib.mkOption {
+                description = "Recipients of the link: ServiceName -> DeployementEnvironment";
+                type = types.attrsOf types.deployementEnvironment;
             };
-            envs = lib.mkOption {
-                description = "Deployement environment of the host of the link";
-                type = types.listOf types.deployementEnvironment;
+            providers = lib.mkOption {
+                description = "Services providing the link: ServiceName -> ServiceInstance";
+                type = types.attrsOf types.serviceInstance;
             };
 
-        };
-    };
-    proxy = types.submodule {
-        options = {
-            bind = lib.mkOption {
-                description = "List of IP address to listen";
-                type = types.listOf types.str;
-                default = [];
-                apply = ips: if ips == [] then throw "No listening ip for this proxy" else lib.unique ips; 
-            };
-            backends = lib.mkOption {
-                description = "List of Backends";
-                type = types.listOf hostsLink;
-                default = [];
-                apply = eps: if eps == [] then throw "No backends for this link" else lib.unique eps;
-            };
         };
     };
 
@@ -38,9 +22,9 @@ options.naps.internal.links = lib.mkOption {
     description = "All deployement environments";
     type = types.submodule {
         options = {
-            hosts = lib.mkOption {
-                description = "All hosts providing each links (e.g. postgres, s3,...). Type -> EndpointType -> HostsLink = (Endpoint, [Env])";
-                type = types.attrsOf (types.attrsOf hostsLink);
+            all = lib.mkOption {
+                description = "All links. linktype -> {requesters, providers}";
+                type = types.attrsOf links;
                 default = {};
             };
             perEnv = lib.mkOption {
@@ -51,11 +35,6 @@ options.naps.internal.links = lib.mkOption {
             perVM = lib.mkOption {
                 description = "All links requested by each vm (which includes the links requested by the containers hosted by the vm), grouped by type. VMEnv -> Type -> EnvUID -> AccessUID -> Access ";
                 type = types.attrsOf (types.attrsOf (types.attrsOf (types.attrsOf types.access)));
-                default = {};
-            };
-            proxy = lib.mkOption {
-                description = "Proxy configuration of each VM:  VMName -> LinkType -> Proxy = ([Bind], [Backends])";
-                type = types.attrsOf (types.attrsOf proxy);
                 default = {};
             };
         };

@@ -10,12 +10,15 @@ let
         };
     };
     generateProxy = 
-        endpoints: # [(Endpoint, LinksHosts = [Env], RequestersEnv = [Env])]: LinksHosts = environment hosting the provider, Requesters = environments requesting access (= the native vm + some of the containers)
+        endpoints: # [(endpoint, providers = [ServiceInstance], requesters = [Env])]: ServiceInstance = environment hosting the provider (with priorities, tags,...), Requesters = environments requesting access (= the native vm + some of the containers)
         let
            processEndpoint =
-               tcp@{hostname, port}: providers: requesters:
+               {endpoint, providers, requesters}:
                let
+                    inherit (endpoint) hostname port;
                     envIP = env: if utils.isContainer env then utils.envIP env else "127.0.0.1"; # if the env is a vm requesting the links, it corresponds to a service running natively
+                    sortedProviders = lib.sort (a: b: a.priority > b.priority) providers; # providers sorted by priority
+                    mkBackendI = i: {ip,...}: "server be_tcp_${hostname}_${lib.toString port}_${i} ${ip}:${lib.toString port} check ${lib.optionalString (i > 1) "backup"}";
                in {
                     "frontend fe_tcp_${hostname}_${lib.toString port}" =
                         ''
@@ -27,7 +30,8 @@ let
                         let
                         in ''
                             mode tcp
-                            backend 
+                            ${lib.concatStringsSep "\n"
+                                (lib.imap mkBackendI sortedProviders)}
 
                         '';
                };

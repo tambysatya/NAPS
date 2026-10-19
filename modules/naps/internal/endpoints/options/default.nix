@@ -15,8 +15,8 @@ in {
         default = {};
     };
     options.naps.internal.endpoints.hosts = lib.mkOption {
-        description = "Hosts of each endpoint: Type -> Endpoint -> [Env]";
-        type = types.attrsOf (types.attrsOf (types.listOf types.deployementEnvironment));
+        description = "Hosts of each endpoint: Type -> Endpoint -> Map InstanceName ServiceInstance";
+        type = types.attrsOf (types.attrsOf (types.attrsOf types.serviceInstance));
         default = {};
     };
 
