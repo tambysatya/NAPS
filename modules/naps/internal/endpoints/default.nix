@@ -2,114 +2,68 @@
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
+    getLinkEP = linktype: config.naps.links.${linktype}.endpoints;
+
+    # [Endpoints] -> attrset hostname:port endpoint
+    mkEndpointsAttrs = eps: map (ep: {${utils.epToString ep} = ep;}) eps;
+    
+    mkEndpointsHosts = insname: eps: map (ep: {${utils.epToString ep}.${insname} = config.naps.internal.envs.instances.${insname};}) eps;
+
+    # Generic function to generate the attributes sets
+    # hostField = hosts or consumers
+    # exposesOrReaches = exposes or reaches (obviously)
+    generateAttrSet = 
+        hostField: exposesOrReaches: insname: env: eptype: eps: 
+        let attrs = mkEndpointsAttrs eps;
+        in {
+            perEnv.${utils.envUID env}.${exposesOrReaches}.${eptype} = lib.mkMerge attrs;
+            perVM = {
+                details.${utils.envHost env}.${utils.envUID env}.${exposesOrReaches}.${eptype} = lib.mkMerge attrs;
+                global.${utils.envHost env}.${eptype}.${exposesOrReaches} = lib.mkMerge attrs;
+            };
+            ${hostField} = mkEndpointsHosts insname env;
+        };
+    generateAttrSetFromLink =
+        hostField: exposesOrReaches: insname: env: linktype: 
+        let fun = generateAttrSet hostField exposesOrReaches insname env;
+        in lib.mkMerge (lib.mapAttrsToList fun (getLinkEP linktype));
+    
+
+
+    processProvides =
+        insname: env: provides:
+        let
+            processProvide = 
+                linktype: generateAttrSetFromLink "hosts" "exposes" insname env linktype;
+        in lib.mkMerge (map processProvide provides);
+
+    processEndpoints =
+        insname: env: endpoints:
+        let
+            fun = generateAttrSet "hosts" "exposes" insname env;
+        in lib.mkMerge (lib.mapAttrsToList fun endpoints);
+
+    processLinks  =
+        insname: env: links:
+        let
+            fun = generateAttrSetFromLink "consumers" "reaches" insname env;
+        in lib.mkMerge (lib.mapAttrsToList (linktype: _: fun linktype) links);
     processService = 
         srvname: {deployements, provides, endpoints, links,...}:
-        let 
-           
-           generateLinksEndpoints =
-                insname: env: linktype: 
-                let
-                    linkendpoints = config.naps.links.${linktype}.endpoints; # EndpointType -> [Endpoint]
-                in
-                    lib.mapAttrsToList 
-                        (eptype: eps:
-                            {
-                                ${eptype} = lib.mkMerge (map (ep: {${utils.epToString ep} = ep;}) eps);
-                            }) 
-                        linkendpoints;
-
-
-           /* Generates a map: EndpointType -> EndpointName -> InstanceName -> Instance */
-           generateLinksHosts =
-                insname: instance: linktype:
-                let
-                    linkendpoints = config.naps.links.${linktype}.endpoints; # EndpointType -> [Endpoint]
-                in
-                    lib.mapAttrsToList 
-                        (eptype: eps:
-                            {
-                                ${eptype} = lib.mkMerge (map (ep: {${utils.epToString ep}.${insname} = instance;}) eps);
-                            }) 
-                        linkendpoints;
-
-
-
-           processDeployement =
-            insname: env:
-            let
-                instance = config.naps.internal.envs.instances.${insname};
-                # Reached endpoints: perVM: endpointType -> hostname:port -> Endpoint
-                reaches = lib.mkMerge
-                            (lib.concatMap
-                                (generateLinksEndpoints insname env)
-                                (builtins.attrNames links));
-                # Exposed endpoints: perVM: endpointType -> hostname:port -> Endpoint
-                exposes = lib.mkMerge  [
-                              # endpoints associated with the link of the service
-                              (lib.mkMerge (lib.concatMap (generateLinksEndpoints insname env) provides)) 
-
-                              # other endpoints
-                              (lib.mkMerge 
-                                    (lib.mapAttrsToList 
-                                        (eptype: eps: 
-                                            lib.mkMerge (map (ep: { ${eptype}.${utils.epToString ep} = ep;}) eps)) 
-                                        endpoints))
-                          ];
-                # EndpointType -> hostname:port -> ServiceID -> ServiceInstance                           
-                hosts = lib.mkMerge [
-                              # endpoints associated with the link of the service
-                             (lib.mkMerge (lib.concatMap (generateLinksHosts insname instance) provides))
-                              # other endpoints
-                              (lib.mkMerge 
-                                    (lib.mapAttrsToList 
-                                        (eptype: eps: 
-                                            lib.mkMerge (map (ep: { ${eptype}.${utils.epToString ep}.${insname} = instance;}) eps)) 
-                                        endpoints))
-                          ];
-                # EndpointType -> hostname:port -> ServiceID -> ServiceInstance                           
-                consumers = lib.mkMerge
-                                (lib.concatMap 
-                                    (generateLinksHosts insname instance)
-                                    (builtins.attrNames links));
-            in {
-                inherit hosts consumers;
-                perEnv.${utils.envUID env} = {
-                    inherit exposes reaches;
-                };
-                perVM.details.${utils.envHost env}.${utils.envUID env} = {inherit exposes reaches;};
-                perVM.global.${utils.envHost env} = {inherit exposes reaches;};
-            };
+        let
+            processDeployement =
+                insname: env:
+                lib.mkMerge [
+                    (processProvides insname env provides)
+                    (processEndpoints insname env endpoints)
+                    (processLinks insname env links)
+                ];
         in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
-
-
-    generateProxy = 
-        vmname: eptype: {reaches, exposes}:
-        let provider = config.naps.endpoints.${eptype};
-            hosts = config.naps.internal.endpoints.hosts.${eptype};
-            consumers = config.naps.internal.endpoints.consumers.${eptype};
-
-            applyMerge =
-                type: value:
-                if type == null then value else type.merge [] [{inherit value; file = "modules.naps.internal.endpoints.default";}];
-
-            hosts' = lib.mapAttrs (epname: ep@{extraArgs,...}: ep // {extraArgs = applyMerge provider.extraArgsType extraArgs;}) hosts;
-            consumers' = lib.mapAttrs (epname: ep@{extraArgs,...}: ep // {extraArgs = applyMerge provider.extraArgsType extraArgs;}) consumers;
-        in provider.generateProxy vmname hosts' consumers' exposes reaches;
-
 
 in {
     imports = [./options];
     naps.internal.endpoints = lib.mkMerge [
             (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-            /*
-            {
-                perVM.proxy = 
-                    lib.mkMerge 
-                        (lib.mapAttrsToList 
-                            (vmname: {exposes, reaches}: lib.mkMerge (lib.mapAttrsToList (generateProxy vmname) eps))
-                            config.naps.internal.endpoints.perVM.global);
-            }
-            */
         ];
 
 }
