@@ -69,6 +69,11 @@ in {
         # Endpoints that are exposed are not considered to be reached
         apply = attrs: lib.mapAttrs (env: {exposes, reaches}: {inherit exposes; reaches = filterReaches exposes reaches;} ) attrs;
     };
+    options.naps.internal.endpoints.perVM.proxy = lib.mkOption {
+        description = "Proxy configuration of each VM";
+        type = types.attrsOf types.proxy;
+        default = {};
+    };
 
 }
 

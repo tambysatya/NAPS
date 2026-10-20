@@ -9,12 +9,13 @@ let
     links = import ./links.nix {inherit lib inputs; };
     networktypes = import ./network.nix {inherit lib inputs;};
     endpointstypes = import ./endpoints.nix {inherit lib inputs;};
+    proxy = import ./proxy.nix {inherit lib inputs;};
     users = import ./users.nix {inherit lib inputs;};
     volumes = import ./volumes.nix {inherit lib inputs;};
     assets = import ./assets.nix {inherit lib inputs;};
     services = import ./services.nix {inherit lib inputs;};
 
-    types = libtypes // files // deployement // links // networktypes // endpointstypes // users // volumes // assets // services;
+    types = libtypes // files // deployement // links // networktypes // endpointstypes // proxy // users // volumes // assets // services;
 
 
 
