@@ -36,6 +36,7 @@ let
     envHost = env: if builtins.isString env then env
                    else if env.type == "vm" then env.host
                    else env.host.vm;
+    serviceEnv = ins@{deployement,...}: deployement;
     isContainer = env: env.type == "container";
     isVM = env: env.type == "vm";
 
@@ -56,5 +57,6 @@ in {
     inherit directory_id;
     inherit isContainer isVM;
     inherit envUID envHost hostDeployementEnv hostIP envIP;
+    inherit serviceEnv;
     inherit epToString;
 }

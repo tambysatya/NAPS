@@ -4,6 +4,15 @@ let
     utils = import ../lib {inherit inputs lib flakeRoot;};    
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
        
+    firewallConfig = types.submodule {
+        options = {
+            interfaces = lib.mkOption {
+                description = "On which interface the firewall should be openned. all = all the interfaces";
+                type = types.either (types.enum ["all"]) (types.listOf types.str);
+            };
+            inherit (types) port;
+        };
+    };
     frontend = types.submodule {
         options = {
             bind = types.submodules {
@@ -27,6 +36,10 @@ let
                 description = "Backend section";
                 type = types.str;
                 example = "default_backend be_postgres.local.fr";
+            };
+            firewall = lib.mkOption {
+                description = "Firewall configuration for this frontend";
+                type = firewallConfig;
             };
             extraConfig = lib.mkOption {
                 description = "Extra config appened in the section";
@@ -72,8 +85,8 @@ let
                 default = null;
             };
             generateProxy = lib.mkOption {
-                description = "Given the set of all the endpoints of this type, generate a proxy configuration for this type of endpoint: perVM: hosts -> exposes -> reaches -> haproxyConfig";
-                type = types.functionTo (types.functionTo (types.functionTo haproxyConfig));
+                description = "Given the set of all the endpoints of this type, generate a proxy configuration for this type of endpoint: perVM: vmname -> hosts -> consumers -> exposes -> reaches -> haproxyConfig";
+                type = types.functionTo (types.functionTo (types.functionTo (types.functionTo (types.functionTo haproxyConfig))));
             };
         };
     };
