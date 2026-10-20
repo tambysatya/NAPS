@@ -82,10 +82,34 @@ let
         in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
 
 
+    generateProxy = 
+        vmname: eptype: {reaches, exposes}:
+        let provider = config.naps.endpoints.${eptype};
+            hosts = config.naps.internal.endpoints.hosts.${eptype};
+            consumers = config.naps.internal.endpoints.consumers.${eptype};
+
+            applyMerge =
+                type: value:
+                if type == null then value else type.merge [] [{inherit value; file = "modules.naps.internal.endpoints.default";}];
+
+            hosts' = lib.mapAttrs (epname: ep@{extraArgs,...}: ep // {extraArgs = applyMerge provider.extraArgsType extraArgs;}) hosts;
+            consumers' = lib.mapAttrs (epname: ep@{extraArgs,...}: ep // {extraArgs = applyMerge provider.extraArgsType extraArgs;}) consumers;
+        in provider.generateProxy vmname hosts' consumers' exposes reaches;
+
 
 in {
     imports = [./options];
-    naps.internal.endpoints = 
-        lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services);
+    naps.internal.endpoints = lib.mkMerge [
+            (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
+            /*
+            {
+                perVM.proxy = 
+                    lib.mkMerge 
+                        (lib.mapAttrsToList 
+                            (vmname: {exposes, reaches}: lib.mkMerge (lib.mapAttrsToList (generateProxy vmname) eps))
+                            config.naps.internal.endpoints.perVM.global);
+            }
+            */
+        ];
 
 }
