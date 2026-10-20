@@ -37,12 +37,18 @@ in {
         default = {};
     };
     options.naps.internal.endpoints.perEnv = lib.mkOption {
-        description = "Endpoints of each environment: Env -> Endpoints";
-        type = types.attrsOf endpoints;
+        description = "Endpoints of each environment: Env -> EndpointType -> Endpoints";
+        type = types.attrsOf (types.attrsOf endpoints);
         default = {};
 
         # Endpoints that are exposed are not considered to be reached
-        apply = attrs: lib.mapAttrs (env: {exposes, reaches}: {inherit exposes; reaches = filterReaches exposes reaches;} ) attrs;
+        apply = attrs: lib.mapAttrs 
+                            (env: eps:
+                                lib.mapAttrs 
+                                (eptype: {exposes, reaches}: 
+                                    {inherit exposes; reaches = filterReaches exposes reaches;} )
+                                eps)
+                            attrs;
     };
     options.naps.internal.endpoints.perVM.details = lib.mkOption {
         description = "Endpoints of each VM: VM -> Env -> EndpointType -> Endpoints";

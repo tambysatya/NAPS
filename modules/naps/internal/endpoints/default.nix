@@ -25,12 +25,12 @@ let
         hostField: exposesOrReaches: insname: env: eptype: eps: 
         let attrs = mkEndpointsAttrs eptype eps;
         in {
-            perEnv.${utils.envUID env}.${exposesOrReaches}.${eptype} = lib.mkMerge attrs;
+            perEnv.${utils.envUID env}.${eptype}.${exposesOrReaches} = lib.mkMerge attrs;
             perVM = {
                 details.${utils.envHost env}.${utils.envUID env}.${eptype}.${exposesOrReaches} = lib.mkMerge attrs;
                 global.${utils.envHost env}.${eptype}.${exposesOrReaches} = lib.mkMerge attrs;
             };
-            ${hostField} = mkEndpointsHosts insname env;
+            ${hostField}.${eptype} = lib.mkMerge (mkEndpointsHosts insname eps);
         };
     generateAttrSetFromLink =
         hostField: exposesOrReaches: insname: env: linktype: 
