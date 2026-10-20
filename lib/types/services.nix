@@ -45,6 +45,13 @@ let
                 endpoints = lib.mkOption {
                     description = "Various endpoints exposed by the service";
                     type = types.attrsOf (types.listOf types.endpoint);
+                    apply = eps: 
+                        let check = 
+                                eptype: ep:
+                                assert (builtins.hasAttr eptype config.naps.endpoints) || throw "Unknown endpoint ${eptype}";
+                                ep;
+
+                        in lib.mapAttrs check eps;
                 };
                 assets = lib.mkOption {
                     description = "Files placed in the store (config files, strings, encrypted password). Should be of the form <filename/dirname> = {...}";

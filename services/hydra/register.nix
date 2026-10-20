@@ -6,14 +6,16 @@ let
     owner = "hydra";
     reload = ["hydra-server.service" "hydra-init.service"];
     endpoints = {
-        http = [
+        https = [
             {
                 hostname = "hydra.${domain}";
                 port = 3000;
+                extraArgs = {tls = "termination";};
             }
             {
                 hostname = "cache.${domain}";
                 port = 3001;
+                extraArgs = {tls = "termination";};
             }
         ];
     };

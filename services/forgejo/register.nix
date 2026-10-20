@@ -31,8 +31,8 @@ naps.services.forgejo = {
         ];
     };
     endpoints = {
-        http = [{
-           inherit hostname; port = 3000;
+        https = [{
+           inherit hostname; port = 3000; extraArgs = {tls = "termination";};
         }];
         tcp = [{
            inherit hostname; port = 5022; #SSH connection

@@ -11,7 +11,7 @@ let
         let
             consumersEnvs = lib.mapAttrsToList (insname: ins: ins.deployement) epConsumers;
             consumersHosts = map utils.envHost consumersEnvs;
-            isConsumedLocally = builtins.length (lib.unique consumersHosts) == 1;
+            isConsumedLocally = lib.unique consumersHosts == [vmname];
             listen = if isConsumedLocally 
                         then map (env: if utils.isContainer env then utils.envIP env else "127.0.0.1") consumersEnvs
                         else ["0.0.0.0"];

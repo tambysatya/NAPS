@@ -21,7 +21,7 @@ naps.services.step-ca = {
         };
     };
     endpoints.https = [
-        {inherit hostname port;}
+        {inherit hostname port; extraArgs = {tls="passthrough";}; }
     ];
 };
 }

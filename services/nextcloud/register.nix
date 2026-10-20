@@ -10,6 +10,7 @@ let
     endpoints = [{
                    hostname = hostname;
                    port = 80; 
+                   extraArgs = {tls = "termination";};
                  }];
 in {
 
@@ -36,7 +37,7 @@ naps.services.nextcloud = {
         {path="/var/lib/nextcloud/config"; shared=true; inherit owner reload;}
         {path="/var/lib/nextcloud/data"; shared=true; inherit owner reload;}
     ];
-    endpoints.http = endpoints;
+    endpoints.https = endpoints;
 
 };
 

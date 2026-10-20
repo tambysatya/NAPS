@@ -5,10 +5,11 @@ let
     owner = "systemd-journal-remote";
     reload = ["systemd-journal-remote.service"];
     endpoints = {
-        http= [ #journald use mTLS internally
+        https= [ #journald use mTLS internally
             {
                 inherit hostname;
                 port = 19532;
+                extraArgs = {tls = "termination";};
                 /*
                 extraConfig = {
                     frontend  = {

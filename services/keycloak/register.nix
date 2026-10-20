@@ -27,8 +27,8 @@ naps.services.keycloak = {
             {database="keycloak"; inherit owner reload;}
         ];  
     };
-    endpoints.http = [
-        {inherit hostname port;}
+    endpoints.https = [
+        {inherit hostname port; extraArgs = {tls = "termination";};}
     ];
 };
 
