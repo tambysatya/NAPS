@@ -66,12 +66,18 @@ let
                                             lib.mkMerge (map (ep: { ${eptype}.${utils.epToString ep}.${insname} = instance;}) eps)) 
                                         endpoints))
                           ];
+                # EndpointType -> hostname:port -> ServiceID -> ServiceInstance                           
+                consumers = lib.mkMerge
+                                (lib.concatMap 
+                                    (generateLinksHosts insname instance)
+                                    (builtins.attrNames links));
             in {
-                inherit hosts;
+                inherit hosts consumers;
                 perEnv.${utils.envUID env} = {
                     inherit exposes reaches;
                 };
-                perVM.${utils.envHost env}.${utils.envUID env} = {inherit exposes reaches;};
+                perVM.details.${utils.envHost env}.${utils.envUID env} = {inherit exposes reaches;};
+                perVM.global.${utils.envHost env} = {inherit exposes reaches;};
             };
         in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
 

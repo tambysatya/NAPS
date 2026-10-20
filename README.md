@@ -51,6 +51,13 @@ Main module: config.infra
 ### naps.internal.links
     - all: providers and requesters of each link type
     - perEnv / perVM: aggregation of each requester
+### naps.internal.endpoints
+    Describes which endpoints are reached / exposed by each environment/VM.
+    Note: 
+    - `naps.internal.endpoints.perVM.details` describes the endpoints of each VM grouped by containers while `naps.internal.endpoints.perVM.global` flattens this list
+    - endpoints that are simultaneously exposed and reached are removed from the reached list. It is assumed that if an endpoint is exposed, you can access it locally. In addition, this is true at the level of the VM, which means that if a container exposes an endpoints => a proxy will be created on the vm => the endpoint is reachable by everyone, no matter how.
+
+    This second assumption is maybe too large. If an endpoint is reached only by the containers of the VM, there is no need to open it publicly. TODO
 
 # TODO
 

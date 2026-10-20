@@ -68,11 +68,12 @@ let
         options = {
             extraArgsType = lib.mkOption {
                 description = "An endpoint contains {hostname, port, extraArgs}. This specifies the type of the user-defined extraArgs";
-                type = types.raw;
+                type = types.nullOr types.raw;
+                default = null;
             };
             generateProxy = lib.mkOption {
-                description = "Given the set of all the endpoints of this type, generate a proxy configuration: perVM: exposes:  -> reaches";
-                type = types.functionTo haproxyConfig;
+                description = "Given the set of all the endpoints of this type, generate a proxy configuration for this type of endpoint: perVM: hosts -> exposes -> reaches -> haproxyConfig";
+                type = types.functionTo (types.functionTo (types.functionTo haproxyConfig));
             };
         };
     };
