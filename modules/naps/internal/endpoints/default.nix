@@ -4,8 +4,17 @@ let
 
     getLinkEP = linktype: config.naps.links.${linktype}.endpoints;
 
+    checkEndpoint = eptype: ep@{extraArgs,...}:
+       let applyMerge =
+                type: value: 
+                if type == null then value else type.merge [] [{inherit value; file = "module.naps.internal.endpoints.default.nix";}];
+           check = config.naps.endpoints.${eptype}.extraArgsType;
+       in ep // {extraArgs = applyMerge check extraArgs;};
+
+    # Transforms a list of endpoints into a set of hostname:port => endpoint.
+    # Performs type checking of the extraArgs as well
     # [Endpoints] -> attrset hostname:port endpoint
-    mkEndpointsAttrs = eps: map (ep: {${utils.epToString ep} = ep;}) eps;
+    mkEndpointsAttrs = eptype: eps: map (ep: {${utils.epToString ep} = checkEndpoint eptype ep;}) eps;
     
     mkEndpointsHosts = insname: eps: map (ep: {${utils.epToString ep}.${insname} = config.naps.internal.envs.instances.${insname};}) eps;
 
@@ -14,11 +23,11 @@ let
     # exposesOrReaches = exposes or reaches (obviously)
     generateAttrSet = 
         hostField: exposesOrReaches: insname: env: eptype: eps: 
-        let attrs = mkEndpointsAttrs eps;
+        let attrs = mkEndpointsAttrs eptype eps;
         in {
             perEnv.${utils.envUID env}.${exposesOrReaches}.${eptype} = lib.mkMerge attrs;
             perVM = {
-                details.${utils.envHost env}.${utils.envUID env}.${exposesOrReaches}.${eptype} = lib.mkMerge attrs;
+                details.${utils.envHost env}.${utils.envUID env}.${eptype}.${exposesOrReaches} = lib.mkMerge attrs;
                 global.${utils.envHost env}.${eptype}.${exposesOrReaches} = lib.mkMerge attrs;
             };
             ${hostField} = mkEndpointsHosts insname env;
@@ -59,6 +68,13 @@ let
                     (processLinks insname env links)
                 ];
         in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
+
+    generateProxy = 
+        vmname: globalEPS:
+        let
+            
+        in
+        {};
 
 in {
     imports = [./options];
