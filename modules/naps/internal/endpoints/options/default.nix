@@ -68,6 +68,17 @@ in {
         type = types.attrsOf types.haproxyConfig;
         default = {};
     };
-
+    options.naps.internal.endpoints.outputs.proxy = lib.mkOption {
+        description = "Proxy final configuration file of each VM";
+        type = types.attrsOf types.str;
+        readOnly = true;
+        default = lib.mapAttrs (vmname: proxy: lib.concatStringsSep "\n" proxy.config) config.naps.internal.endpoints.perVM.proxy;
+    };
+    options.naps.internal.endpoints.outputs.firewall = lib.mkOption {
+        description = "Firewall final configuration of each VM";
+        type = types.attrs;
+        readOnly = true;
+        default = lib.mapAttrs (vmname: proxy: proxy.firewall) config.naps.internal.endpoints.perVM.proxy;
+    };
 }
 

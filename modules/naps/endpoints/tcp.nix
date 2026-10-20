@@ -23,7 +23,7 @@ let
                 ''
                     frontend reverse_fe_tcp_${hostname}_${lib.toString port}
                         mode tcp
-                        bind ${lib.concatStringsSep " " listen}
+                        bind ${lib.concatMapStringsSep "," (ip: "${ip}:${lib.toString port}") listen}
                         default_backend "be_tcp_${hostname}_${lib.toString port}
                 ''];
             firewall.${lib.toString port} = {
@@ -64,7 +64,7 @@ let
             config = [''
                 frontend proxy_fe_tcp_${hostname}_${lib.toString port}"
                     mode tcp
-                    bind ${lib.concatStringsSep " " localConsumersIP}
+                    bind ${lib.concatMapStringsSep "," (ip: "${ip}:${lib.toString port}") localConsumersIP}
                     default_backend be_tcp_${hostname}_${lib.toString port}
             ''];
             firewall.${lib.toString port} = {

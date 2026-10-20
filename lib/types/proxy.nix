@@ -24,9 +24,8 @@ let
         options = {
             config = lib.mkOption {
                 description = "HAProxy configuration file";
-                type = types.either types.str (types.listOf types.str);
+                type = types.listOf types.str;
                 default = [];
-                #apply = x: if builtins.isList x then lib.concatStringsSep "\n" x else x;
             };
             firewall = lib.mkOption {
                 description = "Firewall configuration: Port -> firewallConfig";
