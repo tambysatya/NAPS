@@ -70,16 +70,22 @@ let
         in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
 
     generateProxy = 
-        vmname: globalEPS:
+        vmname: globalEPs:
         let
-            
-        in
-        {};
+            processEPType = 
+                eptype: {exposes, reaches}: 
+                let
+                    generate = config.naps.endpoints.${eptype}.generateProxy;
+                    consumers = config.naps.internal.endpoints.consumers.${eptype};
+                    hosts = config.naps.internal.endpoints.hosts.${eptype};
+                in {${vmname} = generate vmname hosts consumers exposes reaches;};
+        in lib.mkMerge (lib.mapAttrsToList processEPType globalEPs);
 
 in {
     imports = [./options];
     naps.internal.endpoints = lib.mkMerge [
             (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
+            {perVM.proxy = lib.mkMerge (lib.mapAttrsToList generateProxy config.naps.internal.endpoints.perVM.global);}
         ];
 
 }

@@ -65,7 +65,7 @@ in {
     };
     options.naps.internal.endpoints.perVM.proxy = lib.mkOption {
         description = "Proxy configuration of each VM";
-        type = types.attrsOf types.proxy;
+        type = types.attrsOf types.haproxyConfig;
         default = {};
     };
 

@@ -16,16 +16,19 @@ let
     };
     frontend = types.submodule {
         options = {
-            bind = types.submodules {
-                options = {
-                    listen = lib.mkOption {
-                        description = "List of IP addresses to listen on";
-                        type = types.listOf types.str;
-                    };
-                    extraArgs = lib.mkOption {
-                        description = "Extra args appened to the bind line";
-                        type = types.str;
-                        default = "";
+            bind = lib.mkOption {
+                description = "Listening section";
+                type = types.submodule {
+                    options = {
+                        listen = lib.mkOption {
+                            description = "List of IP addresses to listen on";
+                            type = types.listOf types.str;
+                        };
+                        extraArgs = lib.mkOption {
+                            description = "Extra args appened to the bind line";
+                            type = types.str;
+                            default = "";
+                        };
                     };
                 };
             };
@@ -93,6 +96,6 @@ let
     };
 
 in {
-    inherit proxy;
+    inherit proxy haproxyConfig;
 }
 
