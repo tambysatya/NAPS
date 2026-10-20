@@ -62,7 +62,7 @@ let
         in {
 
             config = [''
-                frontend proxy_fe_tcp_${hostname}_${lib.toString port}"
+                frontend proxy_fe_tcp_${hostname}_${lib.toString port}
                     mode tcp
                     bind ${lib.concatMapStringsSep "," (ip: "${ip}:${lib.toString port}") localConsumersIP}
                     default_backend be_tcp_${hostname}_${lib.toString port}
