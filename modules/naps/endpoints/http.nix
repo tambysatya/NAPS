@@ -8,8 +8,6 @@ let
     vmname: hosts: consumers: exposes: reaches:
     let
     in {
-        frontends = {};
-        backends = {};
     };
 in 
 {

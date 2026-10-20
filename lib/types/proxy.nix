@@ -11,72 +11,26 @@ let
                 description = "On which interface the firewall should be openned. all = all the interfaces";
                 type = types.either (types.enum ["all"]) (types.listOf types.str);
             };
-            inherit (types) port;
-        };
-    };
-    frontend = types.submodule {
-        options = {
-            bind = lib.mkOption {
-                description = "Listening section";
-                type = types.submodule {
-                    options = {
-                        listen = lib.mkOption {
-                            description = "List of IP addresses to listen on";
-                            type = types.listOf types.str;
-                        };
-                        extraArgs = lib.mkOption {
-                            description = "Extra args appened to the bind line";
-                            type = types.str;
-                            default = "";
-                        };
-                    };
-                };
-            };
-            mode = lib.mkOption {
-                description = "Frontend mode";
-                type = types.enum ["tcp" "http"];
-            };
-            backend = lib.mkOption {
-                description = "Backend section";
-                type = types.str;
-                example = "default_backend be_postgres.local.fr";
-            };
-            firewall = lib.mkOption {
-                description = "Firewall configuration for this frontend";
-                type = firewallConfig;
-            };
-            extraConfig = lib.mkOption {
-                description = "Extra config appened in the section";
-                type = types.listOf types.str;
+            proto = lib.mkOption {
+                description = "Allowed protocol";
+                type = types.listOf (types.enum ["tcp" "udp"]);
+                apply = lib.unique;
                 default = [];
             };
         };
     };
 
-    backend = types.submodule {
-        options = {
-            mode = lib.mkOption {
-                description = "Backend mode";
-                type = types.enum ["tcp" "http"];
-            };
-            config = lib.mkOption {
-                description = "Remaining of the config lines of the section";
-                type = types.listOf types.str;
-                default = [];
-            };
-        };
-    };
- 
     haproxyConfig = types.submodule {
         options = {
-            frontends = lib.mkOption {
-                description = "Description of the frontends";
-                type = types.attrsOf frontend;
-                default = {};
+            config = lib.mkOption {
+                description = "HAProxy configuration file";
+                type = types.either types.str (types.listOf types.str);
+                default = [];
+                #apply = x: if builtins.isList x then lib.concatStringsSep "\n" x else x;
             };
-            backends = lib.mkOption {
-                description = "Description of the backends";
-                type = types.attrsOf backend;
+            firewall = lib.mkOption {
+                description = "Firewall configuration: Port -> firewallConfig";
+                type = types.attrsOf firewallConfig;
                 default = {};
             };
         };

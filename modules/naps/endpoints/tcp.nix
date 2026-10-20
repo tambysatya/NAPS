@@ -6,28 +6,32 @@ let
 
     displayBackendIP = ep@{hostname, port,...}: i: ins: "server be_tcp_${hostname}_${lib.toString port}_${lib.toString i} ${utils.envIP (utils.serviceEnv ins)}:${lib.toString port} check ${lib.optionalString (i > 1) "backup"}";
 
-    processExposedEndpointFrontend = # ep: a given endpoint. epConsumers : all the consumers instances of the endpoint
-        epname: ep@{hostname, port, ...}: epConsumers: 
+    processExposedEndpointFrontend = # ep: a given endpoint. epConsumers, epHosts: all the consumers/hosts instances of the endpoint
+        vmname: epname: ep@{hostname, port, ...}: epConsumers: epHosts: 
         let
             consumersEnvs = lib.mapAttrsToList (insname: ins: ins.deployement) epConsumers;
             consumersHosts = map utils.envHost consumersEnvs;
             isConsumedLocally = builtins.length (lib.unique consumersHosts) == 1;
+            listen = if isConsumedLocally 
+                        then map (env: if utils.isContainer env then utils.envIP env else "127.0.0.1") consumersEnvs
+                        else ["0.0.0.0"];
+            isHostedNatively = builtins.elem vmname (map utils.envUID consumersEnvs); # if hosted natively, no proxy is created (we only open the firewall)
 
         in {
-            "rev_fe_tcp_${hostname}_${lib.toString port}" = {
-                mode = "tcp";
-                bind.listen = 
-                    if isConsumedLocally 
-                    then map (env: if utils.isContainer env then utils.envIP env else "127.0.0.1") consumersEnvs
-                    else ["0.0.0.0"];
-                backend = "be_tcp_${hostname}_${lib.toString port}";
-                firewall = {
-                    inherit port;
-                    interfaces = 
-                        if isConsumedLocally
-                        then map (env: if utils.isContainer env then env.host.veth else "lo") consumersEnvs
-                        else "all";
-                };
+            config = lib.optionals (! isHostedNatively)
+                [
+                ''
+                    frontend reverse_fe_tcp_${hostname}_${lib.toString port}
+                        mode tcp
+                        bind ${lib.concatStringsSep " " listen}
+                        default_backend "be_tcp_${hostname}_${lib.toString port}
+                ''];
+            firewall.${lib.toString port} = {
+                proto = ["tcp"];
+                interfaces = 
+                    if isConsumedLocally
+                    then map (env: if utils.isContainer env then env.host.veth else "lo") consumersEnvs
+                    else "all";
             };
         };
 
@@ -37,10 +41,13 @@ let
             epLocalHosts = lib.filterAttrs (_: ins: utils.envHost (utils.serviceEnv ins) == vmname) hosts;
             sortedHosts = lib.sort (ins: ins': ins.priority > ins'.priority) (builtins.attrValues epLocalHosts);
         in {
-            "be_tcp_${hostname}_${lib.toString port}" = {
-                mode = "tcp";
-                config = lib.imap (displayBackendIP ep) sortedHosts;
-            };
+            config = [
+            ''
+                backend be_tcp_${hostname}_${lib.toString port}
+                    mode tcp
+                    ${lib.concatStringsSep "\n" (lib.imap (displayBackendIP ep) sortedHosts)}
+            ''
+            ];
         };
 
 
@@ -53,15 +60,18 @@ let
             localConsumersIP = map (env: if utils.isContainer env then utils.envIP env else "127.0.0.1") localConsumers;
             localConsumersIface = map (env: if utils.isContainer env then env.host.veth else "lo") localConsumers;
         in {
-           "proxy_fe_tcp_${hostname}_${lib.toString port}" = {
-                mode = "tcp";
-                bind.listen = localConsumersIP;
-                backend = "be_tcp_${hostname}_${lib.toString port}";
-                firewall = {
-                    inherit port;
+
+            config = [''
+                frontend proxy_fe_tcp_${hostname}_${lib.toString port}"
+                    mode tcp
+                    bind ${lib.concatStringsSep " " localConsumersIP}
+                    default_backend be_tcp_${hostname}_${lib.toString port}
+            ''];
+            firewall.${lib.toString port} = {
+                    proto = ["tcp"];
                     interfaces = localConsumersIface;
-                };
-           };
+            };
+
         };
     processReachedEndpointBackend = 
         epname: ep@{hostname, port,...}: epHosts:
@@ -69,24 +79,29 @@ let
             hostsIns = builtins.attrValues epHosts;
             sortedHosts = lib.sort (ins: ins': ins.priority > ins'.priority) hostsIns;
         in {
-            "be_tcp_${hostname}_${lib.toString port}" = {
-                mode = "tcp";
-                config = builtins.trace sortedHosts (lib.imap (displayBackendIP ep) sortedHosts);
-            };
+            config = [''
+                backend be_tcp_${hostname}_${lib.toString port}
+                    mode tcp
+                    ${lib.concatStringsSep "\n" (lib.imap (displayBackendIP ep) sortedHosts)}
+            ''];
         };
     generateProxy =
         vmname: hosts: consumers: exposes: reaches:
         let
-            feExposed = lib.mapAttrsToList (epname: ep: processExposedEndpointFrontend epname ep (consumers.${epname} or {})) exposes;
+            feExposed = lib.mapAttrsToList 
+                            (epname: ep: 
+                                processExposedEndpointFrontend 
+                                    vmname epname ep 
+                                    (consumers.${epname} or {})
+                                    (hosts.${epname} or {})) 
+                            exposes;
             beExposed = lib.mapAttrsToList (epname: ep: processExposedEndpointBackend vmname (hosts.${epname} or {}) epname ep) exposes;
 
             feReached = lib.mapAttrsToList (epname: ep: processReachedEndpointFrontend vmname epname ep (consumers.${epname} or {})) reaches;
             beReached = lib.mapAttrsToList (epname: ep: processReachedEndpointBackend epname ep (hosts.${epname} or {})) reaches;
         in
-        {
-            frontends = lib.mkMerge (feExposed ++ feReached);
-            backends = lib.mkMerge (beExposed ++ beReached);
-        };
+           lib.mkMerge (feExposed ++ feReached ++ beExposed ++ beReached);
+           #lib.mkMerge (feReached ++ beExposed ++ beReached);
 in {
     naps.endpoints.tcp = {
         inherit generateProxy;
