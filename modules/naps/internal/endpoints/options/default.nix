@@ -18,12 +18,7 @@ let
         };
     };
 
-    /* Removes from reaches the subset of endpoints that are locally exposed for a given type*/
-    filterReaches = 
-        exposes: reaches:  #both are hostname:port -> Endpoint
-        let exposesNames = builtins.attrNames exposes;
-        in lib.filterAttrs (name: _: ! builtins.elem name exposesNames) reaches;
-    
+   
 
 in {
     options.naps.internal.endpoints.hosts = lib.mkOption {
@@ -41,14 +36,6 @@ in {
         type = types.attrsOf (types.attrsOf endpoints);
         default = {};
 
-        # Endpoints that are exposed are not considered to be reached
-        apply = attrs: lib.mapAttrs 
-                            (env: eps:
-                                lib.mapAttrs 
-                                (eptype: {exposes, reaches}: 
-                                    {inherit exposes; reaches = filterReaches exposes reaches;} )
-                                eps)
-                            attrs;
     };
     options.naps.internal.endpoints.perVM.details = lib.mkOption {
         description = "Endpoints of each VM: VM -> Env -> EndpointType -> Endpoints";
@@ -59,9 +46,6 @@ in {
         description = "Endpoints of each VM, where all the environments are aggregated. VM -> EndpointType -> Endpoints";
         type = types.attrsOf (types.attrsOf endpoints);
         default = {};
-
-        # Endpoints that are exposed are not considered to be reached
-        apply = attrs: lib.mapAttrs (vmname: epstypes: lib.mapAttrs (_: {exposes, reaches}: {inherit exposes; reaches = filterReaches exposes reaches;}) epstypes ) attrs;
     };
     options.naps.internal.endpoints.perVM.proxy = lib.mkOption {
         description = "Proxy configuration of each VM";

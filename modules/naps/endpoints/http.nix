@@ -27,6 +27,8 @@ let
             consumersIPs = map (env: if utils.isContainer env then utils.evnIP else "127.0.0.1") consumersEnvs;
 
             mapEndpoints = "";
+            crtlist = "";
+            mapTerminationTLS = "";
         in {
             firewall."443" = {
                 mode = "tcp";
