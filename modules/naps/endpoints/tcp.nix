@@ -39,7 +39,7 @@ let
         in {
             "be_tcp_${hostname}_${lib.toString port}" = {
                 mode = "tcp";
-                extraConfig = lib.imap (displayBackendIP ep) sortedHosts;
+                config = lib.imap (displayBackendIP ep) sortedHosts;
             };
         };
 
@@ -53,7 +53,7 @@ let
             localConsumersIP = map (env: if utils.isContainer env then utils.envIP env else "127.0.0.1") localConsumers;
             localConsumersIface = map (env: if utils.isContainer env then env.host.veth else "lo") localConsumers;
         in {
-           "prox_fe_tcp_${hostname}_${lib.toString port}" = {
+           "proxy_fe_tcp_${hostname}_${lib.toString port}" = {
                 mode = "tcp";
                 bind.listen = localConsumersIP;
                 backend = "be_tcp_${hostname}_${lib.toString port}";
@@ -66,12 +66,12 @@ let
     processReachedEndpointBackend = 
         epname: ep@{hostname, port,...}: epHosts:
         let
-            hostsIns = lib.mapAttrsToList (insname: ins: ins.deployement) epHosts;
+            hostsIns = builtins.attrValues epHosts;
             sortedHosts = lib.sort (ins: ins': ins.priority > ins'.priority) hostsIns;
         in {
             "be_tcp_${hostname}_${lib.toString port}" = {
                 mode = "tcp";
-                extraConfig = builtins.trace sortedHosts (lib.imap (displayBackendIP ep) sortedHosts);
+                config = builtins.trace sortedHosts (lib.imap (displayBackendIP ep) sortedHosts);
             };
         };
     generateProxy =
@@ -80,12 +80,12 @@ let
             feExposed = lib.mapAttrsToList (epname: ep: processExposedEndpointFrontend epname ep (consumers.${epname} or {})) exposes;
             beExposed = lib.mapAttrsToList (epname: ep: processExposedEndpointBackend vmname (hosts.${epname} or {}) epname ep) exposes;
 
-            feReached = lib.mapAttrsToList (epname: ep: processReachedEndpointFrontend vmname epname (consumers.${epname} or {})) reaches;
+            feReached = lib.mapAttrsToList (epname: ep: processReachedEndpointFrontend vmname epname ep (consumers.${epname} or {})) reaches;
             beReached = lib.mapAttrsToList (epname: ep: processReachedEndpointBackend epname ep (hosts.${epname} or {})) reaches;
         in
         {
-            frontends = lib.mkMerge feExposed; # ++ feReached);
-            #backends = lib.mkMerge (beExposed ++ beReached);
+            frontends = lib.mkMerge (feExposed ++ feReached);
+            backends = lib.mkMerge (beExposed ++ beReached);
         };
 in {
     naps.endpoints.tcp = {
