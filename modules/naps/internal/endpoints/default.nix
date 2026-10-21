@@ -83,12 +83,11 @@ let
         vmname: globalEPs:
         let
             processEPType = 
-                eptype: {exposes, reaches}: 
+                vmname: eptype: 
                 let
                     generate = config.naps.endpoints.${eptype}.generateProxy;
-                    consumers = config.naps.internal.endpoints.consumers.${eptype};
-                    hosts = config.naps.internal.endpoints.hosts.${eptype};
-                in {${vmname} = generate vmname hosts consumers exposes reaches;};
+                    eps = config.naps.internal.endpoint.perVM.${vmname}.${eptype};
+                in {${vmname} = generate eps;};
         in lib.mkMerge (lib.mapAttrsToList processEPType globalEPs);
 
 in {
