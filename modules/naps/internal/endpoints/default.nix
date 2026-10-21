@@ -24,13 +24,18 @@ let
     generateAttrSet = 
         hostField: exposesOrReaches: insname: env: eptype: eps: 
         let attrs = mkEndpointsAttrs eptype eps;
+            perVMField = if exposesOrReaches == "exposes" then "exposedBy" else "reachedBy";
         in {
             perEnv.${utils.envUID env}.${eptype}.${exposesOrReaches} = lib.mkMerge attrs;
-            perVM = {
-                details.${utils.envHost env}.${utils.envUID env}.${eptype}.${exposesOrReaches} = lib.mkMerge attrs;
-                global.${utils.envHost env}.${eptype}.${exposesOrReaches} = lib.mkMerge attrs;
-            };
-            ${hostField}.${eptype} = lib.mkMerge (mkEndpointsHosts insname eps);
+            perVM.${utils.envHost env}.${eptype} = 
+                lib.mkMerge 
+                    (map 
+                        (ep: 
+                            {
+                                ${utils.epToString ep}.endpoint = ep; # we only add the endpoint description. The globally/locally fields are filled in the apply section of the option.
+                            })
+                         eps);
+            global.${hostField}.${eptype} = lib.mkMerge (mkEndpointsHosts insname eps);
         };
     generateAttrSetFromLink =
         hostField: exposesOrReaches: insname: env: linktype: 
@@ -69,6 +74,25 @@ let
                 ];
         in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
 
+
+    /* Adds exposedBy and reachedBy fields to the endpoints definition */
+    updateEndpoints_ = 
+        eptype: infos@{exposes, reaches}:
+        let cfg = config.naps.internal.endpoints.global;
+            exposedBy = lib.mapAttrs (epname: ep: {exposes.${epname}.exposedBy = cfg.hosts.${eptype}.${epname};}) exposes;
+            reachedBy = lib.mapAttrs (epname: ep: {reaches.${epname}.reachedBy = cfg.consumers.${eptype}.${epname};}) reaches;
+        in lib.mkMerge [
+                infos 
+                (lib.mkMerge exposedBy)
+                (lib.mkMerge reachedBy)
+           ];
+    updateEndpoints = 
+        let fun = attrs:
+                lib.mkMerge (lib.mapAttrs (_: alleps: lib.mapAttrs updateEndpoints alleps) attrs);
+        in fun config.naps.internal.endpoints.perEnv;
+
+
+
     generateProxy = 
         vmname: globalEPs:
         let
@@ -85,7 +109,7 @@ in {
     imports = [./options];
     naps.internal.endpoints = lib.mkMerge [
             (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-            {perVM.proxy = lib.mkMerge (lib.mapAttrsToList generateProxy config.naps.internal.endpoints.perVM.global);}
+            #{perVM.proxy = lib.mkMerge (lib.mapAttrsToList generateProxy config.naps.internal.endpoints.perVM.global);}
         ];
 
 }

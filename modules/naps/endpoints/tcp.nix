@@ -2,7 +2,7 @@
 
 let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
-    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
+    utils = import "./lib" {inherit flakeRoot lib inputs;};
 
     displayBackendIP = ep@{hostname, port,...}: i: ins: "server be_tcp_${hostname}_${lib.toString port}_${lib.toString i} ${utils.envIP (utils.serviceEnv ins)}:${lib.toString port} check ${lib.optionalString (i > 1) "backup"}";
 
@@ -88,21 +88,8 @@ let
     generateProxy =
         vmname: hosts: consumers: exposes: reaches:
         let
-            feExposed = lib.mapAttrsToList 
-                            (epname: ep: 
-                                processExposedEndpointFrontend 
-                                    vmname epname ep 
-                                    (consumers.${epname} or {})
-                                    (hosts.${epname} or {})) 
-                            exposes;
-            beExposed = lib.mapAttrsToList (epname: ep: processExposedEndpointBackend vmname (hosts.${epname} or {}) epname ep) exposes;
-
-
-            feReached = lib.mapAttrsToList (epname: ep: processReachedEndpointFrontend vmname epname ep (consumers.${epname} or {})) reaches;
-            beReached = lib.mapAttrsToList (epname: ep: processReachedEndpointBackend epname ep (hosts.${epname} or {})) reaches;
-        in
-           lib.mkMerge (feExposed ++ feReached ++ beExposed ++ beReached);
-           #lib.mkMerge (feReached ++ beExposed ++ beReached);
+            reachesParts = utils.partitionAttrs reaches; 
+        in {};
 in {
     naps.endpoints.tcp = {
         inherit generateProxy;
