@@ -79,24 +79,6 @@ let
         in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
 
 
-    /* Adds exposedBy and reachedBy fields to the endpoints definition */
-    updateEndpoints_ = 
-        eptype: infos@{exposes, reaches}:
-        let cfg = config.naps.internal.endpoints.global;
-            exposedBy = lib.mapAttrs (epname: ep: {exposes.${epname}.exposedBy = cfg.hosts.${eptype}.${epname};}) exposes;
-            reachedBy = lib.mapAttrs (epname: ep: {reaches.${epname}.reachedBy = cfg.consumers.${eptype}.${epname};}) reaches;
-        in lib.mkMerge [
-                infos 
-                (lib.mkMerge exposedBy)
-                (lib.mkMerge reachedBy)
-           ];
-    updateEndpoints = 
-        let fun = attrs:
-                lib.mkMerge (lib.mapAttrs (_: alleps: lib.mapAttrs updateEndpoints alleps) attrs);
-        in fun config.naps.internal.endpoints.perEnv;
-
-
-
     generateProxy = 
         vmname: globalEPs:
         let
