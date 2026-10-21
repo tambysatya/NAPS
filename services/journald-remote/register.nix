@@ -33,6 +33,9 @@ naps.services.journald-remote = {
         {path = "/var/log/journal/remote"; shared=false; inherit owner reload;}
     ];
     inherit endpoints;
+    configureListen = addr: {
+        config.systemd.sockets.systemd-journal-remote.listenStreams = ["${addr}:19532"];
+    };
 };
 }
 

@@ -25,12 +25,12 @@ config =
                 rpc_secret_file = "/var/lib/secrets/garage-rpc.key";
                 replication_factor = 1;
                 s3_api = {
-                    api_bind_addr = "0.0.0.0:3900"; # localhost because not encrypted
+                    i#api_bind_addr = "0.0.0.0:3900"; # localhost because not encrypted
                     s3_region = "garage";
                     root_domain = "s3.${naps.topology.domain}";
                 };
                 admin = {
-                    api_bind_addr = "127.0.0.1:3903"; # localhost because not encrypted
+                    #api_bind_addr = "127.0.0.1:3903"; # localhost because not encrypted
                     admin_token_file = "/var/lib/secrets/garage-admin.key";
                     metrics_token_file =  "/var/lib/secrets/garage-metrics.key";
                 };

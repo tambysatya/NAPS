@@ -15,6 +15,12 @@ in {
 config.naps.services.garage = {
     path = ./.;
     provides = ["s3"];
+    configureListen = addr: {
+        config.services.garage.settings = {
+            s3_api.api_bind_addr = "${addr}:3900";
+            admin.api_bind_addr = "${addr}:3900";
+        };
+    };
     users."garage" = {service = "garage"; uid=10001;};
     assets = {
         "garage-rpc.key" = {

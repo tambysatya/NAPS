@@ -15,11 +15,13 @@ in {
         services.openldap = {
             enable = true;
 
+            /*
             urlList = [
                 "ldap:///"
                     "ldaps:///"
                     "ldapi:///"
             ];
+            */
 
             settings = {
                 attrs = {

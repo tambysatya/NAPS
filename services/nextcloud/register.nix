@@ -38,6 +38,9 @@ naps.services.nextcloud = {
         {path="/var/lib/nextcloud/data"; shared=true; inherit owner reload;}
     ];
     endpoints.https = endpoints;
+    configureListen = addr: {
+        services.nginx.virtualHosts.${hostname}.listen.addr = addr;
+    };
 
 };
 

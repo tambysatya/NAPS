@@ -11,6 +11,9 @@ in {
 naps.services.postgres = {
     path = ./.;
     provides = ["postgres"];
+    configureListen = addr: {
+        config.services.postgresql.settings.listen_addresses = addr;
+    };
     users.postgres = {service = "postgresql"; uid=10005;};
     assets = {
         ${hostname} = {

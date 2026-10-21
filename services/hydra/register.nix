@@ -31,6 +31,12 @@ naps.services.hydra ={
     path = ./.;
     users."hydra" = {service ="hydra"; uid=10007;};
     inherit links endpoints;
+    configureListen = addr: {
+        config.services = {
+            hydra.listenHost = addr;
+            darkhttpd.address = addr;
+        };
+    };
     assets = {
         "hydra-admin-pass.key" = {
             provider = "password";

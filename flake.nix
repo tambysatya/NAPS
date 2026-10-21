@@ -334,11 +334,9 @@ let
                 description = "Scheme of configurations.";
             };
           };
-          #terranixConfigurations = terranix.lib.terranixConfiguration (terranix-generator ./example.nix);
 
-    #        terranix.lib.terranixConfiguration {inherit system; 
-    #                                            modules = [{config = (terranix-generator naps-config.naps);}];};
-    #
+          /* Additional outputs for debugging */
+          services = lib.mapAttrs (_: x: builtins.removeAttrs x ["configureListen"] ) (compileNAPS exampleArgs).internal.services;
       }
 
       ];

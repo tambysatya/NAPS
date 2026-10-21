@@ -76,6 +76,11 @@ let
                     type = types.nullOr (types.enum ["containers" "vms" "all"]);
                     default = null;
                 };
+                configureListen = lib.mkOption {
+                    description = "A function to sets the listening IP(s) address(es). Mandatory if endpoints are provided. Address -> AttrSet";
+                    type = types.nullOr (types.functionTo types.attrs);
+                    default = null;
+                };
             };
     };
 

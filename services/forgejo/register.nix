@@ -38,6 +38,7 @@ naps.services.forgejo = {
            inherit hostname; port = 5022; #SSH connection
         }];
     };
+    configureListen = addr: {config.services.forgejo.settings.server.HTTP_ADDR = addr;};
     persistent = [
         {path = "/var/lib/forgejo"; shared=false; inherit owner reload;}
     ];

@@ -23,6 +23,9 @@ naps.services.step-ca = {
     endpoints.https = [
         {inherit hostname port; extraArgs = {tls="passthrough";}; }
     ];
+    configureListen = addr: {
+        config.services.step-ca.address = addr;
+    };
 };
 }
 

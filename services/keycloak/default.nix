@@ -23,7 +23,7 @@ in {
                   };
                   settings = {
                     hostname = servicevhost;
-                    http-host = serviceaddr;
+                    #http-host = serviceaddr;
                     http-port = serviceport;
                     proxy-headers = "xforwarded";
                     http-enabled = true;

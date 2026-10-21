@@ -29,6 +29,10 @@ naps.services.openldap = {
     persistent = [
         {path="/var/lib/openldap/data"; inherit owner reload;}
     ];
+
+    configureListen = addr: {
+        config.services.openldap.urlList = ["ldap://${addr}" "ldaps://${addr}" "ldapi://"];
+    };
 };
 
 }
