@@ -83,18 +83,18 @@ let
         vmname: globalEPs:
         let
             processEPType = 
-                vmname: eptype: 
+                eptype: eps:
                 let
                     generate = config.naps.endpoints.${eptype}.generateProxy;
-                    eps = config.naps.internal.endpoint.perVM.${vmname}.${eptype};
-                in {${vmname} = generate eps;};
+                    eps = config.naps.internal.endpoints.perVM.${vmname}.${eptype};
+                in lib.optionalAttrs (eptype != "https") {${vmname} = generate vmname eps;};
         in lib.mkMerge (lib.mapAttrsToList processEPType globalEPs);
 
 in {
     imports = [./options];
     naps.internal.endpoints = lib.mkMerge [
             (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-            #{perVM.proxy = lib.mkMerge (lib.mapAttrsToList generateProxy config.naps.internal.endpoints.perVM.global);}
+            {proxy = lib.mkMerge (lib.mapAttrsToList generateProxy config.naps.internal.endpoints.perVM);}
         ];
 
 }

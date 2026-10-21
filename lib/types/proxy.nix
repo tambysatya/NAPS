@@ -47,7 +47,7 @@ let
                     proxy configuration for this type of endpoint: 
                     Map EndpointName  (globally, locally) -> haproxyConfig
                 '';
-                type = types.functionTo haproxyConfig;
+                type = types.functionTo (types.functionTo haproxyConfig);
             };
         };
     };

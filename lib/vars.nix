@@ -4,6 +4,8 @@
 
 let
 
+    types = import ./types {inherit lib inputs;};
+
     #paths 
     paths = {
         secrets = "/var/lib/secrets";
@@ -37,7 +39,7 @@ let
                    else if env.type == "vm" then env.host
                    else env.host.vm;
     isContainer = env: env.type == "container";
-    isVM = env: env.type == "vm";
+    isVM = env: ! isContainer env;
 
     hostDeployementEnv = # get the hosting deployement environment
         env: {inherit (env) priority tags; type="vm"; host=envHost env;};
