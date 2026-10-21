@@ -42,8 +42,12 @@ let
                 default = null;
             };
             generateProxy = lib.mkOption {
-                description = "Given the set of all the endpoints of this type, generate a proxy configuration for this type of endpoint: perVM: vmname -> hosts -> consumers -> exposes -> reaches -> haproxyConfig";
-                type = types.functionTo (types.functionTo (types.functionTo (types.functionTo (types.functionTo haproxyConfig))));
+                description = ''
+                    Given the set of all the endpoints of this type, generate a 
+                    proxy configuration for this type of endpoint: 
+                    Map EndpointName  (globally, locally) -> haproxyConfig
+                '';
+                type = types.functionTo haproxyConfig;
             };
         };
     };
