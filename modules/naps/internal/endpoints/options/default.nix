@@ -82,7 +82,7 @@ in {
                             lib.mapAttrs
                                 (eptype: eps:
                                     lib.mapAttrs
-                                        (epname: ep@{locally, globally,...}:
+                                        (epname: ep@{locally, globally, endpoint,...}: #only the endpoint field is filled
                                             let
                                                 global = config.naps.internal.endpoints.global;
                                                 reachedBy = global.consumers.${eptype}.${epname} or {}; # remember that some services are not consumed by NAPS (TODO  declare them explicitely or forbid them?)
