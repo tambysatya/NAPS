@@ -32,7 +32,11 @@ let
                     (map 
                         (ep: 
                             {
-                                ${utils.epToString ep}.endpoint = ep; # we only add the endpoint description. The globally/locally fields are filled in the apply section of the option.
+                                /* - we only add the endpoint description. The globally/locally fields are filled in the apply section of the option.
+                                   - since generateAttrSet is called for both reached and exposed endpoint, this field contains all the endpoints
+                                     transiting through the vm
+                                */
+                                ${utils.epToString ep}.endpoint = ep; 
                             })
                          eps);
             global.${hostField}.${eptype} = lib.mkMerge (mkEndpointsHosts insname eps);

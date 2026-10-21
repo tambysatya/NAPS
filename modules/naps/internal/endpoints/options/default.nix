@@ -72,7 +72,7 @@ in {
 
     };
     options.naps.internal.endpoints.perVM = lib.mkOption { 
-        description = "Endpoints of each VM, partitionned between local instances and global instances: VM -> EndpointType -> EndpointName -> {locally, globally} -> {exposedBy, reachedBy}";
+        description = "Endpoints transiting through each VM, partitionned between local instances and global instances: VM -> EndpointType -> EndpointName -> {locally, globally} -> {exposedBy, reachedBy}";
         type = types.attrsOf (types.attrsOf (types.attrsOf vmEndpointsInfos));
         default = {};
         /* The field locally/globally are completed here, by partitioning the hosts and the consumers sets*/
