@@ -91,8 +91,8 @@ in {
                                                 global = config.naps.internal.endpoints.global;
                                                 reachedBy = global.consumers.${eptype}.${epname} or {}; # remember that some services are not consumed by NAPS (TODO  declare them explicitely or forbid them?)
                                                 exposedBy = global.hosts.${eptype}.${epname} or {};
-                                                reachedByPart = utils.partitionAttrs (_: ins: utils.envHost (utils.insEnv ins) == vmname) reachedBy;
-                                                exposedByPart = utils.partitionAttrs (_: ins: utils.envHost (utils.insEnv ins) == vmname) exposedBy;
+                                                reachedByPart = utils.partitionAttrs (_: ins: utils.insHost ins == vmname) reachedBy;
+                                                exposedByPart = utils.partitionAttrs (_: ins: utils.insHost ins == vmname) exposedBy;
                                             in
                                                 ep // 
                                                 {
