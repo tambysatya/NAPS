@@ -7,13 +7,16 @@ let
     displayBackendIP = ep@{hostname, port,...}: i: ins: "server be_tcp_${hostname}_${lib.toString port}_${lib.toString i} ${utils.envIP (utils.serviceEnv ins)}:${lib.toString port} check ${lib.optionalString (i > 1) "backup"}";
 
     forwardProxy =
-        epname: locally@{lExposedBy, lReachedBy}: globally@{gExposedBy, gReachedBy}:
+        epname: ep@{hostname, port}:
+        locally:
+        globally:
         let
         in {};
     reverseProxy =
-        epname: locally@{lExposedBy, lReachedBy}: globally@{gExposedBy, gReachedBy}:
+        epname: ep@{hostname, port}:
+        locally:
+        globally:
         let
-            isNative = lib.any utils.isVM lExposedBy;
         in {};
     generateProxy =
         alleps: # EndpointName -> {endpoint, globally, locally}
