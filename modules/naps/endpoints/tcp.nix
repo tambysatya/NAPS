@@ -48,11 +48,12 @@ let
             globalBind = config.naps.topology.vms.${vmname}.ip;
 
             localIface = map (ins: if utils.isContainer (utils.insEnv ins) then ins.deployement.host.veth else "lo") localReached;
-            interfaces = localIface ++ lib.optionals (globalReached != []) ["eth0"];
+            interfaces = lib.optionals (localReached != []) localIface ++ lib.optionals (localExposed != []) ["eth0"];
 
             globalBackendIPs = map utils.insHostIP globalExposed;
 
             
+            # If the endpoint is exposed by a local service, we create the reverse proxy
             reverseConfig = lib.optionalString (localExposed != []) ''
                 frontend fe_reverse_tcp_${epname}
                     mode tcp
@@ -63,6 +64,7 @@ let
                     ${backendsConfig vmname ep localExposed}
             '';
 
+            # If the endpoint is reached by a local service, we create the forward proxy
             forwardConfig = lib.optionalString (localReached != []) ''
                 frontend fe_forward_tcp_${epname}
                     mode tcp
@@ -75,6 +77,10 @@ let
 
         in {
            config = [reverseConfig forwardConfig]; 
+           firewall.${lib.toString port} = lib.optionalAttrs (interfaces != []) {
+                proto = ["tcp"]; 
+                inherit interfaces;
+           };
         };
 
     generateProxy =

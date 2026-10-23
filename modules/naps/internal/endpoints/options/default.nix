@@ -122,6 +122,13 @@ in {
         default = lib.mapAttrs (vmname: proxy: lib.concatStringsSep "\n" proxy.config) config.naps.internal.endpoints.proxy;
     };
 
+    options.naps.internal.endpoints.outputs.firewall = lib.mkOption {
+        description = "Firewall final configuration of each VM";
+        type = types.attrs;
+        readOnly = true;
+        default = lib.mapAttrs (vmname: proxy: proxy.firewall) config.naps.internal.endpoints.proxy;
+    };
+
     /*
     options.naps.internal.endpoints.perVM.details = lib.mkOption { #TODO add a distinction between NATIVE and CONTAINERS ?
         description = "Endpoints of each VM: VM -> Env -> EndpointType -> Endpoints";
@@ -134,12 +141,6 @@ in {
         default = {};
     };
 
-    options.naps.internal.endpoints.outputs.firewall = lib.mkOption {
-        description = "Firewall final configuration of each VM";
-        type = types.attrs;
-        readOnly = true;
-        default = lib.mapAttrs (vmname: proxy: proxy.firewall) config.naps.internal.endpoints.perVM.proxy;
-    };
     */
 }
 
