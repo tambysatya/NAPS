@@ -2,8 +2,8 @@
 
 /*
 
-        - reverse_frontends: points to the local endpoints (and will be accessible from the public addresses only)
-        - forward_frontends: points to the global endpoints + local endpoins (and will be accessible from the private adresses only)
+        - reverse_frontends: points to the local endpoints (and will be accessible from the public addresses only). Opened if the endpoint is locally exposed.
+        - forward_frontends: points to the global endpoints + local endpoins (and will be accessible from the private adresses only). Openned if the endpoint is locally reached.
 
         Note that: for natively runned services, the forward proxy listens on 127.0.0.1. Therefore, service running natively should be
         bound to 127.0.0.2
@@ -14,21 +14,21 @@ let
     utils = import ./lib {inherit flakeRoot lib inputs;};
 
     backendConfig = 
-        vmname: ep@{hostname, port,...}: i: ins: 
+        vmname: ep@{hostname, port,...}: i: ins@{name, value}: 
         let 
-            env = utils.insEnv ins;
+            env = utils.insEnv value;
             ip = if utils.envUID env == vmname then "127.0.0.2" else utils.envIP env;
-        in "server be_tcp_${hostname}_${lib.toString port}_${lib.toString i} ${ip}:${lib.toString port} check ${lib.optionalString (i > 1) "backup"}";
+        in "\tserver ${name}_tcp_${lib.toString port} ${ip}:${lib.toString port} check ${lib.optionalString (i > 1) "backup"}";
     backendsConfig = vmname: ep: instances:
-        let sorted = lib.sort (ins: ins': ins.priority > ins'.priority) instances;
+        let sorted = lib.sort (attr: attr': attr.value.priority > attr'.value.priority) (lib.attrsToList instances);
         in lib.concatStringsSep "\n" (lib.imap (backendConfig vmname ep) sorted);
 
     bindConfig = vmname: ep@{port,...}: instances:
-        let getIP = ins@{deployement, ...}:
+        let getIP = _: ins@{deployement, ...}:
                 if utils.envUID deployement == vmname 
                 then "127.0.0.1:${lib.toString port}" 
                 else "${deployement.host.privateHostAddress}:${lib.toString port}"; 
-        in lib.concatMapStringsSep 
+        in utils.concatMapAttrsStringsSep 
             ", " 
             getIP
             instances;
@@ -38,16 +38,16 @@ let
         locally:
         globally:
         let
-            localReached = builtins.attrValues locally.reachedBy;
-            globalReached = builtins.attrValues globally.reachedBy;
+            localReached = locally.reachedBy;
+            globalReached = globally.reachedBy;
             
-            localExposed = builtins.attrValues locally.exposedBy;
-            globalExposed = builtins.attrValues globally.exposedBy;
+            localExposed = locally.exposedBy;
+            globalExposed = globally.exposedBy;
             
-            localBind = map (ins: if utils.isContainer (utils.insEnv ins) then utils.insIP ins else "127.0.0.1:${lib.toString port}") localReached;
+            localBind = lib.mapAttrsToList (_: ins: if utils.isContainer (utils.insEnv ins) then utils.insIP ins else "127.0.0.1:${lib.toString port}") localReached;
             globalBind = config.naps.topology.vms.${vmname}.ip;
 
-            localIface = map (ins: if utils.isContainer (utils.insEnv ins) then ins.deployement.host.veth else "lo") localReached;
+            localIface = lib.mapAttrsToList (_: ins: if utils.isContainer (utils.insEnv ins) then ins.deployement.host.veth else "lo") localReached;
             interfaces = lib.optionals (localReached != []) localIface ++ lib.optionals (localExposed != []) ["eth0"];
 
             globalBackendIPs = map utils.insHostIP globalExposed;
@@ -72,7 +72,7 @@ let
                     default_backend be_forward_tcp_${epname}
                 backend be_forward_tcp_${epname}
                     mode tcp
-                    ${backendsConfig vmname ep (localExposed ++ globalExposed)}
+                    ${backendsConfig vmname ep (localExposed // globalExposed)}
             '';
 
         in {

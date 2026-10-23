@@ -29,6 +29,7 @@
         "log-main".is = "journald-remote";
         "nc-main".is = "nextcloud";
         "git-main".is = "forgejo";
+        "pg-backup".is = "postgres";
     };
     hosts = {
       cpuhost1 = {
@@ -42,7 +43,7 @@
         memory = 8000;
         ip = "10.0.0.50";
         #services = ["step-ca" "openldap"];
-        services = ["keycloak-main" "stepca-main" "ldap-main"];
+        services = ["keycloak-main" "stepca-main" "ldap-main" "pg-backup"];
         disks = [
             {type="disk"; path="/dev/pvhdd/ldap"; mount="/var/lib/openldap/data"; fs="xfs";}
         ];
