@@ -20,11 +20,18 @@ in rec {
                 description = "public IP Address of the host"; 
                 type = types.str; 
             };
+            privateHostAddress = lib.mkOption {
+                description = "private IP Address of the host, accessible from the container"; 
+                type = types.str; 
+            };
+
             /* TODO: can be done using --extra-args ? */
             veth = lib.mkOption {
                 description = "Virtual interface of the container";
                 type = types.str;
             };
+
+            
         };
     };
     deployementHostType = types.enum ["vm" "container"];

@@ -1,68 +1,87 @@
 {flakeRoot, lib, inputs, config, ...}:
 
+/*
+
+        - reverse_frontends: points to the local endpoints (and will be accessible from the public addresses only)
+        - forward_frontends: points to the global endpoints + local endpoins (and will be accessible from the private adresses only)
+
+        Note that: for natively runned services, the forward proxy listens on 127.0.0.1. Therefore, service running natively should be
+        bound to 127.0.0.2
+*/
+
 let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     utils = import ./lib {inherit flakeRoot lib inputs;};
 
-    displayBackendIP = ep@{hostname, port,...}: i: ins: "server be_tcp_${hostname}_${lib.toString port}_${lib.toString i} ${utils.envIP (utils.serviceEnv ins)}:${lib.toString port} check ${lib.optionalString (i > 1) "backup"}";
+    backendConfig = 
+        vmname: ep@{hostname, port,...}: i: ins: 
+        let 
+            env = utils.insEnv ins;
+            ip = if utils.envUID env == vmname then "127.0.0.2" else utils.envIP env;
+        in "server be_tcp_${hostname}_${lib.toString port}_${lib.toString i} ${ip}:${lib.toString port} check ${lib.optionalString (i > 1) "backup"}";
+    backendsConfig = vmname: ep: instances:
+        let sorted = lib.sort (ins: ins': ins.priority > ins'.priority) instances;
+        in lib.concatStringsSep "\n" (lib.imap (backendConfig vmname ep) sorted);
 
-    forwardProxy =
-        epname: ep@{hostname, port}:
+    bindConfig = vmname: ep@{port,...}: instances:
+        let getIP = ins@{deployement, ...}:
+                if utils.envUID deployement == vmname 
+                then "127.0.0.1:${lib.toString port}" 
+                else "${deployement.host.privateHostAddress}:${lib.toString port}"; 
+        in lib.concatMapStringsSep 
+            ", " 
+            getIP
+            instances;
+
+    endpointProxy =
+        vmname: epname: ep@{hostname, port,...}:
         locally:
         globally:
         let
-        in {};
-    reverseProxy =
-        vmname: epname: ep@{hostname, port, ...}:
-        locally:
-        globally:
-        let
-            lExposed = builtins.attrValues locally.exposedBy; # [ServiceInstances]
-            # Reverse proxy: the backends are the local services (sorted by priority)
-            backendIPs = 
-                map 
-                    (ins: if utils.isContainer (utils.insEnv ins) 
-                          then utils.insIP ins
-                          else "127.0.0.1") 
-                    (lib.sort (ins: ins': ins.priority > ins'.priority) lExposed);
-            #localBackendIPs = map (ins: if utils.isContainer (utils.insEnv ins) then utils.insIP ins else "127.0.0.1:${lib.toString port}") lExposed;
-            #globalBackendIPs = map utils.insHostIP gExposed;
-            #gExposed = builtins.attrValues globally.exposedBy; # [ServiceInstances]
-            #backendIPs = localBackendIPs; #++ globalBackendIPs; # the reverse proxy points only to local IPs
+            localReached = builtins.attrValues locally.reachedBy;
+            globalReached = builtins.attrValues globally.reachedBy;
+            
+            localExposed = builtins.attrValues locally.exposedBy;
+            globalExposed = builtins.attrValues globally.exposedBy;
+            
+            localBind = map (ins: if utils.isContainer (utils.insEnv ins) then utils.insIP ins else "127.0.0.1:${lib.toString port}") localReached;
+            globalBind = config.naps.topology.vms.${vmname}.ip;
 
-            lReached = builtins.attrValues locally.reachedBy;
-            gReached = builtins.attrValues globally.reachedBy;
-            localBind = map (ins: if utils.isContainer (utils.insEnv ins) then utils.insIP ins else "127.0.0.1:${lib.toString port}") lReached;
-            globalBind = [config.naps.topology.vms.${vmname}.ip];
-            bindIPs = localBind ++ lib.optionals (gReached != []) globalBind;
+            localIface = map (ins: if utils.isContainer (utils.insEnv ins) then ins.deployement.host.veth else "lo") localReached;
+            interfaces = localIface ++ lib.optionals (globalReached != []) ["eth0"];
 
-            localIface = map (ins: if utils.isContainer (utils.insEnv ins) then ins.deployement.host.veth else "lo") lReached;
-            interfaces = localIface ++ lib.optionals (gReached != []) ["eth0"];
-        in lib.optionalAttrs (backendIPs != []) 
-        {
-            config = [''
-                frontend reverse_tcp_${epname}
+            globalBackendIPs = map utils.insHostIP globalExposed;
+
+            
+            reverseConfig = lib.optionalString (localExposed != []) ''
+                frontend fe_reverse_tcp_${epname}
                     mode tcp
-                    bind ${lib.concatStringsSep 
-                                ", " 
-                                (if bindIPs == [] then ["0.0.0.0:${lib.toString port} # TODO this endpoint is exposed globally since it is not consumed by any service in NAPS."] else bindIPs)}
-                    default_backend reverse_be_tcp_${epname}
-                backend reverse_be_tcp_${epname}
+                    bind ${globalBind}:${lib.toString port}
+                    default_backend be_reverse_tcp_${epname}
+                backend be_reverse_tcp_${epname}
                     mode tcp
-                    ${lib.concatStringsSep "\n"
-                        (lib.imap (i: ip: "server be_tcp_${epname}_${lib.toString i} ${ip}:${lib.toString port} check ${lib.optionalString (i > 1) "backup"}") backendIPs)}
+                    ${backendsConfig vmname ep localExposed}
+            '';
 
-            ''];
-            firewall.${lib.toString port} = {
-                proto = ["tcp"];
-                interfaces = if interfaces == [] then "all" else interfaces; #TODO if an endpoint is not consumed, the firewall won't be oppened. In this case, we default it to an oppened world service
-            };
+            forwardConfig = ''
+                frontend fe_forward_tcp_${epname}
+                    mode tcp
+                    bind ${bindConfig vmname ep localReached}
+                    default_backend be_forward_tcp_${epname}
+                backend be_forward_tcp_${epname}
+                    mode tcp
+                    ${backendsConfig vmname ep (localExposed ++ globalExposed)}
+            '';
+
+        in {
+           config = [reverseConfig forwardConfig]; 
         };
+
     generateProxy =
         vmname: alleps: # EndpointName -> {endpoint, globally, locally}
         let
-            reverse = lib.mapAttrsToList (epname: {endpoint, globally, locally}: reverseProxy vmname epname endpoint locally globally) alleps;
-        in lib.mkMerge reverse;
+            allProxies = lib.mapAttrsToList (epname: {endpoint, globally, locally}: endpointProxy vmname epname endpoint locally globally) alleps;
+        in lib.mkMerge allProxies;
 in {
     naps.endpoints.tcp = {
         inherit generateProxy;
