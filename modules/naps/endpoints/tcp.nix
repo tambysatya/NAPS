@@ -2,37 +2,20 @@
 
 /*
 
-        - reverse_frontends: points to the local endpoints (and will be accessible from the public addresses only). Opened if the endpoint is locally exposed.
-        - forward_frontends: points to the global endpoints + local endpoins (and will be accessible from the private adresses only). Openned if the endpoint is locally reached.
+        - reverse_frontends: points to the local endpoints (and will be accessible 
+          from the public addresses only). Opened if the endpoint is locally
+          exposed.
+        - forward_frontends: points to the global endpoints + local endpoins (and
+          will be accessible from the private adresses only). Openned if the 
+          endpoint is locally reached.
 
-        Note that: for natively runned services, the forward proxy listens on 127.0.0.1. Therefore, service running natively should be
-        bound to 127.0.0.2
+        Note that: for natively runned services, the forward proxy listens on 127.0.0.1.
+        Therefore, services running natively should be bound to 127.0.0.2
 */
 
 let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     utils = import ./lib {inherit flakeRoot lib inputs;};
-
-    backendConfig = 
-        vmname: ep@{hostname, port,...}: i: ins@{name, value}: 
-        let 
-            env = utils.insEnv value;
-            ip = if utils.envUID env == vmname then "127.0.0.2" else utils.envIP env;
-        in "\tserver ${name}_tcp_${lib.toString port} ${ip}:${lib.toString port} check ${lib.optionalString (i > 1) "backup"}";
-    backendsConfig = vmname: ep: instances:
-        let sorted = lib.sort (attr: attr': attr.value.priority > attr'.value.priority) (lib.attrsToList instances);
-        in lib.concatStringsSep "\n" (lib.imap (backendConfig vmname ep) sorted);
-
-    bindConfig = vmname: ep@{port,...}: instances:
-        let getIP = _: ins@{deployement, ...}:
-                if utils.envUID deployement == vmname 
-                then "127.0.0.1:${lib.toString port}" 
-                else "${deployement.host.privateHostAddress}:${lib.toString port}"; 
-        in utils.concatMapAttrsStringsSep 
-            ", " 
-            getIP
-            instances;
-
     endpointProxy =
         vmname: epname: ep@{hostname, port,...}:
         locally:
@@ -61,18 +44,18 @@ let
                     default_backend be_reverse_tcp_${epname}
                 backend be_reverse_tcp_${epname}
                     mode tcp
-                    ${backendsConfig vmname ep localExposed}
+                    ${utils.backendsConfig vmname ep localExposed}
             '';
 
             # If the endpoint is reached by a local service, we create the forward proxy
             forwardConfig = lib.optionalString (localReached != []) ''
                 frontend fe_forward_tcp_${epname}
                     mode tcp
-                    bind ${bindConfig vmname ep localReached}
+                    bind ${utils.bindConfig vmname ep localReached}
                     default_backend be_forward_tcp_${epname}
                 backend be_forward_tcp_${epname}
                     mode tcp
-                    ${backendsConfig vmname ep (localExposed // globalExposed)}
+                    ${utils.backendsConfig vmname ep (localExposed // globalExposed)}
             '';
 
         in {

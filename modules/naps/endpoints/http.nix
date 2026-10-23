@@ -1,4 +1,4 @@
-{flakeRoot, lib, inputs, config, ...}:
+{flakeRoot, lib, inputs, config, pkgs, ...}:
 
 /*
     HTTP/HTTPS reverse proxy:
@@ -16,86 +16,61 @@ let
 
 
     mkBackendName = ep@{hostname, ...}: "be_http_${hostname}_443";
-    mkCrtList = endpoints: utils.concatMapAttrsStringsSep "\n" (epname: ep@{hostname,...}: "/var/lib/certs/${hostname}.pem") endpoints;
-    mkMap = endpoints: utils.concatMapAttrsStringsSep "\n" (epname: ep@{hostname,...}: "${hostname}     ${mkBackendName ep}") endpoints;
+    mkCrtList = endpoints: lib.concatMapStringsSep "\n" (ep@{hostname,...}: "/var/lib/certs/${hostname}.pem") endpoints;
+    mkMap = endpoints: lib.concatMapStringsSep "\n" (ep@{hostname,...}: "${hostname}     ${mkBackendName ep}") endpoints;
 
-    generateHTTPsProxy = 
-        vmname: hosts: consumers: exposes: reaches:
+
+    generateHTTPProxy = 
+        vmname: alleps:
         let
-            consumersEnvs = lib.mapAttrsToList (_: ins: utils.servicesEnv ins) consumers;
-            consumersIfaces = map (env: if utils.isContainer env then env.host.veth else "lo") consumersEnvs;
-            consumersIPs = map (env: if utils.isContainer env then utils.evnIP else "127.0.0.1") consumersEnvs;
+            locallyExposedEndpoints = lib.filterAttrs (_: {locally, ...}: locally.exposedBy != {}) alleps; #need a reverse proxy
+            partsExposedEndpoints = utils.partitionAttrs (_: {endpoint,...}: endpoint.extraArgs.tls == "passthrough") locallyExposedEndpoints;
+            passthroughEndpoints = partsExposedEndpoints.right;
+            terminationEndpoints = partsExposedEndpoints.wrong;
 
-            mapEndpoints = "";
-            crtlist = "";
-            mapTerminationTLS = "";
-        in {
-            firewall."443" = {
-                mode = "tcp";
-                interfaces = consumersIfaces;
-            };
-            config = [''
-                frontend fe_forward_https
+            mapPasstrough= pkgs.writeText "passthrough.map" 
+                (mkMap (lib.mapAttrsToList (_: {endpoint,...}: endpoint) passthroughEndpoints));
+            mapTermination = pkgs.writeText "termination.map" 
+                (mkMap (lib.mapAttrsToList (_: {endpoint,...}: endpoint) terminationEndpoints));
+            crtlist = pkgs.writeText "crtlist" 
+                (mkCrtList (lib.mapAttrsToList (_: {endpoint,...}: endpoint) terminationEndpoints));
+            reverseConfig = lib.optionalString (locallyExposedEndpoints != {}) ''
+                frontend fe_reverse_http_passthrough
                     mode tcp
-                    bind ${lib.concatMapStringsSep "," (ip: "${ip}:443") consumersIPs}
+                    bind TODO
                     tcp-request inspect-delay 5s
                     tcp-request content accept if { req_ssl_hello_type 1 }
-                    use_backend %[req.ssl_sni,lower,map_dom(${mapEndpoints},nonSNI_be_forward)]
-                backend nonSNI_be_forward
-                    mode tcp
-                    server fe_forward_http 127.0.0.2:9443 check check-ssl ca-file /etc/intermediate_ca.crt
-                frontend fe_forward_http
-                    mode http
-                    bind 127.0.0.2:9443 ssl crt-list ${crtlist}
-                    option forwardfor
-                    http-request set-header X-Forwarded-Proto https
-                    http-request set-header X-Forwarded-Port 443
-                    use_backend %[req.hdr(host),lower,map_dom(${mapTerminationTLS},be_http_404)]
-            ''];
-        };
-    generateHTTPsReverse = 
-        vmname: hosts: consumers: exposes: reaches:
-        let
-            publicIP = config.naps.internal.envs.all.${vmname}.ip;
-
-            mapPassthroughTLS = "";
-            mapTerminationTLS = "";
-            crtlist = "";
-
-        in {
-            firewall."443" = lib.optionalAttrs (exposes != {}){
-                mode = "tcp";
-                interfaces = ["eth0"];
-            };
-            config = [''
-                frontend fe_reverse_https
-                    mode tcp
-                    bind ${publicIP}:443
-                    tcp-request inspect-delay 5s
-                    tcp-request content accept if { req_ssl_hello_type 1 }
-                    use_backend %[req.ssl_sni,lower,map_dom(${mapPassthroughTLS},nonSNI_be_reverse)]
+                    use_backend %[req.ssl_sni,lower,map_dom(${mapPasstrough},nonSNI_be_reverse)]
                 backend nonSNI_be_reverse
                     mode tcp
-                    server fe_reverse_http 127.0.0.1:9443 check check-ssl ca-file /etc/intermediate_ca.crt
-                frontend fe_reverse_http
+                    server fe_reverse_http_termination 127.0.0.3:443 check check-ssl ca-file /etc/intermediate_ca.crt
+
+                frontend fe_reverse_http_termination
                     mode http
-                    bind 127.0.0.1:9443 ssl crt-list ${crtlist}
+                    bind 127.0.0.3:443 ssl crt-list ${crtlist}
                     option forwardfor
                     http-request set-header X-Forwarded-Proto https
                     http-request set-header X-Forwarded-Port 443
-                    use_backend %[req.hdr(host),lower,map_dom(${mapTerminationTLS},be_http_404)]
+                    use_backend %[req.hdr(host),lower,map_dom(${mapTermination},be_http_404)]
+
+
+            '';
+
+            locallyReachedEndpoints = lib.filterAttrs (_: {locally, ...}: locally.reachedBy != {}) alleps; #need a forward proxy
+            forwardConfig = lib.optionalString (locallyExposedEndpoints != {}) ''
+                frontend fe_forward_http
+                    mode tcp
+                    bind TODO
+                    use_backend MAP_OF_ALL_BACKENDS
+            '';
+
+            backend_404 = ''
                 backend be_http_404
                     mode http
                     http-request return status 404
-
-
-            ''];
-        };
-
-    generateHTTPProxy = 
-        vmname: hosts: consumers: exposes: reaches:
-        let
+            '';
         in {
+            config = [reverseConfig forwardConfig backend_404];
         };
 in 
 {
