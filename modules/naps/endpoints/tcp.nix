@@ -63,7 +63,7 @@ let
                     ${backendsConfig vmname ep localExposed}
             '';
 
-            forwardConfig = ''
+            forwardConfig = lib.optionalString (localReached != []) ''
                 frontend fe_forward_tcp_${epname}
                     mode tcp
                     bind ${bindConfig vmname ep localReached}
