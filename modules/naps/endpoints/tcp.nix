@@ -14,25 +14,48 @@ let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     utils = import ./lib {inherit flakeRoot lib inputs;};
 
-    generateForward = 
-        vmenv:
+    generateForwardFrontend = 
+        vmname:
         hosts: envname: 
         reached: # endpoints reached by the environment: Map EndpointName Endpoint
         let
-            vmname = utils.envUID vmenv;
             env = config.naps.internal.envs.all.${envname}; 
-            processEndpoint = 
+            mkFrontend = 
                 epname: ep@{port, ...}:
                 ''
                     frontend forward_tcp_${envname}_${epname}
                         mode tcp
                         bind ${utils.envPrivateHostIP env}:${lib.toString port}
-                        default_backend forward_be_tcp_${envname}_${epname}
-                    backend forward_be_tcp_${envname}_${epname}
-                        mode tcp
-                        ${utils.backendsConfig vmname ep (hosts.${epname})}
+                        default_backend forward_be_tcp_${epname}
                 '';
-        in utils.concatMapAttrsStringsSep "\n" processEndpoint reached;
+
+                
+        in utils.concatMapAttrsStringsSep "\n" mkFrontend reached;
+    mkForwardBackend =  #Forward backends are shared per endpoint
+        vmname: hosts: 
+        forward: # Map Environment (Map EndpointName Endpoint)
+        let
+            
+            allReachedEndpoints = lib.foldl' (attr: attr': attr // attr') {} (builtins.attrValues forward);
+            mkBackend = epname: ep:
+            ''
+                backend forward_be_tcp_${epname}
+                    mode tcp
+                    ${utils.backendsConfig vmname ep (hosts.${epname})}
+            '';
+        in utils.concatMapAttrsStringsSep "\n" mkBackend allReachedEndpoints;
+
+    generateForward = 
+        vmenv: hosts: forward:
+        let 
+            vmname = utils.envUID vmenv;
+            frontends = utils.concatMapAttrsStringsSep "\n" (generateForwardFrontend vmname hosts) forward;
+            backends = mkForwardBackend vmname hosts forward;
+        in ''
+            # Forward proxy
+            ${frontends}
+            ${backends}
+        '';
     generateReverse = 
         vmenv:
         consumers: epname: 
@@ -41,9 +64,10 @@ let
     generateProxy =
         vmenv: hosts: consumers: {forward, reverse}:
         let
-            forwardProxies = lib.mapAttrsToList (generateForward vmenv hosts) forward; 
+            forwardProxies = lib.mapAttrsToList (generateForwardFrontend vmenv hosts) forward; 
             reverseProxies = lib.mapAttrsToList (generateReverse vmenv consumers) reverse;
-        in lib.concatStringsSep "\n" forwardProxies; #(forwardProxies ++ reverseProxies);
+
+        in generateForward vmenv hosts forward; #(forwardProxies ++ reverseProxies);
 in {
     naps.endpoints.tcp = {
         inherit generateProxy;
