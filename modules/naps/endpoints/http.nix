@@ -86,7 +86,7 @@ in
                 };
             };
         };
-        generateProxy = generateHTTPProxy;
+        generateProxy = vmname: hosts: consumers: ir: "";
     };
 }
 

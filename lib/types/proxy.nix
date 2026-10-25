@@ -17,7 +17,7 @@ let
     */
  
     forwardFrontend = lib.mkOption {
-        description = "Frontend intermediate representation: LocalEnvironment -> (EndpointName -> Endpoint)";
+        description = "Frontend intermediate representation: LocalEnvironment -> Map EndpointName Endpoint";
         type = types.attrsOf (types.attrsOf types.endpoint);
         default = {};
     };
@@ -51,20 +51,6 @@ let
         };
     };
 
-    haproxyConfig = types.submodule {
-        options = {
-            config = lib.mkOption {
-                description = "HAProxy configuration file";
-                type = types.listOf types.str;
-                default = [];
-            };
-            firewall = lib.mkOption {
-                description = "Firewall configuration: Port -> firewallConfig";
-                type = types.attrsOf firewallConfig;
-                default = {};
-            };
-        };
-    };
     proxy = types.submodule {
         options = {
             extraArgsType = lib.mkOption {
@@ -77,15 +63,15 @@ let
                     Given the intermediate representation of the VM proxy and
                     the set of all the hosts and consumers of each endpoint
                     over the infrastructure, generate the haproxy configuration.
-                    Type: Hosts -> Consumers -> ProxyIR -> haproxyConfig
+                    Type: VMEnv -> Hosts -> Consumers -> ProxyIR -> HAProxy configuration
                 '';
-                type = types.functionTo (types.functionTo (types.functionTo haproxyConfig));
+                type = types.functionTo (types.functionTo (types.functionTo (types.functionTo types.str)));
             };
         };
     };
 
 in {
     inherit proxyIR;
-    inherit proxy haproxyConfig;
+    inherit proxy;
 }
 

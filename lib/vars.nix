@@ -43,8 +43,12 @@ let
 
     hostDeployementEnv = # get the hosting deployement environment
         env: {inherit (env) priority tags; type="vm"; host=envHost env;};
-    hostIP = env: if isContainer env then env.host.hostPublicAddress else env.ip;
+    hostIP = env: if isContainer env then env.host.publicHostAddress else env.ip;
     envIP = env: env.ip;
+    envPrivateHostIP = env: # IP of the host on the private network
+        if isContainer env 
+        then env.host.privateHostAddress
+        else "127.0.0.1"; 
 
     epToString = {hostname, port, ...}: "${hostname}:${lib.toString port}";
 
@@ -61,7 +65,7 @@ in {
     inherit s3_root s3_key s3_key_id db_root db_key ldap_root ldap_key;
     inherit directory_id;
     inherit isContainer isVM;
-    inherit envUID envHost hostDeployementEnv hostIP envIP;
+    inherit envUID envHost hostDeployementEnv hostIP envIP envPrivateHostIP;
     inherit insEnv insIP insHost insHostIP;
     inherit epToString;
 }

@@ -23,6 +23,11 @@ in {
         type = types.attrsOf (types.attrsOf types.proxyIR);
         default = {};
     };
+    options.naps.internal.endpoints.outputs.proxy = lib.mkOption {
+        description = "HAProxy config of each VM";
+        type = types.attrsOf types.str;
+        default = {};
+    };
 
 }
 

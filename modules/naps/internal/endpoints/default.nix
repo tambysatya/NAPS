@@ -82,11 +82,21 @@ let
                 ];
         in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
 
+    generateProxy =
+        vmname: alleps:
+        let
+            vmenv = config.naps.internal.envs.all.${vmname};
+            global = config.naps.internal.endpoints.global;
+            process =
+                eptype: ir:
+                let fun = config.naps.endpoints.${eptype}.generateProxy;
+                in fun vmenv global.hosts.${eptype} global.consumers.${eptype} ir;
+        in utils.concatMapAttrsStringsSep "\n" process alleps; 
 in {
     imports = [./options];
     naps.internal.endpoints = lib.mkMerge [
             (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-            #{proxy = lib.mkMerge (lib.mapAttrsToList generateProxy config.naps.internal.endpoints.perVM);}
+            {outputs.proxy= lib.mapAttrs generateProxy config.naps.internal.endpoints.proxy;}
         ];
 
 }
