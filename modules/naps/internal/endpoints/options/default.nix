@@ -8,6 +8,12 @@ let
       
 
 in {
+    options.naps.internal.endpoints.all = lib.mkOption {
+        description = "Endpoints detail from name: Map EndpointType (Map hostname:port Endpoint)";
+        type = types.attrsOf (types.attrsOf types.endpoint);
+        default = {};
+    };
+
     options.naps.internal.endpoints.global.hosts = lib.mkOption {
         description = "Endpoints hosts: EndpointType -> hostname:port -> ServiceID -> ServiceInstance";
         type = types.attrsOf (types.attrsOf (types.attrsOf types.serviceInstance));

@@ -126,6 +126,7 @@ Migration:
     + thus it would not be required to update all the infra when a new endpoints appears / disappears.
     + services providing a link should not specify the corresponding endpoints: these endpoints should be automatically added.
     + same as assets: assets associated to a link should be automatically added
+    + Two services instances having the same priority should be load balanced
 
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets

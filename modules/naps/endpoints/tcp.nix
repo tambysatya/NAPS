@@ -31,7 +31,7 @@ let
 
                 
         in utils.concatMapAttrsStringsSep "\n" mkFrontend reached;
-    mkForwardBackend =  #Forward backends are shared per endpoint
+    generateForwardBackend =  #Forward backends are shared per endpoint
         vmname: hosts: 
         forward: # Map Environment (Map EndpointName Endpoint)
         let
@@ -50,24 +50,52 @@ let
         let 
             vmname = utils.envUID vmenv;
             frontends = utils.concatMapAttrsStringsSep "\n" (generateForwardFrontend vmname hosts) forward;
-            backends = mkForwardBackend vmname hosts forward;
+            backends = generateForwardBackend vmname hosts forward;
         in ''
-            # Forward proxy
+            # TCP Forward proxy
             ${frontends}
             ${backends}
         '';
+
+    generateReverseFrontend =
+        vmenv: epname: _:
+        let
+           ep = config.naps.internal.endpoints.all.tcp.${epname}; 
+        in ''
+            frontend reverse_tcp_${epname}
+                mode tcp
+                bind ${utils.envIP vmenv}:${lib.toString ep.port}
+                default_backend reverse_be_tcp_${epname}
+
+        '';
+    generateReverseBackends =
+        vmname: epname: 
+        exposed: # Local services exposing the endpoint: Map InstanceName ServiceInstances
+        let
+           ep = config.naps.internal.endpoints.all.tcp.${epname}; 
+        in
+        ''
+            backend reverse_be_tcp_${epname}
+                mode tcp
+                ${utils.backendsConfig vmname ep exposed}
+        '';
     generateReverse = 
         vmenv:
-        consumers: epname: 
-        exposed: # Local services exposing the endpoint: Map InstanceName ServiceInstances
-        "";
+        consumers: 
+        reverse: # Map Endpoint (Map InstanceName ServiceInstance)
+        ''
+            # TCP Reverse proxy
+            ${utils.concatMapAttrsStringsSep "\n" (generateReverseFrontend vmenv) reverse}
+            ${utils.concatMapAttrsStringsSep "\n" (generateReverseBackends (utils.envUID vmenv)) reverse}
+        '';
     generateProxy =
         vmenv: hosts: consumers: {forward, reverse}:
         let
-            forwardProxies = lib.mapAttrsToList (generateForwardFrontend vmenv hosts) forward; 
-            reverseProxies = lib.mapAttrsToList (generateReverse vmenv consumers) reverse;
 
-        in generateForward vmenv hosts forward; #(forwardProxies ++ reverseProxies);
+        in ''
+            ${generateForward vmenv hosts forward}
+            ${generateReverse vmenv consumers reverse}
+        ''; #(forwardProxies ++ reverseProxies);
 in {
     naps.endpoints.tcp = {
         inherit generateProxy;

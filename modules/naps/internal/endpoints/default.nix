@@ -32,6 +32,7 @@ let
                 then {${envuid}.${epname} = ep;}
                 else {${epname}.${insname} = ins;};
         in {
+            all.${eptype}.${epname} = ep;
             global.${globalField}.${eptype}.${epname}.${insname} = ins;
             proxy.${utils.envHost (utils.insEnv ins)}.${eptype}.${proxyField} = proxyValue;
         };
