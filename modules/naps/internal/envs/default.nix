@@ -18,13 +18,14 @@ let
                            container = ctname;
                            vm = vmname;
                            publicHostAddress = vmconf.ip;
-                           privateHostAddress = "192.168.1.${lib.toString (2*i)}";
+                           privateSubnet = "192.168.1.${lib.toString (4*i)}/30";
+                           privateHostAddress = "192.168.1.${lib.toString (4*i+1)}";
                            veth = "veth${lib.toString i}";
                         };
-                        ip = "192.168.1.${lib.toString (2*i+1)}";
+                        ip = "192.168.1.${lib.toString (4*i+2)}";
                     };
                 };
-            ctenvs = lib.imap mkCTEnv containers;
+            ctenvs = lib.imap0 mkCTEnv containers;
         in {
             vms.${vmname} = {
                 type = "vm";

@@ -24,6 +24,10 @@ in rec {
                 description = "private IP Address of the host, accessible from the container"; 
                 type = types.str; 
             };
+            privateSubnet = lib.mkOption {
+                description = "Subnet configuration";
+                type = types.str;
+            };
 
             /* TODO: can be done using --extra-args ? */
             veth = lib.mkOption {
