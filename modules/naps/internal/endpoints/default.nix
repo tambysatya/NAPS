@@ -16,85 +16,77 @@ let
     # [Endpoints] -> attrset hostname:port endpoint
     mkEndpointsAttrs = eptype: eps: map (ep: {${utils.epToString ep} = checkEndpoint eptype ep;}) eps;
     
+    # ServiceInstance -> [Endpoints] -> {EndpointName = {ServiceInstance}}
     mkEndpointsHosts = insname: eps: map (ep: {${utils.epToString ep}.${insname} = config.naps.internal.envs.instances.${insname};}) eps;
 
-    # Generic function to generate the attributes sets
-    # hostField = hosts or consumers
-    # exposesOrReaches = exposes or reaches (obviously)
-    generateAttrSet = 
-        hostField: exposesOrReaches: insname: env: eptype: eps: 
-        let attrs = mkEndpointsAttrs eptype eps;
-            perVMField = if exposesOrReaches == "exposes" then "exposedBy" else "reachedBy";
+    processEndpoint = 
+        hostsOrReaches: insname: ins:
+        eptype: ep@{hostname, port,...}:
+        let
+            envuid = utils.envUID (utils.insEnv ins);
+            epname = utils.epToString ep;
+            globalField = if hostsOrReaches == "hosts" then "hosts" else "consumers";
+            proxyField = if hostsOrReaches == "hosts" then "reverse" else "forward";
+            proxyValue = 
+                if proxyField == "forward"
+                then {${envuid}.${epname} = ep;}
+                else {${epname}.${insname} = ins;};
         in {
-            perEnv.${utils.envUID env}.${eptype}.${exposesOrReaches} = lib.mkMerge attrs;
-            perVM.${utils.envHost env}.${eptype} = 
-                lib.mkMerge 
-                    (map 
-                        (ep: 
-                            {
-                                /* - we only add the endpoint description. The globally/locally fields are filled in the apply section of the option.
-                                   - since generateAttrSet is called for both reached and exposed endpoint, this field contains all the endpoints
-                                     transiting through the vm
-                                */
-                                ${utils.epToString ep}.endpoint = ep; 
-                            })
-                         eps);
-            global.${hostField}.${eptype} = lib.mkMerge (mkEndpointsHosts insname eps);
+            global.${globalField}.${eptype}.${epname}.${insname} = ins;
+            proxy.${utils.envHost (utils.insEnv ins)}.${eptype}.${proxyField} = proxyValue;
         };
-    generateAttrSetFromLink =
-        hostField: exposesOrReaches: insname: env: linktype: 
-        let fun = generateAttrSet hostField exposesOrReaches insname env;
-        in lib.mkMerge (lib.mapAttrsToList fun (getLinkEP linktype));
-    
-
-
-    processProvides =
+    processEndpointType = 
+        hostsOrReaches: insname: env: eptype: endpoints: 
+        let
+            ins = config.naps.internal.envs.instances.${insname};
+        in lib.mkMerge 
+            (map 
+                (processEndpoint hostsOrReaches insname ins eptype) 
+                (map (checkEndpoint eptype) endpoints)); #we validate here the type of the endpoint
+    processProvidesField =
         insname: env: provides:
         let
-            processProvide = 
-                linktype: generateAttrSetFromLink "hosts" "exposes" insname env linktype;
-        in lib.mkMerge (map processProvide provides);
+            process = 
+                linktype:
+                let 
+                    endpoints = config.naps.links.${linktype}.endpoints; # Map EndpointType [Endpoints]
+                in lib.mkMerge (lib.mapAttrsToList (processEndpointType "hosts" insname env) endpoints);
+        in lib.mkMerge (map process provides);
 
-    processEndpoints =
+    processEndpointsField =
         insname: env: endpoints:
         let
-            fun = generateAttrSet "hosts" "exposes" insname env;
-        in lib.mkMerge (lib.mapAttrsToList fun endpoints);
+            process = eptype: eps: processEndpointType "hosts" insname env eptype eps;
+        in lib.mkMerge 
+            (lib.mapAttrsToList process endpoints);
 
-    processLinks  =
+    processLinksField =
         insname: env: links:
         let
-            fun = generateAttrSetFromLink "consumers" "reaches" insname env;
-        in lib.mkMerge (lib.mapAttrsToList (linktype: _: fun linktype) links);
+            process =
+                linktype: accesses:
+                let
+                    endpoints = config.naps.links.${linktype}.endpoints;
+                in lib.mkMerge (lib.mapAttrsToList (processEndpointType "reaches" insname env) endpoints);
+        in lib.mkMerge (lib.mapAttrsToList process links);
+
     processService = 
         srvname: {deployements, provides, endpoints, links,...}:
         let
             processDeployement =
                 insname: env:
                 lib.mkMerge [
-                    (processProvides insname env provides)
-                    (processEndpoints insname env endpoints)
-                    (processLinks insname env links)
+                    (processProvidesField insname env provides)
+                    (processEndpointsField insname env endpoints)
+                    (processLinksField insname env links)
                 ];
         in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
-
-
-    generateProxy = 
-        vmname: globalEPs:
-        let
-            processEPType = 
-                eptype: eps:
-                let
-                    generate = config.naps.endpoints.${eptype}.generateProxy;
-                    eps = config.naps.internal.endpoints.perVM.${vmname}.${eptype};
-                in  {${vmname} = generate vmname eps;};
-        in lib.mkMerge (lib.mapAttrsToList processEPType globalEPs);
 
 in {
     imports = [./options];
     naps.internal.endpoints = lib.mkMerge [
             (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-            {proxy = lib.mkMerge (lib.mapAttrsToList generateProxy config.naps.internal.endpoints.perVM);}
+            #{proxy = lib.mkMerge (lib.mapAttrsToList generateProxy config.naps.internal.endpoints.perVM);}
         ];
 
 }

@@ -119,6 +119,8 @@ Migration:
 
     +TODO: assets scripts should be based on config.naps.services instead of config.naps.assets
 
+    + TODO: services.internal.deployement should contain serviceInstances instead of DeployementEnvironments
+
 - naps.endpoints:
     + should generate the proxy of each vm (the minimum number of endpoints required to be connected) based on the links
     + thus it would not be required to update all the infra when a new endpoints appears / disappears.

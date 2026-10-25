@@ -8,6 +8,9 @@
     Note that the reverse and the forward proxy may not serve the same endpoints, although they can overlap.
     In order to circumvent this, the termination REVERSE proxy listens on 127.0.0.1:9443 while the termination FORWARD
     proxy listens on 127.0.0.2:9443
+
+    Forward proxy: we build one different forward proxy per local environment, since all the local environment does not
+    requires to reach the same endpoints.
 */
 
 let
@@ -70,7 +73,7 @@ let
                     http-request return status 404
             '';
         in {
-            config = [reverseConfig forwardConfig backend_404];
+            #config = [reverseConfig forwardConfig backend_404];
         };
 in 
 {
