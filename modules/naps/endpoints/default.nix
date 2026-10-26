@@ -4,6 +4,6 @@
     imports = [
         ./options
         ./tcp.nix
-        ./http.nix
+        ./https.nix
     ];
 }
