@@ -6,6 +6,50 @@ let
             
     domain = config.naps.topology.domain;
 
+    mkInstallerForEnv = 
+        envname: envassets:
+        let 
+            namedlist = lib.mapAttrsToList (k: v: v // {name=k;}) envassets; # [{name, provider, ..}]
+            byprovider = lib.groupBy (builtins.getAttr "provider") namedlist; # {provider => [{name, provider, ...}]}
+            byproviderbyname = lib.mapAttrs 
+                                    (_: vs: 
+                                        utils.mergeAll 
+                                            (lib.map (v: {${v.name} = {inherit (v) generateArgs installArgs reload;};}) vs))
+                                    byprovider;
+        in byproviderbyname;
+
+    generateScript = 
+        let generateAsset =
+                genFun: acc: assetname: {args, recipients}:
+                    genFun acc assetname args ++ [(utils.give assetname recipients)];
+            processProvider =
+                acc: providername: assets:
+                let provider = config.naps.assets.${providername};
+                    genFun = provider.apply.generate;
+                in lib.foldlAttrs (generateAsset genFun) acc assets;
+        in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.internal.assets.generator);
+
+    installScript = 
+        let 
+            installAsset = installFun: args: 
+                lib.concatMapStringsSep "\n" installFun args;
+            processProvider = 
+                providername: assets:
+                let provider = config.naps.assets.${providername};
+                    installFun = provider.apply.install;
+                in lib.concatStringsSep "\n"
+                        (lib.mapAttrsToList installFun assets);
+            processVM = 
+                vmname: assetskinds:
+                let scriptsPerProviders = lib.mapAttrsToList processProvider assetskinds; 
+                in ''
+                    install -d -m 0711 -o root -g root "$PREFIX"${utils.paths.secrets}
+                    ${lib.concatStringsSep "\n" scriptsPerProviders}
+                '';
+        in lib.mapAttrs processVM config.naps.internal.assets.installer;
+
+
+
     /*
     processLinks = env: links@{ldap, postgres, s3}:
         let 
@@ -57,7 +101,6 @@ let
                 in lib.optionalAttrs tls {${dst}.${hostname} = cert;}; #if TLS=false, the certificate should be declared manually in the assets
         in utils.mergeAll(
                 map processHTTPEndpoint endpoints.http);
-    */
     processAssets = env: assets: {
         ${utils.envUID env} = assets;
     };
@@ -75,90 +118,81 @@ let
         srvname: srv@{deployements, ...}:
         utils.mergeAll (map (processDeployement srv) (builtins.attrValues deployements));
 
-
+    */
+    applyMerge =
+        type: value:
+        if type == null then value else type.merge [] [{inherit value; file = "modules.naps.internal.assets.default";}];
     checkAsset = 
-        {provider, generateArgs, installArgs, reload}:
+        provider: {generateArgs, installArgs, reload}:
         let 
-            applyMerge =
-                type: value:
-                if type == null then value else type.merge [] [{inherit value; file = "modules.naps.internal.assets.default";}];
             inputs = config.naps.assets.${provider}.inputs;
             generateArgs' = applyMerge inputs.generateArgs generateArgs;
             installArgs' = applyMerge inputs.installArgs installArgs;
-        in {inherit provider reload; generateArgs=generateArgs'; installArgs=installArgs';};
+        in {inherit reload; generateArgs=generateArgs'; installArgs=installArgs';};
 
-    perEnv = 
-        let assetattrs = utils.mergeAll (lib.mapAttrsToList processService config.naps.internal.services); # envUID => assetName => asset
-            addTLSIdentity = 
-                vmname:
-                {
-                    ${vmname}."vm-${vmname}.${domain}" = {
-                        provider = "tls";
-                        generateArgs.hostname = "vm-${vmname}.${domain}";
-                        installArgs.owner = "root";
-                        reload = [];
-                    };
-                };
-            allassets = 
-                utils.mergeAll (
-                    [assetattrs]
-                    ++ (map addTLSIdentity (builtins.attrNames config.naps.topology.vms)));
-        in lib.mapAttrs (_: lib.mapAttrs (_: checkAsset)) allassets; 
-
-    getEnv = uid: config.naps.internal.envs.all.${uid}; 
-    allAssets = # [{uid, assetname, asset}]
-        let processEnv = uid: assetsattr: lib.mapAttrsToList (assetname: asset: asset // {name=assetname; env = getEnv uid;} ) assetsattr;
-        in lib.concatLists (lib.mapAttrsToList processEnv config.naps.internal.assets.perEnv);
-    assetsPerType = builtins.groupBy (builtins.getAttr "provider") allAssets; # provider => [{uid, assetname, asset}]
-
-    mkInstallerForEnv = 
-        envname: envassets:
+    processAsset = 
+        provider: 
+        recipientsUID: # [EnvUID] : list of recipients
+        assetname: asset:
         let 
-            namedlist = lib.mapAttrsToList (k: v: v // {name=k;}) envassets; # [{name, provider, ..}]
-            byprovider = lib.groupBy (builtins.getAttr "provider") namedlist; # {provider => [{name, provider, ...}]}
-            byproviderbyname = lib.mapAttrs 
-                                    (_: vs: 
-                                        utils.mergeAll 
-                                            (lib.map (v: {${v.name} = {inherit (v) generateArgs installArgs reload;};}) vs))
-                                    byprovider;
-        in byproviderbyname;
+            asset' = checkAsset provider asset;
+        in
+        {
+            all.${provider}.${assetname} = asset';
+            recipients.${provider}.${assetname} = recipientsUID;
+            perEnv = lib.mkMerge (map (uid: {${uid}.${provider}.${assetname} = asset';})  recipientsUID);
+        };
 
+    processProvider =
+        recipientsUID: # [EnvUID]: list of recipients. Assumed to be the same for all the assets
+        provider: 
+        assets:
+        let
+        in lib.mkMerge 
+                (lib.mapAttrsToList 
+                    (processAsset provider recipientsUID)  
+                 assets);
 
+    processAssets =
+        allassets: insname: ins:
+        lib.mkMerge (lib.mapAttrsToList (processProvider [(utils.insEnvUID ins)]) allassets);
+  
+  /*
+    processEndpoints =
+        allendpoints: insname: ins:
+        let
+            processEndpointType =
+                endpointType: endpoints:
+                let generateAssets = config.naps.endpoints.${endpointType}.generateAssets;
+                    allEndpointAssets = lib.foldl' (attrs: attrs': attrs // attrs') {} (map (ep: generateAssets ep (utils.insEnv ins)) endpoints);
+                in lib.mkMerge 
+                        (utils.concatMapAttrsToList 
+                            (provider: endpointAssets: 
+                                lib.mapAttrsToList
+                                    (assetname: endpointAsset@{asset, recipients}:
+                                        processAsset provider recipients assetname asset)
+                                    endpointAssets)
+                            allEndpointAssets);
+                        
+        in lib.mkMerge (lib.mapAttrsToList processEndpointType allendpoints); 
+    */
+        
+    processService = 
+        srvname: {instances, assets, links, endpoints,...}:
+        let
+            stdAssets = lib.mapAttrsToList (processAssets assets) instances;
+            #endpointsAssets = lib.mapAttrsToList (processEndpoints endpoints) instances;
+            #linksAssets = lib.mapAttrsToList (processLinks links) instances;
+        in lib.mkMerge (stdAssets); # ++ endpointsAssets);
 
-    generateScript = 
-        let generateAsset =
-                genFun: acc: assetname: {args, recipients}:
-                    genFun acc assetname args ++ [(utils.give assetname recipients)];
-            processProvider =
-                acc: providername: assets:
-                let provider = config.naps.assets.${providername};
-                    genFun = provider.apply.generate;
-                in lib.foldlAttrs (generateAsset genFun) acc assets;
-        in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.internal.assets.generator);
-
-    installScript = 
-        let 
-            installAsset = installFun: args: 
-                lib.concatMapStringsSep "\n" installFun args;
-            processProvider = 
-                providername: assets:
-                let provider = config.naps.assets.${providername};
-                    installFun = provider.apply.install;
-                in lib.concatStringsSep "\n"
-                        (lib.mapAttrsToList installFun assets);
-            processVM = 
-                vmname: assetskinds:
-                let scriptsPerProviders = lib.mapAttrsToList processProvider assetskinds; 
-                in ''
-                    install -d -m 0711 -o root -g root "$PREFIX"${utils.paths.secrets}
-                    ${lib.concatStringsSep "\n" scriptsPerProviders}
-                '';
-        in lib.mapAttrs processVM config.naps.internal.assets.installer;
+    
 
 in {
     imports = [
         ./options  
     ];
+    naps.internal.assets = lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services);
+
     /*
     naps.internal.assets.perEnv = perEnv;
     naps.internal.assets.generator = lib.mapAttrs  

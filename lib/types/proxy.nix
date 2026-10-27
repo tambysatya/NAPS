@@ -86,7 +86,7 @@ let
                     and the environment of the service deploying the endpoint.
                     Endpoint -> DeployementEnv -> Map ProviderType (Map AssetName EndpointAsset)
                 '';
-                type = types.functionTo (types.functionTo (types.attrsOf endpointAsset));
+                type = types.functionTo (types.functionTo (types.attrsOf (types.attrsOf endpointAsset)));
                 default = ep: env: {};
             };
         };

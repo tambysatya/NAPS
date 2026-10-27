@@ -129,6 +129,21 @@ in
             ${generateReverse vmenv consumers reverse}
             ${backend_404}
         '';
+        generateAssets = 
+            {extraArgs,hostname,...}: 
+            env:
+            lib.optionalAttrs 
+                (extraArgs.tls == "termination")
+                {
+                    "tls".${hostname} = {
+                        generateArgs = {inherit hostname;};
+                        installArgs = {
+                            owner = "haproxy";
+                            sslFormat = "haproxy";
+                        };
+                    };
+                };
+
     };
 }
 

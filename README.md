@@ -119,9 +119,8 @@ Migration:
 
     +TODO: assets scripts should be based on config.naps.services instead of config.naps.assets
 
-    + TODO: services.internal.deployement should contain serviceInstances instead of DeployementEnvironments
-
     + TODO: index by provider (like for the endpoints) instead of having an heterogeneous list of assets.
+    + TODO: in .secrets/plain: generate separates dir per providers (allowing to have the same asset name if produced by two providers ?)
 
 - naps.endpoints:
     + should generate the proxy of each vm (the minimum number of endpoints required to be connected) based on the links
