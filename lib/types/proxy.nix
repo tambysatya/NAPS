@@ -58,8 +58,8 @@ let
                 type = types.asset;
             };
             recipients = lib.mkOption {
-                description = "List of recipients of the asset: [EnvironmentName]";
-                type = types.listOf types.str;
+                description = "recipient of the asset: EnvironmentUID";
+                type = types.str;
             };
         };
     };

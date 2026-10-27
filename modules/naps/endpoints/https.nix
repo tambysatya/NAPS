@@ -136,10 +136,13 @@ in
                 (extraArgs.tls == "termination")
                 {
                     "tls".${hostname} = {
-                        generateArgs = {inherit hostname;};
-                        installArgs = {
-                            owner = "haproxy";
-                            sslFormat = "haproxy";
+                            asset = {
+                                generateArgs = {inherit hostname;};
+                                installArgs = {
+                                    owner = "haproxy";
+                                    sslFormat = "haproxy";
+                            };
+                            recipient = utils.envHostUID env;
                         };
                     };
                 };
