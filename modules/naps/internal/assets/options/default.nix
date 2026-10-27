@@ -59,7 +59,7 @@ in
         type = types.submodule {
             options = {
                 perEnv = lib.mkOption {
-                    description = "List of the assets per environment";
+                    description = "List of the assets per environment: Map EnvName (Map AssetName Asset)";
                     type = types.attrsOf (types.attrsOf types.asset);
                     default = {};
                     apply =

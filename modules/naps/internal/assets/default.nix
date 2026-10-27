@@ -1,11 +1,12 @@
 {flakeRoot, lib, inputs, config, path, pkgs,...}:
 let
 
-    utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import "${flakeRoot}/providers/lib" {inherit flakeRoot lib inputs path pkgs;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import "${flakeRoot}/modules/naps/assets/lib" {inherit lib inputs path pkgs flakeRoot;};
    
             
     domain = config.naps.topology.domain;
 
+    /*
     processLinks = env: links@{ldap, postgres, s3}:
         let 
             ldaphosts = builtins.attrValues config.naps.internal.services.openldap.deployements;
@@ -56,16 +57,17 @@ let
                 in lib.optionalAttrs tls {${dst}.${hostname} = cert;}; #if TLS=false, the certificate should be declared manually in the assets
         in utils.mergeAll(
                 map processHTTPEndpoint endpoints.http);
+    */
     processAssets = env: assets: {
         ${utils.envUID env} = assets;
     };
-    
+
     processDeployement = 
         srv@{endpoints, links, assets, ...}:
         env:
         utils.mergeAll [
-            (processEndpoints env endpoints)
-            (processLinks env links)
+            #(processEndpoints env endpoints)
+            #(processLinks env links)
             (processAssets env assets)
         ];
         

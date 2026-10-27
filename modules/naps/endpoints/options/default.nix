@@ -8,7 +8,7 @@ in
 {
     options.naps.endpoints = lib.mkOption {
         description = "All available endpoints types. Map EndpointType Provider";
-        type = types.attrsOf types.proxy;
+        type = types.attrsOf types.endpointType;
         default = {};
     };
 }

@@ -51,7 +51,19 @@ let
         };
     };
 
-    proxy = types.submodule {
+    endpointAsset = types.submodule {
+        options = {
+            asset = lib.mkOption {
+                description = "Asset content";
+                type = types.asset;
+            };
+            recipients = lib.mkOption {
+                description = "List of recipients of the asset: [EnvironmentName]";
+                type = types.listOf types.str;
+            };
+        };
+    };
+    endpointType = types.submodule {
         options = {
             extraArgsType = lib.mkOption {
                 description = "An endpoint contains {hostname, port, extraArgs}. This specifies the type of the user-defined extraArgs";
@@ -67,11 +79,21 @@ let
                 '';
                 type = types.functionTo (types.functionTo (types.functionTo (types.functionTo types.str)));
             };
+            generateAssets = lib.mkOption {
+                description = ''
+                    Function providing a list endpointsAsset, i.e. assets decorated 
+                    with the list of recipients (environment name), given the endpoint
+                    and the environment of the service deploying the endpoint.
+                    Endpoint -> DeployementEnv -> Map ProviderType (Map AssetName EndpointAsset)
+                '';
+                type = types.functionTo (types.functionTo (types.attrsOf endpointAsset));
+                default = ep: env: {};
+            };
         };
     };
 
 in {
     inherit proxyIR;
-    inherit proxy;
+    inherit endpointType;
 }
 
