@@ -15,9 +15,8 @@ naps.services.postgres = {
         config.services.postgresql.settings.listen_addresses = addr;
     };
     users.postgres = {service = "postgresql"; uid=10005;};
-    assets = {
+    assets."tls" = {
         ${hostname} = {
-            provider = "tls";
             generateArgs = {inherit hostname;};
             installArgs = {inherit owner;};
             inherit reload;

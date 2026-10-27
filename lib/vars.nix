@@ -35,14 +35,14 @@ let
     envUID = env: if builtins.isString env then env
                   else if env.type == "vm" then env.host
                   else env.host.container;
-    envHost = env: if builtins.isString env then env
+    envHostUID = env: if builtins.isString env then env
                    else if env.type == "vm" then env.host
                    else env.host.vm;
     isContainer = env: env.type == "container";
     isVM = env: ! isContainer env;
 
     hostDeployementEnv = # get the hosting deployement environment
-        env: {inherit (env) priority tags; type="vm"; host=envHost env;};
+        env: {inherit (env) priority tags; type="vm"; host=envHostUID env;};
     hostIP = env: if isContainer env then env.host.publicHostAddress else env.ip;
     envIP = env: env.ip;
     envPrivateHostIP = env: # IP of the host on the private network
@@ -53,9 +53,15 @@ let
     epToString = {hostname, port, ...}: "${hostname}:${lib.toString port}";
 
     insEnv = ins@{deployement,...}: deployement;
-    insIP = ins: envIP (insEnv ins);
-    insHost = ins: envHost (insEnv ins);
-    insHostIP = ins: hostIP (insEnv ins);
+    insEnvUID = ins: envUID (insEnv ins);
+    insIP = ins: envIP (insEnv ins); # public IP address
+
+    runsInContainer = ins: isContainer (insEnv ins);
+    runsInVM = ins: isVM (insEnv ins);
+
+    insHostUID = ins: envHostUID (insEnv ins); # Host environment
+    insHostIP = ins: hostIP (insEnv ins); # Host public IP
+    insPrivateHostIP = ins: envPrivateHostIP (insEnv ins); # Host private IP = 127.0.0.1 if native, host veth IP otherwise
 
 in {
     inherit paths;
@@ -65,7 +71,7 @@ in {
     inherit s3_root s3_key s3_key_id db_root db_key ldap_root ldap_key;
     inherit directory_id;
     inherit isContainer isVM;
-    inherit envUID envHost hostDeployementEnv hostIP envIP envPrivateHostIP;
-    inherit insEnv insIP insHost insHostIP;
+    inherit envUID envHostUID hostDeployementEnv hostIP envIP envPrivateHostIP;
+    inherit insEnv insEnvUID insIP runsInContainer runsInVM insHostUID insHostIP insPrivateHostIP;
     inherit epToString;
 }

@@ -14,9 +14,8 @@ in
 naps.services.step-ca = {
     path = ./.;
     users.step-ca = {service="step-ca"; uid=10006;};
-    assets = {
+    assets."step-ca" = {
         "step-ca" = {
-            provider = "step-ca";
             reload = ["step-ca.service"];
         };
     };

@@ -38,23 +38,26 @@ naps.services.hydra ={
         };
     };
     assets = {
-        "hydra-admin-pass.key" = {
-            provider = "password";
-            generateArgs = {opensslType = "base64"; opensslSize = 64;};
-            installArgs = {owner = "hydra";};
-            inherit reload;
+        "password" = {
+            "hydra-admin-pass.key" = {
+                generateArgs = {opensslType = "base64"; opensslSize = 64;};
+                installArgs = {owner = "hydra";};
+                inherit reload;
+            };
         };
-        "hydra-ssh" = {
-            provider = "ssh-keygen";
-            generateArgs = {keyname = "hydra";};
-            installArgs = {owner = "hydra"; path = "/var/lib/hydra/.ssh";};
-            inherit reload;
+        "ssh-keygen" = {
+            "hydra-ssh" = {
+                generateArgs = {keyname = "hydra";};
+                installArgs = {owner = "hydra"; path = "/var/lib/hydra/.ssh";};
+                inherit reload;
+            };
         };
-        "hydra-cache" = {
-            provider = "nix-store";
-            generateArgs = {keyname = "hydra";};
-            installArgs = {owner = "hydra"; mode="0440";};
-            inherit reload;
+        "nix-store" = {
+            "hydra-cache" = {
+                generateArgs = {keyname = "hydra";};
+                installArgs = {owner = "hydra"; mode="0440";};
+                inherit reload;
+            };
         };
     };
     persistent = [

@@ -46,10 +46,6 @@ rec {
 
     asset = types.submodule {
         options = {
-            provider = lib.mkOption {
-                description = "How to generate the asset";
-                type = provider;
-            };
             generateArgs = lib.mkOption {
                 description = "Arguments passed to the generator.";
                 type = types.attrs;

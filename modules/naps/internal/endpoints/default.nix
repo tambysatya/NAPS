@@ -23,7 +23,7 @@ let
         hostsOrReaches: insname: ins:
         eptype: ep@{hostname, port,...}:
         let
-            envuid = utils.envUID (utils.insEnv ins);
+            envuid = utils.insEnvUID ins;
             epname = utils.epToString ep;
             globalField = if hostsOrReaches == "hosts" then "hosts" else "consumers";
             proxyField = if hostsOrReaches == "hosts" then "reverse" else "forward";
@@ -34,54 +34,52 @@ let
         in {
             all.${eptype}.${epname} = ep;
             global.${globalField}.${eptype}.${epname}.${insname} = ins;
-            proxy.${utils.envHost (utils.insEnv ins)}.${eptype}.${proxyField} = proxyValue;
+            proxy.${utils.insHostUID ins}.${eptype}.${proxyField} = proxyValue;
         };
     processEndpointType = 
-        hostsOrReaches: insname: env: eptype: endpoints: 
-        let
-            ins = config.naps.internal.envs.instances.${insname};
-        in lib.mkMerge 
+        hostsOrReaches: insname: ins: eptype: endpoints: 
+        lib.mkMerge 
             (map 
                 (processEndpoint hostsOrReaches insname ins eptype) 
                 (map (checkEndpoint eptype) endpoints)); #we validate here the type of the endpoint
     processProvidesField =
-        insname: env: provides:
+        insname: ins: provides:
         let
             process = 
                 linktype:
                 let 
                     endpoints = config.naps.links.${linktype}.endpoints; # Map EndpointType [Endpoints]
-                in lib.mkMerge (lib.mapAttrsToList (processEndpointType "hosts" insname env) endpoints);
+                in lib.mkMerge (lib.mapAttrsToList (processEndpointType "hosts" insname ins) endpoints);
         in lib.mkMerge (map process provides);
 
     processEndpointsField =
-        insname: env: endpoints:
+        insname: ins: endpoints:
         let
-            process = eptype: eps: processEndpointType "hosts" insname env eptype eps;
+            process = eptype: eps: processEndpointType "hosts" insname ins eptype eps;
         in lib.mkMerge 
             (lib.mapAttrsToList process endpoints);
 
     processLinksField =
-        insname: env: links:
+        insname: ins: links:
         let
             process =
                 linktype: accesses:
                 let
                     endpoints = config.naps.links.${linktype}.endpoints;
-                in lib.mkMerge (lib.mapAttrsToList (processEndpointType "reaches" insname env) endpoints);
+                in lib.mkMerge (lib.mapAttrsToList (processEndpointType "reaches" insname ins) endpoints);
         in lib.mkMerge (lib.mapAttrsToList process links);
 
     processService = 
-        srvname: {deployements, provides, endpoints, links,...}:
+        srvname: {instances , provides, endpoints, links,...}:
         let
-            processDeployement =
-                insname: env:
+            processInstance =
+                insname: ins:
                 lib.mkMerge [
-                    (processProvidesField insname env provides)
-                    (processEndpointsField insname env endpoints)
-                    (processLinksField insname env links)
+                    (processProvidesField insname ins provides)
+                    (processEndpointsField insname ins endpoints)
+                    (processLinksField insname ins links)
                 ];
-        in lib.mkMerge (lib.mapAttrsToList processDeployement deployements);
+        in lib.mkMerge (lib.mapAttrsToList processInstance instances);
 
     generateProxy =
         vmname: alleps:

@@ -17,9 +17,8 @@ in {
 naps.services.nextcloud = {
     path = ./.;
     users.nextcloud = {service="nextcloud"; uid=10003;};
-    assets = {
+    assets."password" = {
             "nextcloud-admin.key" = {
-                provider = "password";
                 generateArgs = {opensslType = "base64"; opensslSize=64;};
                 installArgs = {inherit owner;};
                 reload = ["phpfpm-nextcloud.service"];

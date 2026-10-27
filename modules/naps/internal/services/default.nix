@@ -9,8 +9,8 @@ let
 
 
     processInstance =
-        srvuid: {deployement, is, ...}:{ 
-            ${is}.deployements.${srvuid} = deployement;
+        srvuid: srv@{deployement, is, ...}:{ 
+            ${is}.instances.${srvuid} = srv;
         };
     copyService =  #copy the service declaration (from naps.services to naps.internal.services)
         srvname: srvconf: {${srvname} = srvconf;};

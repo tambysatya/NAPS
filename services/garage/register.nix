@@ -22,21 +22,18 @@ config.naps.services.garage = {
         };
     };
     users."garage" = {service = "garage"; uid=10001;};
-    assets = {
+    assets."password" = {
         "garage-rpc.key" = {
-            provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};
             inherit reload;
         };
         "garage-admin.key" = {
-            provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};
             inherit reload;
         };
         "garage-metrics.key" = {
-            provider = "password";
             generateArgs = {inherit opensslSize opensslType;};
             installArgs = {inherit owner;};
             inherit reload;

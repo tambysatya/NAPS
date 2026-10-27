@@ -159,6 +159,7 @@ in {
     imports = [
         ./options  
     ];
+    /*
     naps.internal.assets.perEnv = perEnv;
     naps.internal.assets.generator = lib.mapAttrs  
                                           (_: assets: # {uid, assetname, env} => uid = {assetname, recipient=[env]}
@@ -199,4 +200,5 @@ in {
         '';
         install = installScript;
     };
+    */
 }

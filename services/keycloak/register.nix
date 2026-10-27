@@ -13,9 +13,9 @@ in
 naps.services.keycloak = {
     path = ./.;
     users.keycloak = {service ="keycloak"; uid=10002;};
-    assets= {
+    assets."plain" = {
+            # WARNING: keycloak initial password is stored in plain text TODO add a warning
             "keycloak-initial-admin.key" = {
-                provider = "plain"; # WARNING: keycloak initial password is stored in plain text TODO add a warning
                 generateArgs = {opensslSize = 64; opensslType = "base64";};
                 installArgs = {inherit owner;};
                 inherit reload;

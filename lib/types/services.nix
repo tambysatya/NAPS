@@ -54,16 +54,24 @@ let
                         in lib.mapAttrs check eps;
                 };
                 assets = lib.mkOption {
-                    description = "Files placed in the store (config files, strings, encrypted password). Should be of the form <filename/dirname> = {...}";
-                    type = types.attrsOf types.asset;
+                    description = ''
+                        Files placed in the store (config files, strings, encrypted password), grouped by providers.
+                        Should be of the form <filename/dirname> = {...}
+                        Map Provider (Map AssetName Asset)
+                        Note that the installation path is defaulted to <secretPath>/<assetName>
+                    '';
+                    type = types.attrsOf (types.attrsOf types.asset);
                     default = {};
                     apply =
                         lib.mapAttrs 
-                            (assetname: asset@{installArgs ? {}, ...}:  #sets the default value of path
-                                let installArgs' = if builtins.hasAttr "path" installArgs 
-                                                   then installArgs
-                                                   else installArgs // {path = "${utils.paths.secrets}/${assetname}";};
-                                in asset // {installArgs = installArgs';});
+                            (assetType: assets:
+                                lib.mapAttrs 
+                                    (assetname: asset@{installArgs ? {}, ...}:  #sets the default value of path
+                                        let installArgs' = if builtins.hasAttr "path" installArgs 
+                                                           then installArgs
+                                                           else installArgs // {path = "${utils.paths.secrets}/${assetname}";};
+                                        in asset // {installArgs = installArgs';})
+                                     assets);
 
                 };
                 links = lib.mkOption {
@@ -88,9 +96,10 @@ let
     internalServiceOptions = config: {...}: {
         imports = [(serviceOptions config)]; #TODO good practice ? Or config is implicit ?
         options = {
-            deployements = lib.mkOption {
-                description = "AttrSet of serviceuid => environment where the service is currently deployed";
-                type = types.attrsOf types.deployementEnvironment;
+            instances = lib.mkOption {
+                description = "Map InstanceName ServiceInstance";
+                internal = true;
+                type = types.attrsOf types.serviceInstance;
                 default = {};
             };
         };

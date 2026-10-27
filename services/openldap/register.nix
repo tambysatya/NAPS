@@ -12,9 +12,8 @@ naps.services.openldap = {
     provides = ["ldap"];
     path = ./.;
     users.openldap = {service="openldap"; uid=10004;};
-    assets = {
+    assets."tls" = {
         ${hostname} = {
-            provider = "tls";
             generateArgs = {inherit hostname;};
             installArgs = {inherit owner;};
             inherit reload;

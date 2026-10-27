@@ -58,10 +58,16 @@ in
         description = "Assets dispatched across the infrastructure";
         type = types.submodule {
             options = {
-                perEnv = lib.mkOption {
-                    description = "List of the assets per environment: Map EnvName (Map AssetName Asset)";
+                all = lib.mkOption {
+                    description = "All assets, sorted by Provider: Map Provider (Map AssetName Asset)";
                     type = types.attrsOf (types.attrsOf types.asset);
                     default = {};
+                };
+                perEnv = lib.mkOption {
+                    description = "List of the assets per environment: Map EnvName (Map Provider (Map AssetName Asset))";
+                    type = types.attrsOf (types.attrsOf (types.attrsOf types.asset));
+                    default = {};
+                    /*
                     apply =
                         envassets: 
                         lib.mapAttrs 
@@ -74,6 +80,7 @@ in
                                         in asset // {installArgs = installArgs';})
                                     assets)
                            envassets;
+                    */
                 };
                 generator = lib.mkOption {
                     description = "Intermediate Representation of the assets generation script. Format is: Provider -> name -> generatorArgs ";

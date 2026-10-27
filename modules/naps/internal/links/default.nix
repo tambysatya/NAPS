@@ -2,51 +2,31 @@
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
-/*
-    getHosts = 
-        let
-            processSrv =
-                srvname: srvconf@{provides, deployements, endpoints,...}: 
-                utils.concatMapAttrsToList 
-                    (eptype: eps:
-                        lib.concatMap
-                            ({link, hostname, port,...}:
-                             lib.optionals (link != null)
-                                (map 
-                                 {
-                                   ${link} = lib.mapAttrsToList (_: env: {inherit env; endpoint = {type=eptype; inherit hostname port;};}) deployements;
-                                 }
-                                 provides )
-                            ) 
-                            eps)
-                    endpoints;
-        in utils.concatMapAttrsToList processSrv config.naps.internal.services;
-*/    
     processService = 
-        srvname: {provides, deployements, links, ...}:
-        let processEnv = 
-                insuid: env: utils.concatMapAttrsToList (processLinkType insuid env) links;
+        srvname: {provides, instances, links, ...}:
+        let processIns = 
+                insuid: ins: utils.concatMapAttrsToList (processLinkType insuid ins) links;
             processLinkType =
-                insuid: env: linktype: links: map (processLink insuid env linktype) links;
+                insuid: ins: linktype: links: map (processLink insuid ins linktype) links;
             processLink =
-                insuid: env: linktype: link: 
+                insuid: ins: linktype: link: 
                 let
                     accessuid = config.naps.links.${linktype}.accessuid link;
                 in 
                     {
-                        perEnv.${utils.envUID env}.${linktype}.${accessuid} = link;
-                        perVM.${utils.envHost env}.${linktype}.${utils.envUID env}.${accessuid} = link;
-                        all.${linktype}.requesters.${insuid} = env;
+                        perEnv.${utils.insEnvUID ins}.${linktype}.${accessuid} = link;
+                        perVM.${utils.insHostUID ins}.${linktype}.${utils.insEnvUID ins}.${accessuid} = link;
+                        all.${linktype}.requesters.${insuid} = utils.insEnv ins;
                         
                     };
             processProvides = 
                 name: {
-                    all.${name}.providers = lib.mapAttrs (ins: _: config.naps.internal.envs.instances.${ins}) deployements;
+                    all.${name}.providers = instances;
                 };
 
         in lib.mkMerge [
                 (lib.mkMerge
-                    (utils.concatMapAttrsToList processEnv deployements))
+                    (utils.concatMapAttrsToList processIns instances))
                 (lib.mkMerge 
                     (map processProvides provides))
             ];
