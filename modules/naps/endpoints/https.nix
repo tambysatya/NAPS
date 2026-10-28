@@ -141,9 +141,9 @@ in
                                 installArgs = {
                                     owner = "haproxy";
                                     sslFormat = "haproxy";
+                                };
                             };
                             recipient = utils.envHostUID env;
-                        };
                     };
                 };
 

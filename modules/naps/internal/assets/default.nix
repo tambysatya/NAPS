@@ -157,7 +157,6 @@ let
         allassets: insname: ins:
         lib.mkMerge (lib.mapAttrsToList (processProvider [(utils.insEnvUID ins)]) allassets);
   
-  /*
     processEndpoints =
         allendpoints: insname: ins:
         let
@@ -169,21 +168,20 @@ let
                         (utils.concatMapAttrsToList 
                             (provider: endpointAssets: 
                                 lib.mapAttrsToList
-                                    (assetname: endpointAsset@{asset, recipients}:
-                                        processAsset provider recipients assetname asset)
+                                    (assetname: endpointAsset@{asset, recipient}:
+                                        processAsset provider recipient assetname asset)
                                     endpointAssets)
                             allEndpointAssets);
                         
         in lib.mkMerge (lib.mapAttrsToList processEndpointType allendpoints); 
-    */
         
     processService = 
         srvname: {instances, assets, links, endpoints,...}:
         let
             stdAssets = lib.mapAttrsToList (processAssets assets) instances;
-            #endpointsAssets = lib.mapAttrsToList (processEndpoints endpoints) instances;
+            endpointsAssets = lib.mapAttrsToList (processEndpoints endpoints) instances;
             #linksAssets = lib.mapAttrsToList (processLinks links) instances;
-        in lib.mkMerge (stdAssets); # ++ endpointsAssets);
+        in lib.mkMerge (stdAssets ++ endpointsAssets);
 
     
 

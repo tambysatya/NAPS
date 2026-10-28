@@ -59,8 +59,20 @@ rec {
             reload = lib.mkOption {
                 description = "List of services depending on this asset. At least one is required.";
                 type = types.listOf types.str;
+                apply = lib.unique;
             };
         };
     };
-
+    shippedAsset = types.submodule {
+        options = {
+            asset = lib.mkOption {
+                description = "Asset content";
+                type = asset;
+            };
+            recipient = lib.mkOption {
+                description = "recipient of the asset: EnvironmentUID";
+                type = types.str;
+            };
+        };
+    };
 }

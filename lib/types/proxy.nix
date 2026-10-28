@@ -4,7 +4,8 @@ let
     network = import ./network.nix {inherit lib inputs;};
     endpoints = import ./endpoints.nix {inherit lib inputs;};
     deployement = import ./deployement.nix {inherit lib inputs;};
-    types = lib.types // network // endpoints // deployement;
+    assets = import ./assets.nix {inherit lib inputs;};
+    types = lib.types // network // endpoints // deployement // assets;
 
     /*  For a given VM:
         - to compute the forward proxy:
@@ -51,18 +52,7 @@ let
         };
     };
 
-    endpointAsset = types.submodule {
-        options = {
-            asset = lib.mkOption {
-                description = "Asset content";
-                type = types.asset;
-            };
-            recipients = lib.mkOption {
-                description = "recipient of the asset: EnvironmentUID";
-                type = types.str;
-            };
-        };
-    };
+
     endpointType = types.submodule {
         options = {
             extraArgsType = lib.mkOption {
@@ -84,9 +74,9 @@ let
                     Function providing a list endpointsAsset, i.e. assets decorated 
                     with the list of recipients (environment name), given the endpoint
                     and the environment of the service deploying the endpoint.
-                    Endpoint -> DeployementEnv -> Map ProviderType (Map AssetName EndpointAsset)
+                    Endpoint -> DeployementEnv -> Map ProviderType (Map AssetName ShippedAsset)
                 '';
-                type = types.functionTo (types.functionTo (types.attrsOf (types.attrsOf endpointAsset)));
+                type = types.functionTo (types.functionTo (types.attrsOf (types.attrsOf types.shippedAsset)));
                 default = ep: env: {};
             };
         };
