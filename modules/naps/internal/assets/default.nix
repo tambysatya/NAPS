@@ -168,20 +168,39 @@ let
                         (utils.concatMapAttrsToList 
                             (provider: endpointAssets: 
                                 lib.mapAttrsToList
-                                    (assetname: endpointAsset@{asset, recipient}:
-                                        processAsset provider recipient assetname asset)
+                                    (assetname: endpointAsset@{asset, recipients}:
+                                        processAsset provider recipients assetname asset)
                                     endpointAssets)
                             allEndpointAssets);
                         
         in lib.mkMerge (lib.mapAttrsToList processEndpointType allendpoints); 
+
+    processLinks =
+        alllinks: insname: ins:
+        let
+            processLinkType =
+                linktype: accesses:
+                let hosts = lib.mapAttrsToList (inshost: host: utils.insEnv host) config.naps.internal.links.all.${linktype}.providers;
+                    generateAsset = config.naps.links.${linktype}.assets;
+                    allLinkAssets_ = map (generateAsset (utils.insEnv ins) hosts) accesses;
+                    allLinkAssets = lib.foldl' (attrs: attrs': attrs //attrs') {} allLinkAssets_;
+                in lib.mkMerge 
+                        (utils.concatMapAttrsToList 
+                            (provider: linkAssets:
+                                lib.mapAttrsToList
+                                    (assetname: linkAsset@{asset, recipients}:
+                                        processAsset provider recipients assetname asset)
+                                    linkAssets)
+                            allLinkAssets);
+        in lib.mkMerge (lib.mapAttrsToList processLinkType alllinks);
         
     processService = 
         srvname: {instances, assets, links, endpoints,...}:
         let
             stdAssets = lib.mapAttrsToList (processAssets assets) instances;
             endpointsAssets = lib.mapAttrsToList (processEndpoints endpoints) instances;
-            #linksAssets = lib.mapAttrsToList (processLinks links) instances;
-        in lib.mkMerge (stdAssets ++ endpointsAssets);
+            linksAssets = lib.mapAttrsToList (processLinks links) instances;
+        in lib.mkMerge (stdAssets ++ endpointsAssets ++ linksAssets);
 
     
 

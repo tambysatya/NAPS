@@ -12,6 +12,20 @@ let
             inherit (types) owner reload;
         };
     };
+    
+    mkAssets = env: hosts: access: {
+        password = {
+            "${utils.db_key access}" = {
+                asset = {
+                    generateArgs = {opensslSize = 64; opensslType = "base64";};
+                    installArgs = {inherit (access) owner; group="postgres"; mode = "440";};
+                    inherit (access) reload;
+                };
+                recipients = [(utils.envUID env)] ++ map utils.envUID hosts;
+            };
+        };
+    };
+
 in {
 
 naps.links.postgres = {
@@ -19,14 +33,7 @@ naps.links.postgres = {
     endpoints.tcp = [
         {hostname = "postgres.${config.naps.topology.domain}"; port = 5432;}
     ];
-    assets = access: {
-        "${utils.db_key access}" = {
-            provider = "password";
-            generateArgs = {opensslSize = 64; opensslType = "base64";};
-            installArgs = {inherit (access) owner; group="postgres"; mode = "440";};
-            inherit (access) reload;
-        };
-    };
+    assets = mkAssets;
     accessuid = utils.db_root;
     waitLinkUp =  
         ''

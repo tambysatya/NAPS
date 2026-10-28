@@ -74,6 +74,7 @@ in
                     description = "Agregation of the recipients of each asset: Map Provider (Map AssetName [EnvUID])";
                     type = types.attrsOf (types.attrsOf (types.listOf types.str));
                     default = {};
+                    apply = lib.mapAttrs (_: lib.mapAttrs (_: lib.unique));
                 };
                 perEnv = lib.mkOption {
                     description = "List of the assets per environment: Map EnvName (Map Provider (Map AssetName Asset))";

@@ -144,7 +144,7 @@ in
                                 };
                                 reload = ["haproxy.service"];
                             };
-                            recipient = utils.envHostUID env;
+                            recipients = [(utils.envHostUID env)];
                     };
                 };
 

@@ -24,12 +24,14 @@ in {
             {inherit hostname; port=389;}
             {inherit hostname; port=636;} 
         ];
-        assets = access:{
-            ${utils.ldap_key access} = {
-                provider = "ldapssha";
-                generateArgs = access;
-                installArgs = {inherit (access) owner;};
-                inherit (access) reload;
+        assets = env: hosts: access: {
+            "ldapssha".${utils.ldap_key access} = {
+                asset = {
+                    generateArgs = access;
+                    installArgs = {inherit (access) owner;};
+                    inherit (access) reload;
+                };
+                recipients = [(utils.envUID env)] ++ map utils.envUID hosts;
             };
         };
         accessuid = utils.ldap_root;

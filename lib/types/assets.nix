@@ -69,9 +69,9 @@ rec {
                 description = "Asset content";
                 type = asset;
             };
-            recipient = lib.mkOption {
-                description = "recipient of the asset: EnvironmentUID";
-                type = types.str;
+            recipients = lib.mkOption {
+                description = "recipient of the asset: [EnvironmentUID]";
+                type = types.listOf types.str;
             };
         };
     };

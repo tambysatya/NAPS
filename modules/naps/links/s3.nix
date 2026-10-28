@@ -19,17 +19,21 @@ naps.links.s3 = {
     endpoints.https = [
         {hostname = "s3.${config.naps.topology.domain}"; port = 3000; extraArgs = {tls="termination";};}
     ];
-    assets = access: {
-        "${utils.s3_key access}" = {
-            provider = "password";
-            generateArgs = {opensslSize = 64; opensslType = "hex";};
-            installArgs = {inherit (access) owner; group="garage"; mode = "440";};
-            inherit (access) reload;
+    assets = env: hosts: access: {
+        "password"."${utils.s3_key access}" = {
+            asset = {
+                generateArgs = {opensslSize = 64; opensslType = "hex";};
+                installArgs = {inherit (access) owner; group="garage"; mode = "440";};
+                inherit (access) reload;
+            };
+            recipients = [(utils.envUID env)] ++ map utils.envUID hosts;
         };
-        "${utils.s3_key_id access}" = {
-            provider = "plain";
-            generateArgs = {opensslSize = 64; opensslType = "hex";};
-            inherit (access) reload;
+        "plain"."${utils.s3_key_id access}" = {
+            asset = {
+                generateArgs = {opensslSize = 64; opensslType = "hex";};
+                inherit (access) reload;
+            };
+            recipients = [(utils.envUID env)] ++ map utils.envUID hosts;
         };
     };
     accessuid = utils.s3_root;
