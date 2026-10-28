@@ -133,8 +133,12 @@ in {
             installArgs = types.submodule {
                 options = {
                     inherit (types) owner sslFormat;
+                    path = lib.mkOption {
+                        description = "Installation path";
+                        type = types.nullOr types.str;
+                        default = null;
+                    };
                 };
-                freeformType = types.attrs;
             };
         };
         apply = {

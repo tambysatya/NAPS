@@ -142,6 +142,7 @@ in
                                     owner = "haproxy";
                                     sslFormat = "haproxy";
                                 };
+                                reload = ["haproxy.service"];
                             };
                             recipient = utils.envHostUID env;
                     };

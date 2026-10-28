@@ -62,6 +62,13 @@ in
                     description = "All assets, sorted by Provider: Map Provider (Map AssetName Asset)";
                     type = types.attrsOf (types.attrsOf types.asset);
                     default = {};
+                    apply = lib.mapAttrs 
+                                (provider: assets: 
+                                    lib.mapAttrs (assetname: asset@{installArgs,...}: 
+                                        if builtins.hasAttr "path" installArgs && installArgs.path != null && installArgs.path != ""
+                                        then asset
+                                        else asset // {installArgs = installArgs // {path = "${utils.paths.secrets}/${assetname}";};})
+                                    assets);
                 };
                 recipients = lib.mkOption {
                     description = "Agregation of the recipients of each asset: Map Provider (Map AssetName [EnvUID])";
@@ -72,20 +79,6 @@ in
                     description = "List of the assets per environment: Map EnvName (Map Provider (Map AssetName Asset))";
                     type = types.attrsOf (types.attrsOf (types.attrsOf types.asset));
                     default = {};
-                    /*
-                    apply =
-                        envassets: 
-                        lib.mapAttrs 
-                            (envname: assets:
-                                lib.mapAttrs 
-                                    (assetname: asset@{installArgs, ...}:  #sets the default value of path
-                                        let installArgs' = if builtins.hasAttr "path" installArgs 
-                                                           then installArgs
-                                                           else installArgs // {path = "${utils.paths.secrets}/${assetname}";};
-                                        in asset // {installArgs = installArgs';})
-                                    assets)
-                           envassets;
-                    */
                 };
                 generator = lib.mkOption {
                     description = "Intermediate Representation of the assets generation script. Format is: Provider -> name -> generatorArgs ";

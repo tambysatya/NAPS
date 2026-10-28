@@ -67,7 +67,7 @@ let
                             (assetType: assets:
                                 lib.mapAttrs 
                                     (assetname: asset@{installArgs ? {}, ...}:  #sets the default value of path
-                                        let installArgs' = if builtins.hasAttr "path" installArgs 
+                                        let installArgs' = if builtins.hasAttr "path" installArgs && installArgs.path != null && installArgs.path != ""
                                                            then installArgs
                                                            else installArgs // {path = "${utils.paths.secrets}/${assetname}";};
                                         in asset // {installArgs = installArgs';})
