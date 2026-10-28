@@ -62,13 +62,6 @@ in
                     description = "All assets, sorted by Provider: Map Provider (Map AssetName Asset)";
                     type = types.attrsOf (types.attrsOf types.asset);
                     default = {};
-                    apply = lib.mapAttrs 
-                                (provider: assets: 
-                                    lib.mapAttrs (assetname: asset@{installArgs,...}: 
-                                        if builtins.hasAttr "path" installArgs && installArgs.path != null && installArgs.path != ""
-                                        then asset
-                                        else asset // {installArgs = installArgs // {path = "${utils.paths.secrets}/${assetname}";};})
-                                    assets);
                 };
                 recipients = lib.mkOption {
                     description = "Agregation of the recipients of each asset: Map Provider (Map AssetName [EnvUID])";
@@ -81,9 +74,9 @@ in
                     type = types.attrsOf (types.attrsOf (types.attrsOf types.asset));
                     default = {};
                 };
-                generator = lib.mkOption {
-                    description = "Intermediate Representation of the assets generation script. Format is: Provider -> name -> generatorArgs ";
-                    type = types.attrsOf (types.attrsOf generatorEntry);
+                perVM = lib.mkOption {
+                    description = "List of the assets per VM: Map VMName (Map Provider (Map AssetName Asset))";
+                    type = types.attrsOf (types.attrsOf (types.attrsOf types.asset));
                     default = {};
                 };
                 installer = lib.mkOption {

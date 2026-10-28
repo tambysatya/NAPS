@@ -20,14 +20,15 @@ let
 
     generateScript = 
         let generateAsset =
-                genFun: acc: assetname: {args, recipients}:
-                    genFun acc assetname args ++ [(utils.give assetname recipients)];
+                providername: genFun: acc: assetname: {generateArgs,...}:
+                    let recipients = config.naps.internal.assets.recipients.${providername}.${assetname};
+                    in genFun acc assetname generateArgs ++ [(utils.give assetname recipients)];
             processProvider =
                 acc: providername: assets:
                 let provider = config.naps.assets.${providername};
                     genFun = provider.apply.generate;
-                in lib.foldlAttrs (generateAsset genFun) acc assets;
-        in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.internal.assets.generator);
+                in lib.foldlAttrs (generateAsset providername genFun) acc assets;
+        in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.internal.assets.all);
 
     installScript = 
         let 
@@ -46,79 +47,9 @@ let
                     install -d -m 0711 -o root -g root "$PREFIX"${utils.paths.secrets}
                     ${lib.concatStringsSep "\n" scriptsPerProviders}
                 '';
-        in lib.mapAttrs processVM config.naps.internal.assets.installer;
+        in lib.mapAttrs processVM config.naps.internal.assets.perVM;
 
 
-
-    /*
-    processLinks = env: links@{ldap, postgres, s3}:
-        let 
-            ldaphosts = builtins.attrValues config.naps.internal.services.openldap.deployements;
-            s3hosts = builtins.attrValues config.naps.internal.services.garage.deployements;
-            dbhosts = builtins.attrValues config.naps.internal.services.postgres.deployements;
-
-            mkSharedSecret =
-                hosts: 
-                hostsOwner:  # service user running on the host (e.g. postgres, garage...) 
-                hostsReload: # services on the host that depends on the secret
-                secretname:
-                secret:
-                let uid = utils.envUID env;
-                    override = {
-                        installArgs = {
-                            group = hostsOwner;
-                            mode = "440";
-                            reload = hostsReload;
-                        };
-                    };
-                    mkHostSecret = host: {${utils.envUID host}.${secretname} =(secret // override);}; #replace the owner of the secret transmitted to the hosts
-                    dsts = lib.filter (name: name != uid) hosts;
-                in utils.mergeAll 
-                        ([{${uid}.${secretname} = secret; }] ++ map mkHostSecret dsts);
-            processLDAP = access:  #TODO the service reload is not corect
-                mkSharedSecret ldaphosts "openldap" ["openldap.service"] (utils.ldap_key access) {provider = "ldapssha"; installArgs = { owner = access.owner;}; generateArgs = access; inherit (access) reload;};
-            processPostgres = access:
-                let 
-                    installArgs = {inherit (access) owner;};
-                    secret =  {provider = "postgres"; inherit installArgs; generateArgs = access; inherit (access) reload;};
-                in mkSharedSecret dbhosts "postgres" ["postgresql-password.service"] (utils.db_key access) secret;
-            processS3 = access:
-                mkSharedSecret s3hosts "garage" ["garage-bootstrap.service"]  (utils.s3_root access) {provider = "s3"; installArgs = {owner = access.owner;}; generateArgs = access; inherit (access) reload;};
-        in utils.mergeAll (
-                map processLDAP ldap ++
-                map processPostgres postgres ++
-                map processS3 s3);
-
-    processEndpoints = env: endpoints:
-        # only reverse proxy are processed. Otherwise, certificates must be 
-        # registered manually in the assets section and handled manually in
-        # the configuration
-        let
-            dst = if env.type == "container" then utils.envUID env else utils.envHost env;
-            processHTTPEndpoint  =
-                {tls, hostname, ...}:
-                let cert = {provider = "tls"; installArgs = {owner = "haproxy"; sslFormat="haproxy";}; generateArgs = {inherit hostname;}; reload = ["haproxy.service"];};
-                in lib.optionalAttrs tls {${dst}.${hostname} = cert;}; #if TLS=false, the certificate should be declared manually in the assets
-        in utils.mergeAll(
-                map processHTTPEndpoint endpoints.http);
-    processAssets = env: assets: {
-        ${utils.envUID env} = assets;
-    };
-
-    processDeployement = 
-        srv@{endpoints, links, assets, ...}:
-        env:
-        utils.mergeAll [
-            #(processEndpoints env endpoints)
-            #(processLinks env links)
-            (processAssets env assets)
-        ];
-        
-    processService = 
-        srvname: srv@{deployements, ...}:
-        utils.mergeAll (map (processDeployement srv) (builtins.attrValues deployements));
-
-    */
     applyMerge =
         type: value:
         if type == null then value else type.merge [] [{inherit value; file = "modules.naps.internal.assets.default";}];
@@ -133,14 +64,18 @@ let
     processAsset = 
         provider: 
         recipientsUID: # [EnvUID] : list of recipients
-        assetname: asset:
+        assetname: asset@{installArgs,...}:
         let 
             asset' = checkAsset provider asset;
+            asset'' = if builtins.hasAttr "path" installArgs && installArgs.path != null && installArgs.path != ""
+                      then asset'
+                      else asset' // {installArgs = installArgs // {path = "${utils.paths.secrets}/${assetname}";};};
         in
         {
-            all.${provider}.${assetname} = asset';
+            all.${provider}.${assetname} = asset'';
             recipients.${provider}.${assetname} = recipientsUID;
-            perEnv = lib.mkMerge (map (uid: {${uid}.${provider}.${assetname} = asset';})  recipientsUID);
+            perEnv = lib.mkMerge (map (uid: {${uid}.${provider}.${assetname} = asset'';})  recipientsUID);
+            perVM = lib.mkMerge (map (uid: {${utils.envHostUID config.naps.internal.envs.all.${uid}}.${provider}.${assetname} = asset'';})  recipientsUID);
         };
 
     processProvider =
@@ -208,7 +143,11 @@ in {
     imports = [
         ./options  
     ];
-    naps.internal.assets = lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services);
+    naps.internal.assets = lib.mkMerge [
+                                (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
+                                {scripts.generate = generateScript;}
+                                {scripts.install = installScript;}
+                            ];
 
     /*
     naps.internal.assets.perEnv = perEnv;
