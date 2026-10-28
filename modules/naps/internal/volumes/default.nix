@@ -6,7 +6,7 @@ let
     
     locatePathInEnv = # lookup which disk contains the file:
         env: dirpath: sharedP:
-        let disks = config.naps.topology.vms.${utils.envHost env}.disks;
+        let disks = config.naps.topology.vms.${utils.envHostUID env}.disks;
             shared = lib.filter (builtins.getAttr "shared") disks;
             diskHaveIt = lib.filter ({mount,...}: mount==dirpath) disks;
 
@@ -22,10 +22,10 @@ let
            lib.head ret;
 
     processService = 
-        {deployements, persistent,...}:
-        let processDeployement =
-                serviceUID: env: utils.mergeAll (map (processPersistent serviceUID env) persistent);
-        in  utils.mergeAll (lib.mapAttrsToList processDeployement deployements);
+        {instances, persistent,...}:
+        let processInstances =
+            serviceUID: ins: utils.mergeAll (map (processPersistent serviceUID ins) persistent);
+        in  utils.mergeAll (lib.mapAttrsToList processInstances instances);
 
     mkMountPoint = disk: if disk.mount == null
                        then "/srv/${lib.baseNameOf disk.path}"
@@ -34,9 +34,10 @@ let
 
     processPersistent = #uid -> env -> Attr
         serviceUID:
-        env:
+        ins:
         persistent@{path, shared,...}:
         let
+            env = utils.insEnv ins;
             diruid = utils.directory_id serviceUID path;
             disk = locatePathInEnv env path shared;
             mount = mkMountPoint disk;
@@ -52,7 +53,7 @@ let
                 inherit env mount;
              
             };
-            perVM.${utils.envHost env}.${disk.path} = {
+            perVM.${utils.envHostUID env}.${disk.path} = {
                 inherit mount;
                 type = disk.type;
                 fs = disk.fs;

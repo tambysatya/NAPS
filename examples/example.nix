@@ -46,6 +46,7 @@
         services = ["keycloak-main" "stepca-main" "ldap-main" "pg-backup"];
         disks = [
             {type="disk"; path="/dev/pvhdd/ldap"; mount="/var/lib/openldap/data"; fs="xfs";}
+            {type="disk"; path="/dev/ssd/postgres"; mount="/var/lib/postgresql"; fs="xfs"; options=["nofail"];}
         ];
 
       };
