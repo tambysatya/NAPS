@@ -46,13 +46,14 @@ let
 in
 
 {
-    imports = [./step.nix
-               ./volumes.nix
-               ./assets.nix # secrets provisioning service
-               ./network.nix
-               ./proxy.nix
-               ./links.nix # services dependency
-               ./logs.nix
+    imports = [
+               # ./step.nix
+               #./volumes.nix
+               #./assets.nix # secrets provisioning service
+               #./network.nix
+               #./proxy.nix
+               #./links.nix # services dependency
+               #./logs.nix
               ];
     #naps.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.naps.deploy.systems);
     naps.outputs.systems = 

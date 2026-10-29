@@ -3,39 +3,6 @@ let
     types = lib.types // (import "${flakeRoot}/lib/types" {inherit lib inputs;});
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
 
-    generatorEntry = types.submodule {
-        options = {
-            args = lib.mkOption {
-                description = "Extra args for the generator";
-                type = types.attrs;
-            };
-            recipients = lib.mkOption {
-                description = "List of environment to ship the asset";
-                type = types.listOf types.deployementEnvironment;
-                default = [];
-            };
-            
-        };
-    };
-
-    installerEntry = types.submodule {
-        options = {
-            generateArgs = lib.mkOption {
-                description = "Args that have been passed to the generator";
-                type = types.attrs;
-            };
-            installArgs = lib.mkOption {
-                description = "Installer args";
-                type = types.attrs;
-                default = [];
-            };
-            inherit (types) reload;
-            
-        };
-    };
-
-
-
     assetScripts = types.submodule {
         options = {
             generate = lib.mkOption {
@@ -77,11 +44,6 @@ in
                 perVM = lib.mkOption {
                     description = "List of the assets per VM: Map VMName (Map Provider (Map AssetName Asset))";
                     type = types.attrsOf (types.attrsOf (types.attrsOf types.asset));
-                    default = {};
-                };
-                installer = lib.mkOption {
-                    description = "Intermediate Representation of the assets installation script. Format is: Env -> Provider -> name -> args";
-                    type = types.attrsOf (types.attrsOf (types.attrsOf installerEntry));
                     default = {};
                 };
                 scripts = lib.mkOption {
