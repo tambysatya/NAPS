@@ -152,11 +152,21 @@ in {
                             (args.installArgs.sslFormat == "haproxy")
                             (installHAproxy secname args.generateArgs)}
                       '';
-                      /*
-                      if args.installArgs.sslFormat == "step"
-                      then installSSL secname args.generateArgs args.installArgs
-                      else installHAproxy secname args.generateArgs;
-                      */
+            /* ExtraConfig: if an SSL certificate is deployed, step-renew is enabled
+               to automatically refresh it */
+            config = asset@{generateArgs, installArgs, reload,...}:
+                let 
+                    inherit (generateArgs) hostname;
+                    inherit (installArgs) path sslFormat;
+                in {
+                    imports = ["${flakeRoot}/services/step-renew"];
+                    config.services.step-renew = {
+                        enable = true;
+                        caURL = "ca.${config.naps.topology.domain}";
+                        caFingerprint = builtins.readFile "${path}/.secrets/git/fingerprint";
+                        certs = [{inherit hostname reload sslFormat;}];
+                    };
+            };
         };
     };
 }

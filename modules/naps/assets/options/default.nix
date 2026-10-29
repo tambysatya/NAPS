@@ -47,6 +47,14 @@ let
                             description = "A function to install the asset. Should have type: assetname -> installerEntry -> Script";
                             type = types.functionTo (types.functionTo types.str);
                         };
+                        config = lib.mkOption {
+                            description = ''
+                                Extra Configuration appended to the system config.
+                                Asset -> ConfigModule
+                            '';
+                            type = types.functionTo types.attrs;
+                            default = asset: {};
+                        };
                     };
                 };
             };
