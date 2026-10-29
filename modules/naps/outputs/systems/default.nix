@@ -45,21 +45,30 @@ let
                 map addServiceToDeployement (builtins.attrValues deployements)
            );
     */
+    proxyConfigs = 
+        let
+            processProxy = envuid: str: {config.services.haproxy.config = str;};
+        in lib.mapAttrs processProxy config.naps.internal.endpoints.outputs.proxy;
+    networkConfig = 
+        let
+            processIR = 
+                envuid: ir: 
+                let
+                    env = config.naps.internal.environments.all.${envuid};
+                in 
+                {};
+        in {};
 in
 
 {
     imports = [
-               # ./step.nix
                #./volumes.nix
-               #./assets.nix # secrets provisioning service
                #./network.nix
-               #./proxy.nix
-               #./links.nix # services dependency
-               #./logs.nix
               ];
     naps.outputs.systems = lib.mkMerge [
-        config.naps.internal.assets.outputs.config
-        config.naps.internal.links.outputs
+        config.naps.internal.assets.outputs.config # assets services (e.g. step-renew for TLS refresh)
+        config.naps.internal.links.outputs # dependencies across the infrastructure (e.g. wait-uplinks services)
+        proxyConfigs # haproxy configuration of VMs
     ];
     #naps.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.naps.deploy.systems);
     /*
