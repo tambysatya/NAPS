@@ -18,7 +18,7 @@ let
                                     byprovider;
         in byproviderbyname;
 
-    generateScript = 
+    generateAssets = 
         let generateAsset =
                 providername: genFun: acc: assetname: {generateArgs,...}:
                     let recipients = config.naps.internal.assets.recipients.${providername}.${assetname};
@@ -29,6 +29,35 @@ let
                     genFun = provider.apply.generate;
                 in lib.foldlAttrs (generateAsset providername genFun) acc assets;
         in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.internal.assets.all);
+    generateScript = ''
+        set -euo pipefail
+        mkdir -p ${utils.paths.out} ${utils.paths.git}
+
+                        
+        # Initializes the perVM repository
+        ${lib.concatMapStringsSep 
+            "\n"
+            (vmname:
+                ''
+                [[ -d ${utils.paths.perVM}/${vmname} ]] && rm -R ${utils.paths.perVM}/${vmname}
+                mkdir -p ${utils.paths.perVM}/${vmname}
+                echo ${vmname} > ${utils.paths.perVM}/${vmname}/FLAKE
+                '')
+            (builtins.attrNames config.naps.internal.envs.vms)}
+        
+        # Generates the secrets
+        ${generateAssets}
+
+        # Generates the provisioner tls certificates
+        mkdir -p .secrets/provisioner/{ssl,secrets,mtls}
+        rm -Rf .secrets/provisioner/ssl/* #clean the repository
+        ${lib.concatStringsSep "\n" 
+            (config.naps.assets.tls.apply.generate
+                [] "vm-provisioning.${domain}"
+                {hostname=config.naps.topology.provisioner.hostname;})}
+        cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/
+        mv .secrets/out/${config.naps.topology.provisioner.hostname}/* .secrets/provisioner/ssl/
+    '';
 
     installScript = 
         let 
@@ -137,6 +166,17 @@ let
             linksAssets = lib.mapAttrsToList (processLinks links) instances;
         in lib.mkMerge (stdAssets ++ endpointsAssets ++ linksAssets);
 
+    generateConfig = 
+        envuid: allassets:
+        let
+            providerConfig = 
+                provider: 
+                assets:
+                let
+                    mkConfig = config.naps.assets.${provider}.apply.config;
+                in lib.mapAttrsToList (assetname: asset: mkConfig asset) assets;
+        in {${envuid} = lib.mkMerge (utils.concatMapAttrsToList providerConfig allassets);};
+
     
 
 in {
@@ -145,8 +185,9 @@ in {
     ];
     naps.internal.assets = lib.mkMerge [
                                 (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-                                {scripts.generate = generateScript;}
-                                {scripts.install = installScript;}
+                                {outputs.scripts.generate = generateScript;}
+                                {outputs.scripts.install = installScript;}
+                                {outputs.config = lib.mkMerge (lib.mapAttrsToList generateConfig config.naps.internal.assets.perEnv);}
                             ];
 
     /*
@@ -186,7 +227,6 @@ in {
                     {hostname=config.naps.topology.provisioner.hostname;})}
             cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/
             mv .secrets/out/${config.naps.topology.provisioner.hostname}/* .secrets/provisioner/ssl/
-
         '';
         install = installScript;
     };

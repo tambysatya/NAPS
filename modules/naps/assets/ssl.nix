@@ -163,7 +163,7 @@ in {
                     config.services.step-renew = {
                         enable = true;
                         caURL = "ca.${config.naps.topology.domain}";
-                        caFingerprint = builtins.readFile "${path}/.secrets/git/fingerprint";
+                        #caFingerprint = builtins.readFile "${path}/.secrets/git/fingerprint"; # done directly in the service config in services/step-renew/default.nix
                         certs = [{inherit hostname reload sslFormat;}];
                     };
             };

@@ -4,6 +4,7 @@ let
 
     utils = import ../../deploy/lib.nix {inherit inputs lib flakeRoot;};
 
+    /*
     mkUser = user: {service, uid}:
         {
             users.${user} = {
@@ -43,6 +44,7 @@ let
         in utils.mergeAll (
                 map addServiceToDeployement (builtins.attrValues deployements)
            );
+    */
 in
 
 {
@@ -55,11 +57,17 @@ in
                #./links.nix # services dependency
                #./logs.nix
               ];
+    naps.outputs.systems = lib.mkMerge [
+        config.naps.internal.assets.outputs.config
+        config.naps.internal.links.outputs
+    ];
     #naps.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.naps.deploy.systems);
+    /*
     naps.outputs.systems = 
         utils.mergeAll [
             (lib.mapAttrs processUsers config.naps.deploy.systems)
             (lib.mapAttrs mkRoot config.naps.deploy.systems)
             (utils.mergeAll (lib.mapAttrsToList addServices config.naps.internal.services))
         ];
+    */
 }

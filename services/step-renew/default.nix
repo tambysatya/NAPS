@@ -1,4 +1,4 @@
-{flakeRoot, inputs, lib, ... }:
+{flakeRoot, inputs, lib, path, ... }:
 
 let customtypes = import ../../lib/types {inherit lib inputs;};
 in {
@@ -19,6 +19,7 @@ in {
     caFingerprint = lib.mkOption {
       type = lib.types.str;
       description = "Step CA fingerprint.";
+      default = builtins.readFile "${path}/.secrets/git/fingerprint";
     };
 
     stepPath = lib.mkOption {

@@ -53,7 +53,7 @@ let
                         };
                     };
                 };
-        in lib.foldl' lib.recursiveUpdate {} (lib.mapAttrsToList processLinkType alllinks);
+        in lib.mkMerge (lib.mapAttrsToList processLinkType alllinks);
 
 in {
     imports = [./options];

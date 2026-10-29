@@ -18,6 +18,21 @@ let
         };
     };
 
+    assetsOutputs = types.submodule {
+        options = {
+            scripts = lib.mkOption {
+                description = "Actual generations and installation script, per VM. The generator is a single script, the installers are defined per VM";
+                type = assetScripts;
+            };
+            config = lib.mkOption {
+                description = "Extra configuration of each environment: Map EnvUID Config";
+                type = types.attrs;
+                default = {};
+            };
+
+        };
+    };
+
 in 
 
 {
@@ -46,11 +61,14 @@ in
                     type = types.attrsOf (types.attrsOf (types.attrsOf types.asset));
                     default = {};
                 };
-                scripts = lib.mkOption {
-                    description = "Actual generations and installation script, per VM. The generator is a single script, the installers are defined per VM";
-                    type = assetScripts;
+                outputs = lib.mkOption {
+                    description = ''
+                        Outputs of this modules, containing assets generation and installation script, as well as 
+                        the specific configuration of each environment
+                    '';
+                    type = assetsOutputs;
                 };
-
+                
             };
         };
     };
