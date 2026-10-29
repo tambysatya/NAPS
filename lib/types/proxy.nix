@@ -18,12 +18,12 @@ let
     */
  
     forwardFrontend = lib.mkOption {
-        description = "Frontend intermediate representation: LocalEnvironment -> Map EndpointName Endpoint";
+        description = "Frontend intermediate representation: Map LocalEnvironment (Map EndpointName Endpoint)";
         type = types.attrsOf (types.attrsOf types.endpoint);
         default = {};
     };
     reverseBackend = lib.mkOption {
-        description = "Backend intermediate representation: LocallyExposedEndpoint -> local serviceInstances";
+        description = "Backend intermediate representation: Map LocallyExposedEndpoint (Map InstanceName serviceInstances)";
         type = types.attrsOf (types.attrsOf types.serviceInstance);
         default = {};
     };
@@ -35,23 +35,8 @@ let
         };
     };
 
- 
 
-    firewallConfig = types.submodule {
-        options = {
-            interfaces = lib.mkOption {
-                description = "On which interface the firewall should be openned. all = all the interfaces";
-                type = types.either (types.enum ["all"]) (types.listOf types.str);
-            };
-            proto = lib.mkOption {
-                description = "Allowed protocol";
-                type = types.listOf (types.enum ["tcp" "udp"]);
-                apply = lib.unique;
-                default = [];
-            };
-        };
-    };
-
+    firewallConfig = types.attrsOf (types.attrsOf (types.listOf lib.type.port)); # Map Proto (Map Interface [Port])
 
 
 in {

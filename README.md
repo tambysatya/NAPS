@@ -128,6 +128,7 @@ Migration:
     + services providing a link should not specify the corresponding endpoints: these endpoints should be automatically added.
     + same as assets: assets associated to a link should be automatically added
     + Two services instances having the same priority should be load balanced
+    + Maybe refactor the DSL and use outputs.config instead of having generateProxy, generateFirewall,...
 
 - NAPS application: 
     + allows either to deploy a VM or to "update" a VM (without tofu) - using rebuils / ssh for the secrets

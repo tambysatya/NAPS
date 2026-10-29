@@ -120,15 +120,6 @@ in
                 };
             };
         };
-        generateProxy = vmenv: hosts: consumers: ir@{forward, reverse}:
-        ''
-            # HTTPs Forward Proxy (always TLS passthrough)
-            ${generateForward vmenv hosts forward}
-
-            # HTTPs Reverse Proxy (Checks Passthrough then termination)
-            ${generateReverse vmenv consumers reverse}
-            ${backend_404}
-        '';
         generateAssets = 
             {extraArgs,hostname,...}: 
             env:
@@ -147,7 +138,52 @@ in
                             recipients = [(utils.envHostUID env)];
                     };
                 };
+        generateProxy = vmenv: hosts: consumers: ir@{forward, reverse}:
+        ''
+            # HTTPs Forward Proxy (always TLS passthrough)
+            ${generateForward vmenv hosts forward}
 
+            # HTTPs Reverse Proxy (Checks Passthrough then termination)
+            ${generateReverse vmenv consumers reverse}
+            ${backend_404}
+        '';
+        generateFirewall = 
+            vmenv: consumers: {forward, reverse}:
+            let
+                # Reverse proxies are always open both on the host and the container 
+                processFwReverseInstance =
+                    endpoint@{port,...}: insname: ins:
+                    lib.mkMerge [
+                       # On containers only we open the backend port (not on native instances)
+                        (lib.optionalAttrs 
+                            (utils.runsInContainer ins) 
+                            {
+                                ${utils.insEnvUID ins}."tcp"."eth0" = [port];
+                            })
+                        /* We always open the 443 public port on the host
+                           (the only way to reach https endpoints) */
+                        {
+                            ${utils.envUID vmenv}."tcp"."eth0" = [443];
+                        }
+
+                    ];
+                fwReverse = endpoint: instances:
+                    lib.mkMerge (lib.mapAttrsToList (processFwReverseInstance endpoint) instances);
+                /*
+                reverseProxy = lib.mkMerge (map fwReverse reversePorts);
+                fwForward =
+                    localenv: endpoints:
+                    let 
+                        ctFwdPorts = 
+                            lib.unique
+                                (lib.mapAttrsToList (epname: ep: ep.port) endpoints);
+                        fwCtForward =
+                            port: {
+                                ${utils.envHostUID env}."tcp".${env.host.veth} = [port];
+                            };
+                    in lib.optionalAttr
+              */  
+            in {}; 
     };
 }
 
