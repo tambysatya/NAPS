@@ -37,6 +37,11 @@ options.naps.internal.links = lib.mkOption {
                 type = types.attrsOf (types.attrsOf (types.attrsOf (types.attrsOf types.access)));
                 default = {};
             };
+            outputs = lib.mkOption {
+                description = "Extra-configuration to be merged with the configuration of each environment: Map EnvUID Config";
+                type = types.attrs;
+                default = {};
+            };
         };
     };
 };

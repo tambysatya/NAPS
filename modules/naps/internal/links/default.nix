@@ -31,10 +31,35 @@ let
                     (map processProvides provides))
             ];
 
+    generateOutputs = 
+        envuid: alllinks:
+        let
+            processLinkType = 
+                linktype: accesses:
+                let
+                    allReloads = lib.unique (utils.concatMapAttrsToList (accessname: access: access.reload) accesses);
+                    waitLinkUp = config.naps.links.${linktype}.waitLinkUp;
+                in {
+                    config.systemd.services."wait-uplink-${linktype}" = {
+                        description = "Waiting for link ${linktype} to be up";
+                        wants = ["network.target"];
+                        after = ["network.target"];
+                        before = allReloads;
+                        requiredBy = allReloads;
+                        serviceConfig = {
+                            Type = "oneshot";
+                            RemainAfterExit = "oneshot";
+                            ExecStart = pkgs.writeShellScript "wait-uplink-${linktype}" waitLinkUp;
+                        };
+                    };
+                };
+        in lib.foldl' lib.recursiveUpdate {} (lib.mapAttrsToList processLinkType alllinks);
+
 in {
     imports = [./options];
     naps.internal.links = lib.mkMerge [
         (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
+        {outputs = lib.mkMerge [(lib.mapAttrs generateOutputs config.naps.internal.links.perEnv)];}
     ];
 }
  
