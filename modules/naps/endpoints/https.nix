@@ -148,7 +148,7 @@ in
             ${backend_404}
         '';
         generateFirewall = 
-            vmenv: consumers: {forward, reverse}:
+            vmenv: {forward, reverse}:
             let
                 # Reverse proxies are always open both on the host and the container 
                 processFwReverseInstance =
@@ -169,8 +169,8 @@ in
                     ];
                 fwReverse = endpoint: instances:
                     lib.mkMerge (lib.mapAttrsToList (processFwReverseInstance endpoint) instances);
-                /*
-                reverseProxy = lib.mkMerge (map fwReverse reversePorts);
+                allReverseFirewall = lib.mkMerge (lib.mapAttrsToList fwReverse reverse);
+
                 fwForward =
                     localenv: endpoints:
                     let 
@@ -179,11 +179,11 @@ in
                                 (lib.mapAttrsToList (epname: ep: ep.port) endpoints);
                         fwCtForward =
                             port: {
-                                ${utils.envHostUID env}."tcp".${env.host.veth} = [port];
+                                ${utils.envHostUID localenv}."tcp".${localenv.host.veth} = [port];
                             };
-                    in lib.optionalAttr
-              */  
-            in {}; 
+                    in lib.optionalAttr (utils.runsInContainer localenv) (lib.mkMerge (map fwCtForward ctFwdPorts));
+                allForwardFirewall = lib.mkMerge (lib.mapAttrsToList fwForward forward);
+            in lib.mkMerge [allReverseFirewall allForwardFirewall];
     };
 }
 

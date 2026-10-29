@@ -35,9 +35,9 @@ let
                 description = ''
                     Given the set of exposed endpoints, generates the firewall configuration
                     of the VM /containers. 
-                    Type: Env -> Consumers -> ProxyIR -> Map EnvUID (Map PortNumber FirewallConfig)
+                    Type: VMEnv -> ProxyIR -> Map EnvUID (Map PortNumber FirewallConfig)
                 ''; #TODO : firewall for containers ?
-                type = types.functionTo (types.functionTo (types.functionTo (types.attrsOf types.firewallConfig)));
+                type = types.functionTo (types.functionTo (types.attrsOf types.firewallConfig));
                 default = env: consumers: ir: {};
             };
         };

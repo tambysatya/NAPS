@@ -96,6 +96,39 @@ let
             ${generateForward vmenv hosts forward}
             ${generateReverse vmenv consumers reverse}
         ''; #(forwardProxies ++ reverseProxies);
+    generateFirewall =
+        vmenv: {forward, reverse}:
+        let
+            processReverse =
+                {port, ...}: insname: ins: 
+                 lib.mkMerge [
+                    (lib.optionalAttrs (utils.runsInContainer ins) 
+                     {
+                        ${utils.insEnvUID ins}."tcp"."eth0" = [port];
+                     })
+                    {
+                        ${utils.envUID vmenv}."tcp"."eth0" = [port];
+                    }
+                 ];
+
+            mkReverseFw = 
+                endpoint: instances: 
+                    lib.mkMerge (lib.mapAttrsToList (processReverse endpoint) instances);
+            allReverseFw = lib.mkMerge (lib.mapAttrsToList mkReverseFw reverse);
+
+            mkForwardFw = 
+                localenv: endpoints: 
+                let
+                    allPorts = 
+                        lib.unique 
+                            (lib.mapAttrsToList (_: {port,...}: port) endpoints);
+                    processPort =
+                        port: {
+                            ${utils.envUID vmenv}."tcp".${localenv.host.veth} = [port];
+                        };
+                in lib.mkMerge (lib.mapAttrsToList processPort allPorts);
+            allForwardFw = lib.mkMerge (lib.mapAttrsToList mkForwardFw forward);
+        in lib.mkMerge [allReverseFw allForwardFw];
 in {
     naps.endpoints.tcp = {
         inherit generateProxy;
