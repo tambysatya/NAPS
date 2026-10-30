@@ -14,8 +14,9 @@ let
     volumes = import ./volumes.nix {inherit lib inputs;};
     assets = import ./assets.nix {inherit lib inputs;};
     services = import ./services.nix {inherit lib inputs;};
+    config = import ./config.nix {inherit lib inputs;};
 
-    types = libtypes // files // deployement // links // networktypes // endpointstypes // proxy // users // volumes // assets // services;
+    types = libtypes // files // deployement // links // networktypes // endpointstypes // proxy // users // volumes // assets // services // config;
 
 
 

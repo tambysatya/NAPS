@@ -100,14 +100,16 @@ let
         vmenv: {forward, reverse}:
         let
             processReverse =
-                {port, ...}: insname: ins: 
-                 lib.mkMerge [
+                 epname: insname: ins: 
+                 let
+                    port = config.naps.internal.endpoints.tcp.${epname};
+                 in lib.mkMerge [
                     (lib.optionalAttrs (utils.runsInContainer ins) 
                      {
-                        ${utils.insEnvUID ins}."tcp"."eth0" = [port];
+                        ${utils.insEnvUID ins}."eth0".tcp = [port];
                      })
                     {
-                        ${utils.envUID vmenv}."tcp"."eth0" = [port];
+                        ${utils.envUID vmenv}."eth0".tcp = [port];
                     }
                  ];
 
@@ -117,16 +119,19 @@ let
             allReverseFw = lib.mkMerge (lib.mapAttrsToList mkReverseFw reverse);
 
             mkForwardFw = 
-                localenv: endpoints: 
+                localenvuid: endpoints: 
                 let
+                    localenv = config.naps.internal.envs.all.${localenvuid};
                     allPorts = 
                         lib.unique 
                             (lib.mapAttrsToList (_: {port,...}: port) endpoints);
                     processPort =
                         port: {
-                            ${utils.envUID vmenv}."tcp".${localenv.host.veth} = [port];
+                            ${utils.envUID vmenv}.${localenv.host.veth}.tcp= [port];
                         };
-                in lib.mkMerge (lib.mapAttrsToList processPort allPorts);
+                in lib.optionalAttrs 
+                    (utils.isContainer localenv) #open the forward port only for containers
+                    lib.mkMerge (lib.mapAttrsToList processPort allPorts);
             allForwardFw = lib.mkMerge (lib.mapAttrsToList mkForwardFw forward);
         in lib.mkMerge [allReverseFw allForwardFw];
 in {

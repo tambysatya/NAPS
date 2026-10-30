@@ -26,7 +26,7 @@ let
             };
             config = lib.mkOption {
                 description = "Extra configuration of each environment: Map EnvUID Config";
-                type = types.attrs;
+                type = types.attrsOf types.config;
                 default = {};
             };
 

@@ -35,7 +35,7 @@ let
             all.${eptype}.${epname} = ep;
             perEnv.${envuid}.${eptype}.${epname} = ep;
             global.${globalField}.${eptype}.${epname}.${insname} = ins;
-            proxy.${utils.insHostUID ins}.${eptype}.${proxyField} = proxyValue;
+            ir.${utils.insHostUID ins}.${eptype}.${proxyField} = proxyValue;
         };
     processEndpointType = 
         hostsOrReaches: insname: ins: eptype: endpoints: 
@@ -92,11 +92,22 @@ let
                 let fun = config.naps.endpoints.${eptype}.generateProxy;
                 in fun vmenv global.hosts.${eptype} global.consumers.${eptype} ir;
         in utils.concatMapAttrsStringsSep "\n" process alleps; 
+    generateFirewall  =
+        vmname: alleps:
+        let
+            vmenv = config.naps.internal.envs.all.${vmname};
+            process =
+                eptype: ir:
+                let fun = config.naps.endpoints.${eptype}.generateFirewall;
+                in fun vmenv ir;
+        in lib.mkMerge (lib.mapAttrsToList process alleps); 
+
 in {
     imports = [./options];
     naps.internal.endpoints = lib.mkMerge [
             (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-            {outputs.proxy= lib.mapAttrs generateProxy config.naps.internal.endpoints.proxy;}
+            {outputs.proxy= lib.mapAttrs generateProxy config.naps.internal.endpoints.ir;}
+            {outputs.firewall= lib.mkMerge (lib.mapAttrsToList generateFirewall config.naps.internal.endpoints.ir);}
         ];
 
 }

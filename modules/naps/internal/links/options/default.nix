@@ -39,7 +39,7 @@ options.naps.internal.links = lib.mkOption {
             };
             outputs = lib.mkOption {
                 description = "Extra-configuration to be merged with the configuration of each environment: Map EnvUID Config";
-                type = types.attrs;
+                type = types.attrsOf types.config;
                 default = {};
             };
         };

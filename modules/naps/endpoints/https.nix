@@ -152,18 +152,20 @@ in
             let
                 # Reverse proxies are always open both on the host and the container 
                 processFwReverseInstance =
-                    endpoint@{port,...}: insname: ins:
-                    lib.mkMerge [
+                    epname: insname: ins:
+                    let
+                        port = config.naps.internal.endpoints.all."https".${epname}.port;
+                    in lib.mkMerge [
                        # On containers only we open the backend port (not on native instances)
                         (lib.optionalAttrs 
                             (utils.runsInContainer ins) 
                             {
-                                ${utils.insEnvUID ins}."tcp"."eth0" = [port];
+                                ${utils.insEnvUID ins}."eth0".tcp = [port];
                             })
                         /* We always open the 443 public port on the host
                            (the only way to reach https endpoints) */
                         {
-                            ${utils.envUID vmenv}."tcp"."eth0" = [443];
+                            ${utils.envUID vmenv}."eth0".tcp = [443];
                         }
 
                     ];
@@ -172,16 +174,17 @@ in
                 allReverseFirewall = lib.mkMerge (lib.mapAttrsToList fwReverse reverse);
 
                 fwForward =
-                    localenv: endpoints:
+                    localenvuid: endpoints:
                     let 
+                        localenv = config.naps.internal.envs.all.${localenvuid};
                         ctFwdPorts = 
                             lib.unique
                                 (lib.mapAttrsToList (epname: ep: ep.port) endpoints);
                         fwCtForward =
                             port: {
-                                ${utils.envHostUID localenv}."tcp".${localenv.host.veth} = [port];
+                                ${utils.envHostUID localenv}.${localenv.host.veth}.tcp = [443];
                             };
-                    in lib.optionalAttr (utils.runsInContainer localenv) (lib.mkMerge (map fwCtForward ctFwdPorts));
+                    in lib.optionalAttrs (utils.isContainer localenv) (lib.mkMerge (map fwCtForward ctFwdPorts));
                 allForwardFirewall = lib.mkMerge (lib.mapAttrsToList fwForward forward);
             in lib.mkMerge [allReverseFirewall allForwardFirewall];
     };

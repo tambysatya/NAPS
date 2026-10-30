@@ -55,48 +55,25 @@ let
         };
     };
 */
-    extraConfigType = lib.types.mkOptionType {
-        name = "extraConfig";
-        description = "An attrset merged recursively with utils.mergeAll";
-        check = lib.isAttrs;
-        merge = loc: defs:
-          utils.mergeAll (map (def: def.value) defs);
-    };
 
-    systemConfig = types.submodule {
-        options = {
-            config = lib.mkOption {
-                description = "Generated NixOS configurations";
-                type = extraConfigType;
-                default = {};
-            };
-            imports = lib.mkOption {
-                description = "Generated NixOS imports";
-                type = types.listOf (types.either types.str types.path);
-                default = [];
-                apply = lib.unique;
-            };
-        };
-
-    };
     
 in
 {
     options.naps.outputs.systems = lib.mkOption {
             description = "System configurations";
-            type = types.attrsOf systemConfig;
+            type = types.attrsOf types.config;
             default = {};
     };
     options.naps.outputs.domains= lib.mkOption {
         description = "Generated Terranix configurations";
         #type = types.attrsOf config;
-        type = extraConfigType;
+        type = types.extraConfigType;
         default = {};
     };
     options.naps.outputs.iso= lib.mkOption {
         description = "Bootstrap ISO config";
         #type = types.attrsOf config;
-        type = extraConfigType;
+        type = types.extraConfigType;
         default = {};
     };
 }
