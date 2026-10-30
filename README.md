@@ -46,6 +46,13 @@ Main module: config.infra
 - infra.services.name : API for services to register what are their needs
 - ... others are internal structures which are essentially views of the infrastructure to simplify secret generation, visualization, coherence verification...
 
+## Config
+
+- naps.assets: declaration of new asset: generation/installation 
+- naps.endpoints: declaration of new endpoints types: contains proxy/firewall configuration  + asset declarations
+- naps.links: declaration of new link type: contains services dependencies + asset declaration + endpoints 
+- naps.persistent: declaration of new type of persistent data + backup/migration procedures
+
 ## IRs:
 
 ### naps.internal.links

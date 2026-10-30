@@ -4,6 +4,7 @@ let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
     
+    /*
     locatePathInEnv = # lookup which disk contains the file:
         env: dirpath: sharedP:
         let disks = config.naps.topology.vms.${utils.envHostUID env}.disks;
@@ -76,11 +77,14 @@ let
             { assertion = dupVMMntPoint == null; message = "${dupVMMntPoint} is declared multiple times on ${vmname}";}
             { assertion = dupSrvPersistent == null; message = "${dupSrvPersistent} is declared by multiple services.";}
         ];
+        */
 
 in {
     imports = [./options];
+    /*
     assertions = lib.concatLists (lib.mapAttrsToList checkVM config.naps.topology.vms);
     naps.internal.volumes = utils.mergeAll (map processService (builtins.attrValues config.naps.internal.services));
+    */
     /*
     config.naps.volumes = {
         perDirectory = utils.mergeAll (libsmapAttrsToList processVM config.naps.topology.vms);

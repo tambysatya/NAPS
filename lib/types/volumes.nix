@@ -5,92 +5,83 @@ fsType = lib.types.enum ["xfs" "ext4" "ntfs"];
 
 
 in
-{
+rec {
 
 inherit fsType;
 
-volume = types.submodule { # Persistent volumes
-    options = {
-        owner = lib.mkOption {
-            description = "Owner of the directory";
-            type = types.str;
-            default = "root";
-        };
-        path = lib.mkOption {
-            description = "Path of the persistent directory";
-            type = types.str;
-            example = "/var/lib/docker/storage";
-        };
-        reload = lib.mkOption {
-            description = "Services that requires the volume.";
-            type = types.listOf types.str;
-            default = [];
-        };
-        mode = lib.mkOption {
-            description = "Permissions of the directory";
-            type = types.str;
-            default = "0700";
-        };
-        shared = lib.mkOption {
-            description = "If true, multiple services registering 'shared' directories can store their data.";
-            type = types.bool;
-            default = false;
-        };
-    };
-};
-
+/* 
+    Physical disk, associated to a VM.
+    Identified using a unique identifier: envuid:diskname
+*/
 disk = types.submodule {
-    options= {
-        path = lib.mkOption {
-            description = "name of the qcow disk or path to the device block";
-            type = types.str;
-        };
-        mount = lib.mkOption {
-            description = "Mounting point. If set to null, the directory will be mounted on /srv/<name>";
-            type = types.nullOr types.str;
-            default = null;
+    options = {
+        env = lib.mkOption {
+            description = "Deployement environment possessing the disk";
+            type = types.deployementEnvironment;
         };
         type = lib.mkOption {
-            description = "If the disk is a qcow volume or a raw disk";
+            description = "Type of kvm storage";
             type = types.enum ["qcow" "disk"];
         };
-        size = lib.mkOption {
-            description = "Size of the qcow disk. This option is ignored if type='disk'";
-            type = types.ints.positive;
-            default = 1024*1024*100; #100M
+        location = lib.mkOption {
+            description = "Physical location, on the KVM host. Can be a path to a dev block or a path to a qcow file";
+            type = types.str;
+            example = "/dev/sda1";
         };
-        shared = lib.mkOption {
-            description = "This volume will be shared by multiple services";
-            type = types.bool;
-            default = false;
+        mount = lib.mkOption {
+            description = "Mount point on the VM";
+            type = types.str;
+            example = "/srv/persistent";
         };
-        fs = lib.mkOption {
-            description = "Filesystem format";
+        filesystem = lib.mkOption {
+            description = "Filesystem type";
             type = fsType;
-            default = "ext4";
         };
         options = lib.mkOption {
             description = "Mounting options";
             type = types.listOf types.str;
-            default = ["nofail"];
+            default = [];
+        };
+        shared = lib.mkOption {
+            description = "True if this disk can contain multiple resources";
+            type = types.bool;
+            default = false;
         };
     };
 };
 
-directory = types.submodule {
+/* Logical information on the directory (owner, permissions, bindmount,...) */
+logInfos = types.submodule {
     options = {
-        path = types.filename;
-        mode = types.dirmode;
-        inherit (types) owner reload;
-        env = lib.mkOption {
-            description = "Which environment requests the directory";
-            type = types.deployementEnvironment;
-        };
-        mount = lib.mkOption {
-            description = "Mountpoint where the directory is supposed to exists";
-            type = types.str;
+        mode = types.fileMode;
+        inherit (types) owner group reload;
+        bind = lib.mkOption {
+            description = "Path where the resource should be bind-mounted (facultative)";
+            type = types.nullOr types.str;
+            example = "/var/lib/persistent/logs";
         };
     };
 };
+
+/* A persistent resource, which is migrable and backupable and that is referred to using a unique identifierw*/
+resource = types.submodule {
+        instance = lib.mkOption {
+            description = "Instance requesting the resource"; 
+            type = types.serviceInstance;
+        };
+        phys = lib.mkOption {
+            description = "Identifier of the kvm disk";
+            type = types.str;
+        };
+        backupArgs = lib.mkOption {
+            description = "Arguments to generate the backup script [UNUSED]";
+            type = types.attrs;
+        };
+        migrateArgs = lib.mkOption {
+            description = "Arguments to generate the migration script [UNUSED]";
+            type = types.attrs;
+        };
+};
+
 
 }

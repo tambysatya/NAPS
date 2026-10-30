@@ -1,6 +1,6 @@
 {flakeRoot, lib, inputs, pkgs, config,...}:
 let
-    types = lib.types;
+    types = import "${flakeRoot}/lib/types" {inherit inputs lib;};
 
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
 

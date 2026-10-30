@@ -45,19 +45,30 @@ let
                 map addServiceToDeployement (builtins.attrValues deployements)
            );
     */
-    proxyConfigs = 
+    proxyAndFirewallConfigs = 
         let
+            outputs = config.naps.internal.endpoints.outputs;
             processProxy = envuid: str: {config.services.haproxy.config = str;};
-        in lib.mapAttrs processProxy config.naps.internal.endpoints.outputs.proxy;
-    networkConfig = 
-        let
-            processIR = 
-                envuid: ir: 
-                let
-                    env = config.naps.internal.environments.all.${envuid};
-                in 
-                {};
-        in {};
+            processFirewall = 
+                envuid: fwconfig: {
+                    config.networking.firewall.interfaces = 
+                        lib.mapAttrs 
+                            (iface: protoconfig: 
+                                lib.mapAttrs 
+                                    (proto: ports: 
+                                        if proto == "tcp" 
+                                        then {allowedTCPPorts = ports;}
+                                        else if proto == "udp"
+                                        then {allowedUDPPorts = ports;}
+                                        else throw "firewall: unknown protocol ${proto}")
+                                    protoconfig) 
+                            fwconfig;
+                    };
+        in lib.mkMerge [
+                (lib.mapAttrs processProxy outputs.proxy)
+                (lib.mapAttrs processFirewall outputs.firewall)
+           ];
+
 in
 
 {
@@ -66,9 +77,9 @@ in
                #./network.nix
               ];
     naps.outputs.systems = lib.mkMerge [
-        config.naps.internal.assets.outputs.config # assets services (e.g. step-renew for TLS refresh)
-        config.naps.internal.links.outputs # dependencies across the infrastructure (e.g. wait-uplinks services)
-        proxyConfigs # haproxy configuration of VMs
+        config.naps.internal.assets.outputs.config # assets services (e.g. step-renew for TLS refresh): defined in internal.assets
+        config.naps.internal.links.outputs # dependencies across the infrastructure (e.g. wait-uplinks services): defined in internal.links
+        proxyAndFirewallConfigs # haproxy + firewall configuration of VMs: defined in internal.endpoints
     ];
     #naps.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.naps.deploy.systems);
     /*
