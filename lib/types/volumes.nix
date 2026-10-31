@@ -17,7 +17,9 @@ disk = types.submodule {
     options = {
         env = lib.mkOption {
             description = "Deployement environment possessing the disk";
-            type = types.deployementEnvironment;
+            internal = true;
+            type = types.nullOr types.deployementEnvironment;
+            default = "null";
         };
         type = lib.mkOption {
             description = "Type of kvm storage";
@@ -32,6 +34,7 @@ disk = types.submodule {
             description = "Mount point on the VM";
             type = types.str;
             example = "/srv/persistent";
+            default = "/srv/persistent";
         };
         filesystem = lib.mkOption {
             description = "Filesystem type";
@@ -65,22 +68,27 @@ logInfos = types.submodule {
 
 /* A persistent resource, which is migrable and backupable and that is referred to using a unique identifierw*/
 resource = types.submodule {
+    options = {
+        path = lib.mkOption {
+            description = "Path of the persistent directory";
+            internal = true;
+            type = types.nullOr types.str; # set when the resource identifier is assigned
+            default = null;
+        };
         instance = lib.mkOption {
-            description = "Instance requesting the resource"; 
-            type = types.serviceInstance;
+            description = "Instance requesting this resource";
+            internal = true;
+            type = types.nullOr types.serviceInstance;
+            default = null; # set when the resource identifier is assigned
         };
-        phys = lib.mkOption {
-            description = "Identifier of the kvm disk";
-            type = types.str;
+        shareable = lib.mkOption {
+            description = "True if this directory can be stored on a shared disk"; 
+            type = types.bool;
+            default = false;
         };
-        backupArgs = lib.mkOption {
-            description = "Arguments to generate the backup script [UNUSED]";
-            type = types.attrs;
-        };
-        migrateArgs = lib.mkOption {
-            description = "Arguments to generate the migration script [UNUSED]";
-            type = types.attrs;
-        };
+        mode = types.dirmode;
+        inherit (types) owner group reload;
+    };
 };
 
 

@@ -35,4 +35,9 @@ in
        type = types.attrsOf types.resource;
        default = {};
     };
+    options.naps.internal.persistent.ir = lib.mkOption {
+       description  = "All resources assignment";
+       type = types.attrsOf ir;
+       default = {};
+    };
 }

@@ -1,9 +1,9 @@
-{path, ...}:
+{location, ...}:
 {
   #imports = [inputs.small-lab.nixosModules.naps];
   config.naps.topology = {
 /*
-    flakePath = path;
+    flakePath = location;
     secretsPath = ".secrets";
     caURL = "ca.local.fr";
 */
@@ -45,8 +45,8 @@
         #services = ["step-ca" "openldap"];
         services = ["keycloak-main" "stepca-main" "ldap-main" "pg-backup"];
         disks = [
-            {type="disk"; path="/dev/pvhdd/ldap"; mount="/var/lib/openldap/data"; fs="xfs";}
-            {type="disk"; path="/dev/ssd/postgres"; mount="/var/lib/postgresql"; fs="xfs"; options=["nofail"];}
+            {type="disk"; location="/dev/pvhdd/ldap"; mount="/var/lib/openldap/data"; filesystem="xfs";}
+            {type="disk"; location="/dev/ssd/postgres-back"; mount="/var/lib/postgresql"; filesystem="xfs"; options=["nofail"];}
         ];
 
       };
@@ -56,8 +56,8 @@
         memory = 8000;
         ip = "10.0.0.51";
         disks = [
-            {type="disk"; path="/dev/pvhdd/s3"; mount="/srv/data"; fs="xfs"; options=["nofail"];}
-            {type="disk"; path="/dev/pvhdd/s3_metadatas"; mount="/srv/meta"; fs="xfs"; options=["nofail"];}
+            {type="disk"; location="/dev/pvhdd/s3"; mount="/srv/data"; filesystem="xfs"; options=["nofail"];}
+            {type="disk"; location="/dev/pvhdd/s3_metadatas"; mount="/srv/meta"; filesystem="xfs"; options=["nofail"];}
         ];
 
         services = ["s3-main"]; 
@@ -68,7 +68,7 @@
         memory = 8000;
         ip = "10.0.0.52";
         disks = [
-            {type="disk"; path="/dev/ssd/postgres"; mount="/var/lib/postgresql"; fs="xfs"; options=["nofail"];}
+            {type="disk"; location="/dev/ssd/postgres"; mount="/var/lib/postgresql"; filesystem="xfs"; options=["nofail"];}
         ];
 
         #containers = ["pg-main"]; 
@@ -83,9 +83,9 @@
         #services = ["nc-main"]; 
         containers = ["nc-main" "git-main"]; 
         disks = [
-            {type="qcow"; path="persistent"; fs="ext4"; shared=true;}
-            {type="qcow"; path="test"; mount="/srv/persistent"; fs="ext4"; shared=false;}
-            {type="disk"; path="/dev/ssd/forgejo"; mount="/var/lib/forgejo"; fs="xfs"; shared=false;}
+            {type="qcow"; location="persistent"; filesystem="ext4"; shared=true;}
+            {type="qcow"; location="test"; mount="/srv/persistent"; filesystem="ext4"; shared=false;}
+            {type="disk"; location="/dev/ssd/forgejo"; mount="/var/lib/forgejo"; filesystem="xfs"; shared=false;}
         ];
       };
       build = {
@@ -96,8 +96,8 @@
         ip = "10.0.0.54";
         services = ["hydra-main"];
         disks = [
-            {type="disk"; path="/dev/ssd/hydra"; mount="/nix"; fs="xfs"; options=["noatime"];}
-            {type="disk"; path="/dev/pvhdd/hydra"; mount="/var/lib/hydra/cache"; fs="xfs"; options=["noatime"];}
+            {type="disk"; location="/dev/ssd/hydra"; mount="/nix"; filesystem="xfs"; options=["noatime"];}
+            {type="disk"; location="/dev/pvhdd/hydra"; mount="/var/lib/hydra/cache"; filesystem="xfs"; options=["noatime"];}
         ];
 
 
@@ -110,7 +110,7 @@
         ip = "10.0.0.55";
         services = ["log-main"];
         disks = [
-            {type="disk"; path="/dev/pvhdd/logs"; mount="/var/log/journal/remote"; fs="xfs"; options=["noatime"];}
+            {type="disk"; location="/dev/pvhdd/logs"; mount="/var/log/journal/remote"; filesystem="xfs"; options=["noatime"];}
         ];
 
 

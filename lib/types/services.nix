@@ -39,8 +39,8 @@ let
                 };
                 persistent = lib.mkOption {
                     description = "Persistent directories, managed by the service. The napsstructure must explicitely declare a persistent storage for each of them";
-                    type = types.listOf types.volume;
-                    default = [];
+                    type = types.attrsOf types.resource;
+                    default = {};
                 };
                 endpoints = lib.mkOption {
                     description = "Various endpoints exposed by the service";

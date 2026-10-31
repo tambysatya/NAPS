@@ -22,9 +22,9 @@ naps.services.postgres = {
             inherit reload;
         };
     };
-    persistent = [
-        {path = "/var/lib/postgresql"; inherit owner reload;}
-    ];
+    persistent = {
+        "/var/lib/postgresql" = {inherit owner reload;};
+    };
 };
 
 }

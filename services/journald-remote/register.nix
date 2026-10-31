@@ -29,9 +29,9 @@ naps.services.journald-remote = {
         "systemd-journal-remote" = {service ="systemd-journal-remote"; uid=10008;};
         "systemd-journal-upload" = {service ="systemd-journal-upload"; uid=10009;}; #clients
     };
-    persistent = [
-        {path = "/var/log/journal/remote"; shared=false; inherit owner reload;}
-    ];
+    persistent = {
+        "/var/log/journal/remote" = {shareable=false; inherit owner reload;};
+    };
     inherit endpoints;
     configureListen = addr: {
         config.systemd.sockets.systemd-journal-remote.listenStreams = ["${addr}:19532"];

@@ -32,10 +32,10 @@ naps.services.nextcloud = {
             {bucket = "nextcloud"; inherit owner reload;}
         ];
     };
-    persistent = [
-        {path="/var/lib/nextcloud/config"; shared=true; inherit owner reload;}
-        {path="/var/lib/nextcloud/data"; shared=true; inherit owner reload;}
-    ];
+    persistent = {
+        "/var/lib/nextcloud/config" = {shareable=true; inherit owner reload;};
+        "/var/lib/nextcloud/data" = {shareable=true; inherit owner reload;};
+    };
     endpoints.https = endpoints;
     configureListen = addr: {
         services.nginx.virtualHosts.${hostname}.listen.addr = addr;

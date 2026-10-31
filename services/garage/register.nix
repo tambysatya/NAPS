@@ -39,10 +39,10 @@ config.naps.services.garage = {
             inherit reload;
         };
     };
-    persistent = [
-        {path="/srv/data"; inherit owner reload; mode = "0700";}
-        {path="/srv/meta"; inherit owner reload; mode = "0700";}
-    ];
+    persistent = {
+        "/srv/data" = {inherit owner reload; mode = "0700";};
+        "/srv/meta" = {inherit owner reload; mode = "0700";};
+    };
     endpoints.https= [
         {hostname="s3-admin.${domain}";port=3903; extraArgs = {tls = "termination";};}
     ];
