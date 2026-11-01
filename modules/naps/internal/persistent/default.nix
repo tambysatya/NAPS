@@ -97,6 +97,18 @@ let
             };
         };
 
+    generateVMSharedResourcesInitConfig = # initializes shared volumes if their resources does not exist
+        vmname: {resources,...}:
+        let
+            locations = config.naps.internal.persistent.ir.resourcesLocation;
+            # a resource is shared when living on a shared volume
+            isShared = rname: resource: locations.${rname}.shared;
+            sharedResources = lib.filterAttrs isShared resources;
+            service = utils.mkInitDirServices locations sharedResources;
+        in lib.optionalAttrs (sharedResources != {}){
+            ${vmname}.config = service;
+        };
+
 
     
 in {
@@ -106,11 +118,15 @@ in {
             (lib.mkMerge (utils.concatMapAttrsToList processVM config.naps.topology.vms))
             (lib.mkMerge (utils.concatMapAttrsToList processService config.naps.internal.services))
             {ir = lib.mkMerge (lib.mapAttrsToList processResource config.naps.internal.persistent.resources);} 
+            # Disko configuration of VMs
             {outputs.systems = lib.mkMerge (lib.mapAttrsToList generateVMDiskoConfig config.naps.internal.persistent.ir.attachments.perVM);} 
+            # Container configurations
             {outputs.systems = 
                 lib.mkMerge 
                     (utils.concatMapAttrsToList 
                         (envname: {resources, ...}: lib.mapAttrsToList generateResourceConfig resources)
                         config.naps.internal.persistent.ir.attachments.perEnv);} 
+            # Initialization of the shared volumes
+            {outputs.systems = lib.mkMerge (lib.mapAttrsToList generateVMSharedResourcesInitConfig config.naps.internal.persistent.ir.attachments.perVM);} 
         ];
 }
