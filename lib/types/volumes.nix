@@ -19,7 +19,7 @@ disk = types.submodule {
             description = "Deployement environment possessing the disk";
             internal = true;
             type = types.nullOr types.deployementEnvironment;
-            default = "null";
+            default = null;
         };
         type = lib.mkOption {
             description = "Type of kvm storage";
