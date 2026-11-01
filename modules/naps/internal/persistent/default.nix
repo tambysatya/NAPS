@@ -104,9 +104,16 @@ let
             # a resource is shared when living on a shared volume
             isShared = rname: resource: locations.${rname}.shared;
             sharedResources = lib.filterAttrs isShared resources;
+
+            # shared resources used by a native service should be bind-mounted using systemd-mount
+            sharedUsedNatively = lib.filterAttrs (_: resource@{instance,...}: ! utils.runsInContainer instance) sharedResources;
+
             service = utils.mkInitDirServices locations sharedResources;
         in lib.optionalAttrs (sharedResources != {}){
-            ${vmname}.config = service;
+            ${vmname}.config.systemd = {
+                services = service;
+                mounts = lib.mapAttrsToList (utils.genMountService locations) sharedUsedNatively;
+            };
         };
 
 
@@ -126,7 +133,7 @@ in {
                     (utils.concatMapAttrsToList 
                         (envname: {resources, ...}: lib.mapAttrsToList generateResourceConfig resources)
                         config.naps.internal.persistent.ir.attachments.perEnv);} 
-            # Initialization of the shared volumes
+            # Initialization of the shared volumes + bind-mounts for native services sharing their storage
             {outputs.systems = lib.mkMerge (lib.mapAttrsToList generateVMSharedResourcesInitConfig config.naps.internal.persistent.ir.attachments.perVM);} 
         ];
 }

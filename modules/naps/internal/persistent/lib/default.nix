@@ -49,41 +49,6 @@ let
         };
     };
 
-
- 
- /*
-    mkInitDirServices = ensuredirs: #Initializes the shared volumes (creates the expected directories if they does not exist)
-        let reload = lib.unique 
-                        (lib.concatMap 
-                            (dir@{env,reload,...}: 
-                                if env.type == "vm" then reload
-                                else if env.type == "container" then ["container@${utils.envUID env}.service"]
-                                else throw "mkInitDir: not implementend for deployement type ${env.type}")
-                         ensuredirs);
-            script = lib.concatMapStringsSep "\n" initDir ensuredirs;
-            mntservices = lib.unique (map ({mount,...}: utils.pathToMountUnit mount) ensuredirs);
-            initDir = 
-                {path, mode, owner,...}: 
-                ''
-                    if [[ ! -d ${path} ]]; then
-                        mkdir -p ${path}
-                        chown ${owner} ${path}
-                        chmod ${mode} ${path}
-                    fi
-                '';
-        in {
-            "init-persistent-dirs" = {
-                description = "Ensures that bind-mounted and container-mounted directories exist";
-                before = reload;
-                requiredBy = reload;
-                after = mntservices;
-                requires = mntservices;
-                serviceConfig.Type = "oneshot";
-                inherit script;
-            };
-        };
-
-    */  
     mkInitDirServices = locations: sharedResources: #Initializes the shared volumes (creates the expected directories if they does not exist)
         let reload = lib.unique 
                         (lib.concatMap 
@@ -104,7 +69,7 @@ let
                     fi
                 '';
         in {
-            systemd.services."init-persistent-dirs" = {
+            "init-persistent-dirs" = {
                 description = "Ensures that bind-mounted and container-mounted directories exist";
                 before = reload;
                 requiredBy = reload;
@@ -114,7 +79,23 @@ let
                 inherit script;
             };
         };
+
+    # Systemd bind-mount
+    genMountService  = 
+        locations: rname: resource@{reload, path,...}:
+        let
+            disk = locations.${rname};
+            what = "${disk.mount}/${rname}";
+            where = path;
+        in {
+            inherit what where;
+            before = reload;
+            requiredBy = reload;
+            options = "bind";
+            type = "none";
+        };  
 in utils // {
     inherit genDisko genDiskoRoot;
-    inherit mkInitDirServices;
+    inherit mkInitDirServices; #initializes shared volumes
+    inherit genMountService;  # bind-mount directories
 }

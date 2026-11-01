@@ -28,6 +28,7 @@
         "hydra-main".is = "hydra";
         "log-main".is = "journald-remote";
         "nc-main".is = "nextcloud";
+        "nc-bkup".is = "nextcloud";
         "git-main".is = "forgejo";
         "pg-backup".is = "postgres";
     };
@@ -80,7 +81,7 @@
         memory = 16000;
 
         ip = "10.0.0.53";
-        #services = ["nc-main"]; 
+        services = ["nc-bkup"]; 
         containers = ["nc-main" "git-main"]; 
         disks = [
             {type="qcow"; location="persistent"; filesystem="ext4"; shared=true;}
