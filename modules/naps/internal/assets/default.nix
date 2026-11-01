@@ -176,6 +176,17 @@ let
                     mkConfig = config.naps.assets.${provider}.apply.config;
                 in lib.mapAttrsToList (assetname: asset: mkConfig asset) assets;
         in {${envuid} = lib.mkMerge (utils.concatMapAttrsToList providerConfig allassets);};
+        
+    generateContainersBinds =
+        envuid: allassets:
+        let
+            env = config.naps.internal.envs.all.${envuid};
+            processContainerAsset =
+                assetname: asset@{installArgs,...}:
+                {${utils.envHostUID env}.config.containers.bindMounts.${installArgs.path} = [{hostPath = installArgs.path; isReadOnly = true;}];};
+            processContainerProvider =
+                provider: assets: lib.mapAttrsToList processContainerAsset assets;
+        in lib.mkMerge (utils.concatMapAttrsToList processContainerProvider allassets);
 
     
 
@@ -188,6 +199,7 @@ in {
                                 {outputs.scripts.generate = generateScript;}
                                 {outputs.scripts.install = installScript;}
                                 {outputs.config = lib.mkMerge (lib.mapAttrsToList generateConfig config.naps.internal.assets.perEnv);}
+                                {outputs.config = lib.mkMerge (lib.mapAttrsToList generateContainersBinds config.naps.internal.assets.perEnv);}
                             ];
 
     /*
