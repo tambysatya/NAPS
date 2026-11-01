@@ -85,7 +85,7 @@
         disks = [
             {type="qcow"; location="persistent"; filesystem="ext4"; shared=true;}
             {type="qcow"; location="test"; mount="/srv/persistent"; filesystem="ext4"; shared=false;}
-            {type="disk"; location="/dev/ssd/forgejo"; mount="/var/lib/forgejo"; filesystem="xfs"; shared=false;}
+            #{type="disk"; location="/dev/ssd/forgejo"; mount="/var/lib/forgejo"; filesystem="xfs"; shared=false;}
         ];
       };
       build = {

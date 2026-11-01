@@ -53,19 +53,6 @@ disk = types.submodule {
     };
 };
 
-/* Logical information on the directory (owner, permissions, bindmount,...) */
-logInfos = types.submodule {
-    options = {
-        mode = types.fileMode;
-        inherit (types) owner group reload;
-        bind = lib.mkOption {
-            description = "Path where the resource should be bind-mounted (facultative)";
-            type = types.nullOr types.str;
-            example = "/var/lib/persistent/logs";
-        };
-    };
-};
-
 /* A persistent resource, which is migrable and backupable and that is referred to using a unique identifierw*/
 resource = types.submodule {
     options = {

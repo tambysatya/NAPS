@@ -39,7 +39,7 @@ naps.services.forgejo = {
     };
     configureListen = addr: {config.services.forgejo.settings.server.HTTP_ADDR = addr;};
     persistent = {
-        "/var/lib/forgejo" = { shareable=false; inherit owner reload; group = null;};
+        "/var/lib/forgejo" = { shareable=true; inherit owner reload; group = null;};
     };
 
 
