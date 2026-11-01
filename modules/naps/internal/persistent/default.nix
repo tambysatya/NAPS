@@ -1,7 +1,7 @@
 {lib, inputs, flakeRoot, config, ...}:
 
 let
-    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
+    utils = import ./lib {inherit flakeRoot lib inputs;};
 
     processVM = 
         vmname: {disks, host, ...}:
@@ -48,9 +48,53 @@ let
             dname = assignResourceToDisk rname resource;
             disk = config.naps.internal.persistent.disks.${dname};
         in {
-            attachments.${utils.insEnvUID instance}.${dname} = disk;
+            attachments = {
+                perEnv.${utils.insEnvUID instance} = {
+                    disks.${dname} = disk;
+                    resources.${rname} = resource;
+                };
+                perVM.${utils.insHostUID instance} = {
+                    disks.${dname} = disk;
+                    resources.${rname} = resource;
+                };
+            };
             resourcesLocation.${rname} = disk;
             disks.${dname}.${rname} = resource;
+        };
+
+    generateVMDiskoConfig = 
+        vmname: attachments@{disks, resources}: # Map DiskUID Disk, Map ResourceUID Resource
+        {
+            ${vmname}.config = {
+                boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "sr_mod" "virtio_blk" ];
+                disko.devices.disk = 
+                    lib.mkMerge ([utils.genDiskoRoot] ++ 
+                                 lib.zipListsWith 
+                                    utils.genDisko 
+                                    (builtins.attrValues disks) 
+                                    (lib.stringToCharacters "bcdefghiklmnopqrstuvwxyz"));
+            };
+        };
+
+    generateResourceConfig =
+        rname: resource@{instance, path, ...}:
+        let
+            disk = config.naps.internal.persistent.ir.resourcesLocation.${rname};
+            vmname = utils.insHostUID instance;
+            envuid = utils.insEnvUID instance;
+            location = if disk.shared then "${disk.mount}/${rname}" else disk.mount;
+        in {
+            ${vmname}.config = {
+                # container-mounts
+                containers = lib.optionalAttrs (utils.runsInContainer instance)
+                    {
+                        ${envuid}.bindMounts.${path} = {
+                            hostpath = location;
+                            isReadOnly = false;
+                        };
+                    };
+                # if stored on a shareable disk, the resource should be initialized + bind-mounted
+            };
         };
 
 
@@ -62,5 +106,11 @@ in {
             (lib.mkMerge (utils.concatMapAttrsToList processVM config.naps.topology.vms))
             (lib.mkMerge (utils.concatMapAttrsToList processService config.naps.internal.services))
             {ir = lib.mkMerge (lib.mapAttrsToList processResource config.naps.internal.persistent.resources);} 
+            {outputs.systems = lib.mkMerge (lib.mapAttrsToList generateVMDiskoConfig config.naps.internal.persistent.ir.attachments.perVM);} 
+            {outputs.systems = 
+                lib.mkMerge 
+                    (utils.concatMapAttrsToList 
+                        (envname: {resources, ...}: lib.mapAttrsToList generateResourceConfig resources)
+                        config.naps.internal.persistent.ir.attachments.perEnv);} 
         ];
 }
