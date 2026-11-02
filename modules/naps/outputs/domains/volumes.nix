@@ -59,11 +59,11 @@ let
         ];
     attachQCow = 
         vmname: hostname:
-        {host, letter,...}: # host is the reference of the volume on the KVM hyperviser (e.g. "persistent")
+        {location, letter,...}: # location is the reference of the volume on the KVM hyperviser (e.g. "persistent")
             { 
                 source = {
                   volume = {
-                    volume = "\${libvirt_volume.${vmname}_${host}.name}";	
+                    volume = "\${libvirt_volume.${vmname}_${location}.name}";	
                     pool = "\${libvirt_pool.default_${hostname}.name}";
                   };
                     
@@ -72,11 +72,11 @@ let
             };
 
     attachDisk = 
-        {host, letter, ...}: # host is the reference of the volume on the KVM hyperviser (e.g. "/dev/sdb")
+        {location, letter, ...}: # location is the reference of the volume on the KVM hyperviser (e.g. "/dev/sdb")
         {
             source = {
               block = {
-                dev = host;
+                dev = location;
               };
             };
             target = {dev = "vd${letter}"; bus="virtio";};
@@ -91,18 +91,17 @@ let
         };
 
     attachVMVolumes =
-        vmname: deploy:
+        vmname: {disks, ...}:
         let hostname = config.naps.topology.vms.${vmname}.host;
             processVolume =
-                vol@{type,...}: if type == "disk" then attachDisk vol else attachQCow vmname hostname vol;
+                diskname: disk@{type,...}: if type == "disk" then attachDisk disk else attachQCow vmname hostname disk;
         in {
-                ${vmname}.devices.disks = attachIsoAndRoot vmname hostname ++ map processVolume deploy.storage.mappings;
+                ${vmname}.devices.disks = attachIsoAndRoot vmname hostname ++ lib.mapAttrsToList processVolume disks;
         };
-    vms = lib.filterAttrs (_: {env, ...}: env.type == "vm") config.naps.deploy.systems;
 
 in {
-    naps.outputs.domains = {
-        resource.libvirt_volume = lib.mkMerge (lib.mapAttrsToList createVMVolumes config.naps.internal.persistent.ir.attachments.perVM);
-        #resource.libvirt_domain = utils.mergeAll (lib.mapAttrsToList attachVMVolumes vms);
+    naps.outputs.domains.resource = {
+        libvirt_volume = lib.mkMerge (lib.mapAttrsToList createVMVolumes config.naps.internal.persistent.ir.attachments.perVM);
+        libvirt_domain = lib.mkMerge (lib.mapAttrsToList attachVMVolumes config.naps.internal.persistent.ir.attachments.perVM);
     };
 }
