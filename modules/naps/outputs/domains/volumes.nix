@@ -23,15 +23,15 @@ let
 
 
     createVMVolumes =
-        vmname: deploy:
+        vmname: {disks,...}:
         let hostname = config.naps.topology.vms.${vmname}.host;
-            qcows = lib.filter ({type,...}: type == "qcow") deploy.storage.mappings;
+            qcows = lib.filterAttrs (_: {type,...}: type == "qcow") disks;
             root = generateRootQcow vmname hostname;
             defaultSize = 100*1024*1024;
             processQcowMapping =
-                {host, type, ...}: # note: host in the mappings represents the name of the volume from the host side (TODO)
-                generateQcow vmname hostname {name=host; size=defaultSize;  persistentP = true;};
-        in utils.mergeAll ([root] ++ map processQcowMapping qcows);
+                diskname: {location, type, ...}:
+                generateQcow vmname hostname {name=diskname; size=defaultSize;  persistentP = true;};
+        in utils.mergeAll ([root] ++ lib.mapAttrsToList processQcowMapping qcows);
             
     /* Volume Attach */
             
@@ -102,7 +102,7 @@ let
 
 in {
     naps.outputs.domains = {
-        resource.libvirt_volume = utils.mergeAll (lib.mapAttrsToList createVMVolumes vms);
-        resource.libvirt_domain = utils.mergeAll (lib.mapAttrsToList attachVMVolumes vms);
+        resource.libvirt_volume = lib.mkMerge (lib.mapAttrsToList createVMVolumes config.naps.internal.persistent.ir.attachments.perVM);
+        #resource.libvirt_domain = utils.mergeAll (lib.mapAttrsToList attachVMVolumes vms);
     };
 }
