@@ -6,6 +6,20 @@ let
 
 
 
+    perEnvConf = types.submodule {
+        options = {
+            exposes = lib.mkOption {
+                description = "Endpoints exposed by the environment: Map EndpointType (Map hostname:port Endpoint)";
+                type = types.attrsOf (types.attrsOf types.endpoint);
+                default = {};
+            };
+            reaches = lib.mkOption {
+                description = "Endpoints reached by the environment: [hostname]";
+                type = types.attrsOf (types.attrsOf types.endpoint);
+                default = {};
+            };
+        };
+    };
            
       
 
@@ -16,9 +30,8 @@ in {
         default = {};
     };
     options.naps.internal.endpoints.perEnv = lib.mkOption {
-        description = "Endpoints exposed by each environment: Map EnvUID (Map EndpointType (Map hostname:port Endpoint))";
-        type = types.attrsOf (types.attrsOf (types.attrsOf types.endpoint));
-        default = {};
+        description = "Endpoints exposed by each environment: Map EnvUID perEnvConf";
+        type = types.attrsOf perEnvConf;
     };
 
     options.naps.internal.endpoints.global.hosts = lib.mkOption {

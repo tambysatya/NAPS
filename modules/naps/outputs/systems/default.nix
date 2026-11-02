@@ -56,17 +56,25 @@ let
                             (iface: protoconfig: 
                                 lib.mapAttrs 
                                     (proto: ports: 
-                                        if proto == "tcp" 
-                                        then {allowedTCPPorts = ports;}
-                                        else if proto == "udp"
-                                        then {allowedUDPPorts = ports;}
+                                        if proto == "tcp" then {allowedTCPPorts = ports;}
+                                        else if proto == "udp" then {allowedUDPPorts = ports;}
                                         else throw "firewall: unknown protocol ${proto}")
                                     protoconfig) 
                             fwconfig;
                     };
+            generateEtcHosts = 
+                envuid: {reaches, ...}:
+                let
+                    env = config.naps.internal.envs.all.${envuid};
+                    proxyIP = utils.envPrivateHostIP env;
+                    processEPProvider = provider: endpoints: lib.mapAttrsToList (_: {hostname,...}: hostname) endpoints;
+                in {
+                    config.networking.hosts.${proxyIP} = lib.unique (utils.concatMapAttrsToList processEPProvider reaches);
+                };
         in lib.mkMerge [
                 (lib.mapAttrs processProxy outputs.proxy)
                 (lib.mapAttrs processFirewall outputs.firewall)
+                (lib.mapAttrs generateEtcHosts config.naps.internal.endpoints.perEnv)
            ];
 
 in

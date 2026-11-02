@@ -31,9 +31,10 @@ let
                 if proxyField == "forward"
                 then {${envuid}.${epname} = ep;}
                 else {${epname}.${insname} = ins;};
+            perEnvField = if hostsOrReaches == "hosts" then "exposes" else "reaches";
         in {
             all.${eptype}.${epname} = ep;
-            perEnv.${envuid}.${eptype}.${epname} = ep;
+            perEnv.${envuid}.${perEnvField}.${eptype}.${epname} = ep;
             global.${globalField}.${eptype}.${epname}.${insname} = ins;
             ir.${utils.insHostUID ins}.${eptype}.${proxyField} = proxyValue;
         };

@@ -199,7 +199,7 @@ in {
                                 {outputs.scripts.generate = generateScript;}
                                 {outputs.scripts.install = installScript;}
                                 {outputs.config = lib.mkMerge (lib.mapAttrsToList generateConfig config.naps.internal.assets.perEnv);}
-                                {outputs.config = lib.mkMerge (lib.mapAttrsToList generateContainersBinds config.naps.internal.assets.perEnv);}
+                                {outputs.config = lib.mkMerge (lib.mapAttrsToList generateContainersBinds config.naps.internal.assets.perEnv);} # bind-mounts of containers secrets
                             ];
 
     /*
