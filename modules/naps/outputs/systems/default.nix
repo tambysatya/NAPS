@@ -71,10 +71,22 @@ let
                 in {
                     config.networking.hosts.${proxyIP} = lib.unique (utils.concatMapAttrsToList processEPProvider reaches);
                 };
+            /* Allows haproxy to bind on non-existing interfaces if at least one container
+               requires a forward proxy */
+            allowNonLocalBind = 
+                envuid: {reaches, ... }: 
+                    let env = config.naps.internal.envs.all.${envuid};
+                    in lib.optionalAttrs (utils.isContainer env && reaches != {}) {
+                        ${utils.envHostUID env}.config.boot.kernel.sysctl = {
+                                "net.ipv4.ip_nonlocal_bind" = 1;
+                                "net.ipv6.ip_nonlocal_bind" = 1;
+                        };
+                };
         in lib.mkMerge [
                 (lib.mapAttrs processProxy outputs.proxy)
                 (lib.mapAttrs processFirewall outputs.firewall)
                 (lib.mapAttrs generateEtcHosts config.naps.internal.endpoints.perEnv)
+                (lib.mkMerge (lib.mapAttrsToList allowNonLocalBind config.naps.internal.endpoints.perEnv))
            ];
 
 in
@@ -85,6 +97,7 @@ in
                #./network.nix
               ];
     naps.outputs.systems = lib.mkMerge [
+        config.naps.internal.envs.outputs # basic netwroking for vms and containers (ip addresses, gateway,...)
         config.naps.internal.assets.outputs.config # assets services (e.g. step-renew for TLS refresh): defined in internal.assets
         config.naps.internal.links.outputs # dependencies across the infrastructure (e.g. wait-uplinks services): defined in internal.links
         proxyAndFirewallConfigs # haproxy + firewall configuration of VMs: defined in internal.endpoints

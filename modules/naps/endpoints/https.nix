@@ -165,7 +165,7 @@ in
                         /* We always open the 443 public port on the host
                            (the only way to reach https endpoints) */
                         {
-                            ${utils.envUID vmenv}."eth0".tcp = [443];
+                            ${utils.envUID vmenv}."enp1s0".tcp = [443];
                         }
 
                     ];

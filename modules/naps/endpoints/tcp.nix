@@ -109,7 +109,7 @@ let
                         ${utils.insEnvUID ins}."eth0".tcp = [port];
                      })
                     {
-                        ${utils.envUID vmenv}."eth0".tcp = [port];
+                        ${utils.envUID vmenv}."enp1s0".tcp = [port];
                     }
                  ];
 

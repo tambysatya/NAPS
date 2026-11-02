@@ -102,6 +102,9 @@ in {
                 declaredInstances
             ];
             all = lib.mkMerge [config.naps.internal.envs.vms config.naps.internal.envs.containers];
+            outputs = lib.mkMerge (
+                        lib.mapAttrsToList (utils.initializeVMNetworking config) config.naps.internal.envs.vms ++
+                        lib.mapAttrsToList (utils.initializeContainerNetworking config) config.naps.internal.envs.containers);
         }
     ]; 
 }
