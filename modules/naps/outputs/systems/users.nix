@@ -40,7 +40,11 @@ let
         in lib.mkMerge (lib.mapAttrsToList processInstance instances);
 
 in {
-    naps.outputs.systems = lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services);
+    naps.outputs.systems = 
+        lib.mkMerge [
+            (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
+            (lib.mkMerge (lib.mapAttrsToList mkRoot config.naps.topology.vms))
+        ];
 }
 
 
