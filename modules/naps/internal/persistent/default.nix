@@ -7,10 +7,10 @@ let
         vmname: {disks, host, ...}:
         let 
             processDisk = 
-                disk@{type, location,...}: {
-                    disks."${host}:${location}" = disk // {env = config.naps.internal.envs.all.${vmname};};
+                disk@{type, location,...}: letter: {
+                    disks."${host}:${location}" = disk // {env = config.naps.internal.envs.all.${vmname}; inherit letter;};
                 };
-        in map processDisk disks;
+        in lib.zipListsWith processDisk disks (lib.stringToCharacters "bcdefghiklmnopqrstuvwxyz");
 
     processService = 
         srvname: srvconf@{persistent,instances,...}:
@@ -69,10 +69,9 @@ let
                 boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "sr_mod" "virtio_blk" ];
                 disko.devices.disk = 
                     lib.mkMerge ([utils.genDiskoRoot] ++ 
-                                 lib.zipListsWith 
+                                 map 
                                     utils.genDisko 
-                                    (builtins.attrValues disks) 
-                                    (lib.stringToCharacters "bcdefghiklmnopqrstuvwxyz"));
+                                    (builtins.attrValues disks));
             };
         };
 

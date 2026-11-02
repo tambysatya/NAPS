@@ -1,7 +1,7 @@
 {flakeRoot, lib, inputs, ...}:
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
-    genDisko = {mount, options, filesystem,...}: letter: {
+    genDisko = {mount, options, filesystem, letter, ...}: {
         "vd${letter}" ={
             device = "/dev/vd${letter}";
             type = "disk";

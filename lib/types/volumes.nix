@@ -50,6 +50,13 @@ disk = types.submodule {
             type = types.bool;
             default = false;
         };
+        letter = lib.mkOption {
+            description = "Letter X in vdX: name of the device in the VM side";
+            type = types.nullOr types.str;
+            default = null; #set during assignment
+            internal = true;
+
+        };
     };
 };
 
