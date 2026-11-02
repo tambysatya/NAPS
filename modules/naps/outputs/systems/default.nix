@@ -2,7 +2,7 @@
 
 let
 
-    utils = import ../../deploy/lib.nix {inherit inputs lib flakeRoot;};
+    utils = import "${flakeRoot}/lib" {inherit inputs lib flakeRoot;};
 
     /*
     mkUser = user: {service, uid}:
@@ -95,6 +95,7 @@ in
     imports = [
                #./volumes.nix
                #./network.nix
+               ./users.nix
               ];
     naps.outputs.systems = lib.mkMerge [
         config.naps.internal.envs.outputs # basic netwroking for vms and containers (ip addresses, gateway,...)
