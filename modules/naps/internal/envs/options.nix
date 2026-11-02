@@ -27,6 +27,11 @@ options.naps.internal.envs = lib.mkOption {
                 type = types.attrsOf types.deployementEnvironment;
                 default = {};
             };
+            outputs = lib.mkOption {
+                description = "Generated container-specific configuration: Map EnvUID Conf";
+                type = types.attrsOf types.config;
+                default = {};
+            };
         };
     };
 };

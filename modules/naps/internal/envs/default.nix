@@ -1,7 +1,7 @@
 {flakeRoot, lib, inputs, config, ...}:
 
 let
-    utils = import "${flakeRoot}/lib" {inherit inputs lib;};
+    utils = import ./lib {inherit flakeRoot inputs lib;};
 
 
     
