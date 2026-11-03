@@ -7,25 +7,27 @@ let
         uri = "qemu+ssh://root@${hostconf.ipAddress}/system"; 
         alias = hostName;
       }];
-      resource.libvirt_pool = {
-        "iso_${hostName}" = {
-          name = "iso";
-          type = "dir";
-          target.path = "/var/lib/libvirt/iso";
+      resource = {
+          libvirt_pool = {
+            "iso_${hostName}" = {
+              name = "iso";
+              type = "dir";
+              target.path = "/var/lib/libvirt/iso";
+              provider = "libvirt.${hostName}";
+            };
+            "default_${hostName}" = {
+              name = "qcow";
+              type = "dir";
+              target.path = "/var/lib/libvirt/qcow/terranix";
+              provider = "libvirt.${hostName}";
+            };
+          };
+        libvirt_volume."iso_${hostName}" = {
+          name = "nixos-autoinstall.iso";
+          pool = "\${resource.libvirt_pool.iso_${hostName}.name}";
+          create.content.url = "ISO_NAME";
           provider = "libvirt.${hostName}";
         };
-        "default_${hostName}" = {
-          name = "qcow";
-          type = "dir";
-          target.path = "/var/lib/libvirt/qcow/terranix";
-          provider = "libvirt.${hostName}";
-        };
-      };
-    resource.libvirt_volume."iso_${hostName}" = {
-      name = "nixos-autoinstall.iso";
-      pool = "\${resource.libvirt_pool.iso_${hostName}.name}";
-      create.content.url = "ISO_NAME";
-      provider = "libvirt.${hostName}";
     };
 
 
