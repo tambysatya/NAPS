@@ -216,7 +216,7 @@ let
         let
             processContainerAsset =
                 envuid: assetname: asset@{installArgs,...}:
-                {${vmname}.config.containers.${envuid}.bindMounts.${installArgs.path} = [{hostPath = "${utils.paths.secrets}/${envuid}${installArgs.path}"; isReadOnly = true;}];};
+                {${vmname}.config.containers.${envuid}.bindMounts.${installArgs.path} = {hostPath = "${utils.paths.secrets}/${envuid}${installArgs.path}"; isReadOnly = true;};};
             processContainerProvider =
                 envuid: provider: assets: lib.mkMerge (lib.mapAttrsToList (processContainerAsset envuid) assets);
             processEnv =
