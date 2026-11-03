@@ -4,13 +4,14 @@
 let 
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
+    sanitizeName = name: builtins.replaceStrings [":"] ["_"] name;
     /* Volume creation */
     generateQcow =
         vmname: host: 
         {name, size, persistentP ? false, ...}:
                {
-                    "${vmname}_${name}"= {
-                        name = "${vmname}_${name}";
+                    "${vmname}_${sanitizeName name}"= {
+                        name = "${vmname}_${sanitizeName name}";
                         pool = "\${libvirt_pool.default_${host}.name}";
                         capacity = size;
                         provider = "libvirt.${host}";
@@ -59,11 +60,11 @@ let
         ];
     attachQCow = 
         vmname: hostname:
-        {location, letter,...}: # location is the reference of the volume on the KVM hyperviser (e.g. "persistent")
+        diskname: {location, letter,...}: # location is the reference of the volume on the KVM hyperviser (e.g. "persistent")
             { 
                 source = {
                   volume = {
-                    volume = "\${libvirt_volume.${vmname}_${location}.name}";	
+                    volume = "\${libvirt_volume.${vmname}_${sanitizeName diskname}.name}";	
                     pool = "\${libvirt_pool.default_${hostname}.name}";
                   };
                     
@@ -72,7 +73,7 @@ let
             };
 
     attachDisk = 
-        {location, letter, ...}: # location is the reference of the volume on the KVM hyperviser (e.g. "/dev/sdb")
+        diskname: {location, letter, ...}: # location is the reference of the volume on the KVM hyperviser (e.g. "/dev/sdb")
         {
             source = {
               block = {
@@ -94,7 +95,7 @@ let
         vmname: {disks, ...}:
         let hostname = config.naps.topology.vms.${vmname}.host;
             processVolume =
-                diskname: disk@{type,...}: if type == "disk" then attachDisk disk else attachQCow vmname hostname disk;
+                diskname: disk@{type,...}: if type == "disk" then attachDisk diskname disk else attachQCow vmname hostname diskname disk;
         in {
                 ${vmname}.devices.disks = attachIsoAndRoot vmname hostname ++ lib.mapAttrsToList processVolume disks;
         };
