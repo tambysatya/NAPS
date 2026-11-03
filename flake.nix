@@ -66,7 +66,7 @@ let
         let conf = compileConfig args; 
             naps = conf.naps;
             vmconfs = lib.filterAttrs 
-                            (name: value: naps.deploy.systems.${name}.env.type == "vm")
+                            (name: _: naps.internal.envs.all.${name}.type == "vm")
                             naps.outputs.systems;
             configs = lib.mapAttrs
                             (vmname: vmconf:
@@ -100,7 +100,7 @@ let
                                     pkgs.step-cli
                                     pkgs.gzip
                                 ];
-                                text = naps.internal.assets.scripts.generate;
+                                text = naps.internal.assets.outputs.scripts.generate;
                            };
                 in {
                     packages.${system}."gen-assets"= pkg;
@@ -130,7 +130,7 @@ let
                             meta.description = "Install assets for ${name}";
                         };
                     };
-            in utils.mergeAll (lib.mapAttrsToList build naps.internal.assets.scripts.install);
+            in utils.mergeAll (lib.mapAttrsToList build naps.internal.assets.outputs.scripts.install);
 
 
         compileBuildDomains = 
@@ -300,7 +300,7 @@ let
 
 
     in utils.mergeAll [
-        #(exposeApps exampleArgs) #TODO
+        (exposeApps exampleArgs) #TODO
         {
           
 

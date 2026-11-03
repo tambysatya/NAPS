@@ -13,10 +13,14 @@ let
         '';
  
 
-    give = filename: envs: 
+    give = config: filename: envs: 
         let filepath = "${utils.paths.out}/${filename}";
-            target = env: "${utils.paths.perVM}/${utils.envHostUID env}/${filename}";
-        in lib.concatMapStringsSep "\n" (env: ''cp -r ${filepath} ${target env}'') envs;
+            target = envname:
+                let env = config.naps.internal.envs.all.${envname};
+                    path = if utils.isContainer env 
+                           then "${utils.envHostUID env}/${envname}" else envname;
+                in "${utils.paths.perVM}/${path}/${filename}";
+        in lib.concatMapStringsSep "\n" (envname: ''cp -r ${filepath} ${target envname}'') envs;
 
     install = 
         filename: 

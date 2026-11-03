@@ -22,7 +22,7 @@ let
         let generateAsset =
                 providername: genFun: acc: assetname: {generateArgs,...}:
                     let recipients = config.naps.internal.assets.recipients.${providername}.${assetname};
-                    in genFun acc assetname generateArgs ++ [(utils.give assetname recipients)];
+                    in genFun acc assetname generateArgs ++ [(utils.give config assetname recipients)];
             processProvider =
                 acc: providername: assets:
                 let provider = config.naps.assets.${providername};
@@ -31,6 +31,7 @@ let
         in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.internal.assets.all);
     generateScript = ''
         set -euo pipefail
+        set -x
         mkdir -p ${utils.paths.out} ${utils.paths.git}
 
                         
@@ -44,6 +45,17 @@ let
                 echo ${vmname} > ${utils.paths.perVM}/${vmname}/FLAKE
                 '')
             (builtins.attrNames config.naps.internal.envs.vms)}
+        # Generates the containers directory within each vm directory
+        ${utils.concatMapAttrsStringsSep 
+            "\n"
+            (ctname: ctenv:
+                let vmname = utils.envHostUID ctenv;
+                in ''
+                [[ -d ${utils.paths.perVM}/${vmname}/${ctname} ]] && rm -R ${utils.paths.perVM}/${vmname}/${ctname}
+                mkdir -p ${utils.paths.perVM}/${vmname}/${ctname}
+                echo ${ctname} > ${utils.paths.perVM}/${vmname}/${ctname}/FLAKE
+                '')
+            config.naps.internal.envs.containers}
         
         # Generates the secrets
         ${generateAssets}

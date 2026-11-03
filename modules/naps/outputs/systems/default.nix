@@ -68,9 +68,10 @@ in
                #./volumes.nix
                #./network.nix
                ./users.nix
+               ./commons.nix
               ];
     naps.outputs.systems = lib.mkMerge [
-        config.naps.internal.envs.outputs # basic netwroking for vms and containers (ip addresses, gateway,...)
+        config.naps.internal.envs.outputs # basic networking for vms and containers (ip addresses, gateway,...)
         config.naps.internal.assets.outputs.config # assets services (e.g. step-renew for TLS refresh): defined in internal.assets
         config.naps.internal.links.outputs # dependencies across the infrastructure (e.g. wait-uplinks services): defined in internal.links
         proxyAndFirewallConfigs # haproxy + firewall configuration of VMs: defined in internal.endpoints
