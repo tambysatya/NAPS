@@ -212,15 +212,19 @@ let
         in {${envuid} = lib.mkMerge (utils.concatMapAttrsToList providerConfig allassets);};
         
     generateContainersBinds =
-        envuid: allassets:
+        vmname: envassets:
         let
-            env = config.naps.internal.envs.all.${envuid};
             processContainerAsset =
-                assetname: asset@{installArgs,...}:
-                {${utils.envHostUID env}.config.containers.bindMounts.${installArgs.path} = [{hostPath = installArgs.path; isReadOnly = true;}];};
+                envuid: assetname: asset@{installArgs,...}:
+                {${vmname}.config.containers.${envuid}.bindMounts.${installArgs.path} = [{hostPath = "${utils.paths.secrets}/${envuid}${installArgs.path}"; isReadOnly = true;}];};
             processContainerProvider =
-                provider: assets: lib.mapAttrsToList processContainerAsset assets;
-        in lib.mkMerge (utils.concatMapAttrsToList processContainerProvider allassets);
+                envuid: provider: assets: lib.mkMerge (lib.mapAttrsToList (processContainerAsset envuid) assets);
+            processEnv =
+                envuid: allassets:
+                let env = config.naps.internal.envs.all.${envuid};
+                in lib.optionalAttrs (utils.isContainer env) 
+                        (lib.mkMerge (lib.mapAttrsToList (processContainerProvider envuid) allassets));
+        in lib.mkMerge (lib.mapAttrsToList processEnv envassets);
 
     
 
@@ -233,7 +237,7 @@ in {
                                 {outputs.scripts.generate = generateScript;}
                                 {outputs.scripts.install = installScript;}
                                 {outputs.config = lib.mkMerge (lib.mapAttrsToList generateConfig config.naps.internal.assets.perEnv);}
-                                {outputs.config = lib.mkMerge (lib.mapAttrsToList generateContainersBinds config.naps.internal.assets.perEnv);} # bind-mounts of containers secrets
+                                {outputs.config = lib.mkMerge (lib.mapAttrsToList generateContainersBinds config.naps.internal.assets.perVM);} # bind-mounts of containers secrets
                             ];
 
     /*
