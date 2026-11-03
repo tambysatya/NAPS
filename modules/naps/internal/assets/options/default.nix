@@ -57,8 +57,8 @@ in
                     default = {};
                 };
                 perVM = lib.mkOption {
-                    description = "List of the assets per VM: Map VMName (Map Provider (Map AssetName Asset))";
-                    type = types.attrsOf (types.attrsOf (types.attrsOf types.asset));
+                    description = "List of the assets per VM: Map VMName (Map EnvUID (Map Provider (Map AssetName Asset)))";
+                    type = types.attrsOf (types.attrsOf (types.attrsOf (types.attrsOf types.asset)));
                     default = {};
                 };
                 outputs = lib.mkOption {

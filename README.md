@@ -129,6 +129,10 @@ Migration:
     + TODO: index by provider (like for the endpoints) instead of having an heterogeneous list of assets.
     + TODO: in .secrets/plain: generate separates dir per providers (allowing to have the same asset name if produced by two providers ?)
 
+    + TODO: container secrets should be stored in /var/lib/secrets/<containername>
+    + in addition: container secrets should be installed in this directory, e.g. in /var/lib/secrets/<containername>/var/lib/secrets ...
+    + then, these secrets can be simply bind-mounted
+
 - naps.endpoints:
     + should generate the proxy of each vm (the minimum number of endpoints required to be connected) based on the links
     + thus it would not be required to update all the infra when a new endpoints appears / disappears.

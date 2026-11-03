@@ -81,9 +81,31 @@ let
                     installFun = provider.apply.install;
                 in lib.concatStringsSep "\n"
                         (lib.mapAttrsToList installFun assets);
-            processVM = 
-                vmname: assetskinds:
+            
+            processEnv =
+                envuid: assetskinds: 
                 let scriptsPerProviders = lib.mapAttrsToList processProvider assetskinds; 
+                    env = config.naps.internal.envs.all.${envuid};
+                    installPrefix = 
+                        if utils.isContainer env 
+                        then ''"$PREFIX"${utils.paths.secrets}/${envuid}''
+                        else ''"$PREFIX"'';
+                in ''
+                    install -d -m 0711 -o root -g root "$PREFIX"${utils.paths.secrets}${lib.optionalString (utils.isContainer env) "/${envuid}"}
+                    ${lib.optionalString (utils.isContainer env) 
+                        ''
+                            TMP_PREFIX="$PREFIX" 
+                            PREFIX="$PREFIX${utils.paths.secrets}/${envuid}"
+                        ''}
+                    ${lib.concatStringsSep "\n" scriptsPerProviders}
+                    ${lib.optionalString (utils.isContainer env) 
+                        ''
+                            PREFIX=TMP_PREFIX 
+                        ''}
+                '';
+            processVM = 
+                vmname: envuids: 
+                let scriptsPerProviders = lib.mapAttrsToList processEnv envuids; 
                 in ''
                     install -d -m 0711 -o root -g root "$PREFIX"${utils.paths.secrets}
                     ${lib.concatStringsSep "\n" scriptsPerProviders}
@@ -116,7 +138,7 @@ let
             all.${provider}.${assetname} = asset'';
             recipients.${provider}.${assetname} = recipientsUID;
             perEnv = lib.mkMerge (map (uid: {${uid}.${provider}.${assetname} = asset'';})  recipientsUID);
-            perVM = lib.mkMerge (map (uid: {${utils.envHostUID config.naps.internal.envs.all.${uid}}.${provider}.${assetname} = asset'';})  recipientsUID);
+            perVM = lib.mkMerge (map (uid: {${utils.envHostUID config.naps.internal.envs.all.${uid}}.${uid}.${provider}.${assetname} = asset'';})  recipientsUID);
         };
 
     processProvider =
