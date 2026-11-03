@@ -52,6 +52,18 @@ let
                    then {right = right // {${name} = val;}; inherit wrong;}
                    else {wrong = wrong // {${name} = val;}; inherit right;};
         in lib.foldl' f {right={}; wrong={};} (builtins.attrNames attrs);
+sanitize = value:
+  if builtins.isFunction value then
+    "<function>"
+  else if builtins.isAttrs value then
+    if value ? _type then
+      "<${value._type}>"
+    else
+      builtins.mapAttrs (_: sanitize) value
+  else if builtins.isList value then
+    map sanitize value
+  else
+    value;
 
     concatMapAttrsStringsSep = 
         sep: f: attrs: lib.concatStringsSep sep (lib.mapAttrsToList f attrs);
@@ -72,4 +84,5 @@ in vars // {
     inherit mergeAll pathToMountUnit;
     inherit hasDupplicate getFirstDupplicate;
     inherit serviceName servicePriority serviceTags serviceInfo;
+    inherit sanitize;
 }

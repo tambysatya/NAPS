@@ -12,7 +12,7 @@ naps.services.postgres = {
     path = ./.;
     provides = ["postgres"];
     configureListen = addr: {
-        config.services.postgresql.settings.listen_addresses = addr;
+        services.postgresql.settings.listen_addresses = lib.mkForce addr;
     };
     users.postgres = {service = "postgresql"; uid=10005;};
     assets."tls" = {

@@ -73,8 +73,8 @@ in
        type = ir;
        default = {};
     };
-    options.naps.internal.persistent.outputs.systems = lib.mkOption {
-       description  = "All resources assignment";
+    options.naps.internal.persistent.outputs = lib.mkOption {
+       description  = "All configurations";
        type = types.attrsOf types.config;
        default = {};
     };

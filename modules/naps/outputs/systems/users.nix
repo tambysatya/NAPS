@@ -2,7 +2,7 @@
 
 let
 
-    utils = import ../../deploy/lib.nix {inherit inputs lib flakeRoot;};
+    utils = import "${flakeRoot}/lib" {inherit inputs lib flakeRoot;};
 
     mkUser = username: uid:
         {

@@ -88,7 +88,7 @@ let
                 containers = lib.optionalAttrs (utils.runsInContainer instance)
                     {
                         ${envuid}.bindMounts.${path} = {
-                            hostpath = location;
+                            hostPath = location;
                             isReadOnly = false;
                         };
                     };
@@ -125,14 +125,14 @@ in {
             (lib.mkMerge (utils.concatMapAttrsToList processService config.naps.internal.services))
             {ir = lib.mkMerge (lib.mapAttrsToList processResource config.naps.internal.persistent.resources);} 
             # Disko configuration of VMs
-            {outputs.systems = lib.mkMerge (lib.mapAttrsToList generateVMDiskoConfig config.naps.internal.persistent.ir.attachments.perVM);} 
+            {outputs = lib.mkMerge (lib.mapAttrsToList generateVMDiskoConfig config.naps.internal.persistent.ir.attachments.perVM);} 
             # Container configurations
-            {outputs.systems = 
+            {outputs = 
                 lib.mkMerge 
                     (utils.concatMapAttrsToList 
                         (envname: {resources, ...}: lib.mapAttrsToList generateResourceConfig resources)
                         config.naps.internal.persistent.ir.attachments.perEnv);} 
             # Initialization of the shared volumes + bind-mounts for native services sharing their storage
-            {outputs.systems = lib.mkMerge (lib.mapAttrsToList generateVMSharedResourcesInitConfig config.naps.internal.persistent.ir.attachments.perVM);} 
+            {outputs = lib.mkMerge (lib.mapAttrsToList generateVMSharedResourcesInitConfig config.naps.internal.persistent.ir.attachments.perVM);} 
         ];
 }

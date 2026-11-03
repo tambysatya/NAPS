@@ -13,12 +13,13 @@ let
                     config.networking.firewall.interfaces = 
                         lib.mapAttrs 
                             (iface: protoconfig: 
-                                lib.mapAttrs 
-                                    (proto: ports: 
-                                        if proto == "tcp" then {allowedTCPPorts = ports;}
-                                        else if proto == "udp" then {allowedUDPPorts = ports;}
-                                        else throw "firewall: unknown protocol ${proto}")
-                                    protoconfig) 
+                                lib.mkMerge (
+                                    lib.mapAttrsToList 
+                                        (proto: ports: 
+                                            if proto == "tcp" then {allowedTCPPorts = ports;}
+                                            else if proto == "udp" then {allowedUDPPorts = ports;}
+                                            else throw "firewall: unknown protocol ${proto}")
+                                        protoconfig))
                             fwconfig;
                     };
             generateEtcHosts = 
@@ -72,6 +73,7 @@ in
               ];
     naps.outputs.systems = lib.mkMerge [
         config.naps.internal.envs.outputs # basic networking for vms and containers (ip addresses, gateway,...)
+        config.naps.internal.persistent.outputs # persistency + root filesystems
         config.naps.internal.assets.outputs.config # assets services (e.g. step-renew for TLS refresh): defined in internal.assets
         config.naps.internal.links.outputs # dependencies across the infrastructure (e.g. wait-uplinks services): defined in internal.links
         proxyAndFirewallConfigs # haproxy + firewall configuration of VMs: defined in internal.endpoints

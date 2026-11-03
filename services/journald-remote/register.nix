@@ -34,7 +34,7 @@ naps.services.journald-remote = {
     };
     inherit endpoints;
     configureListen = addr: {
-        config.systemd.sockets.systemd-journal-remote.listenStreams = ["${addr}:19532"];
+        systemd.sockets.systemd-journal-remote.listenStreams = ["${addr}:19532"];
     };
 };
 }

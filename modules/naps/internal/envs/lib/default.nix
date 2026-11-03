@@ -7,10 +7,12 @@ let
     initializeVMNetworking = config: vmname: env:
         lib.optionalAttrs (utils.isVM env) {
             ${vmname}.config = {
-                    networking.interfaces."enp1s0".ipv4 = {
-                        nameservers = config.naps.topology.dns; # TODO useful ?
+                    networking = {
                         defaultGateway = config.naps.topology.gateway;
-                        addresses = [{address = utils.envIP env; prefixLength = 24;}];
+                        nameservers = config.naps.topology.dns; # TODO useful ?
+                        interfaces."enp1s0".ipv4 = {
+                            addresses = [{address = utils.envIP env; prefixLength = 24;}];
+                        };
                     };
             };
         };

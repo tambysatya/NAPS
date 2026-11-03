@@ -84,8 +84,8 @@
         services = ["nc-bkup"]; 
         containers = ["nc-main" "git-main"]; 
         disks = [
-            {type="qcow"; location="persistent"; filesystem="ext4"; shared=true;}
-            {type="qcow"; location="test"; mount="/srv/persistent"; filesystem="ext4"; shared=false;}
+            {type="qcow"; location="persistent"; filesystem="ext4"; shared=true; options = ["nofail"];}
+            {type="qcow"; location="test"; mount="/srv/persistent"; filesystem="ext4"; shared=false; options = ["nofail"];}
             #{type="disk"; location="/dev/ssd/forgejo"; mount="/var/lib/forgejo"; filesystem="xfs"; shared=false;}
         ];
       };

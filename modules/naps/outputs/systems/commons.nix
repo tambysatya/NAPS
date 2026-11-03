@@ -9,7 +9,7 @@ let
     defaultVMConf = 
         vmname: _:
         {
-            config = {
+            ${vmname}.config = {
                 system.stateVersion = "26.05";
                 boot.kernelParams = ["console=tty1" "console=ttyS0,115200"];
                 boot.loader.systemd-boot.enable = true;

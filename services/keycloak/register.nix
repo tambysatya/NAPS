@@ -31,7 +31,7 @@ naps.services.keycloak = {
         {inherit hostname port; extraArgs = {tls = "termination";};}
     ];
     configureListen = addr: {
-        config.services.keycloak.settings.http-host = addr;
+        services.keycloak.settings.http-host = addr;
     };
 };
 

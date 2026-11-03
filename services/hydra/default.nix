@@ -38,7 +38,6 @@ let
 in {
 config.services.hydra = {
     enable = true;
-    listenHost = "0.0.0.0";
     hydraURL = hostname;
     dbi = "dbi:Pg:dbname=hydra;host=postgres.${domain};user=hydra;sslmode=require";
     notificationSender = "hydra@${domain}";

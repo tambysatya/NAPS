@@ -5,7 +5,7 @@ let
 
 
     s3lib = import ./lib.nix {inherit lib inputs pkgs flakeRoot;};
-    accesses = lib.concatMap ({links,...}: links.s3) (builtins.attrValues naps.services);
+    accesses = lib.concatMap ({links,...}: links.s3 or []) (builtins.attrValues naps.services);
     
 
 
@@ -25,7 +25,7 @@ config =
                 rpc_secret_file = "/var/lib/secrets/garage-rpc.key";
                 replication_factor = 1;
                 s3_api = {
-                    i#api_bind_addr = "0.0.0.0:3900"; # localhost because not encrypted
+                    #api_bind_addr = "0.0.0.0:3900"; # localhost because not encrypted
                     s3_region = "garage";
                     root_domain = "s3.${naps.topology.domain}";
                 };

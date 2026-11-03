@@ -23,7 +23,7 @@ naps.services.step-ca = {
         {inherit hostname port; extraArgs = {tls="passthrough";}; }
     ];
     configureListen = addr: {
-        config.services.step-ca.address = addr;
+        services.step-ca.address = addr;
     };
 };
 }

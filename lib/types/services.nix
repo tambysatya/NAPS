@@ -85,9 +85,10 @@ let
                     default = null;
                 };
                 configureListen = lib.mkOption {
-                    description = "A function to sets the listening IP(s) address(es). Mandatory if endpoints are provided. Address -> AttrSet";
+                    description = "A function to sets the listening IP(s) address(es). Mandatory if endpoints are provided. Note that the prefix config. should NOT be specified. Address -> AttrSet";
                     type = types.nullOr (types.functionTo types.attrs);
                     default = null;
+                    example = "addr: {services.darkhttpd.address = addr;}";
                 };
             };
     };

@@ -20,7 +20,6 @@ in {
              ####
              ./internal
             
-             ./deploy # Summary of the requirements (per vm and per container) [source of truth: services, assets, volumes]
              ./outputs];
 
 /*  

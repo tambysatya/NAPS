@@ -30,7 +30,7 @@ naps.services.openldap = {
     };
 
     configureListen = addr: {
-        config.services.openldap.urlList = ["ldap://${addr}" "ldaps://${addr}" "ldapi://"];
+        services.openldap.urlList = ["ldap://${addr}" "ldaps://${addr}" "ldapi://"];
     };
 };
 

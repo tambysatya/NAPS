@@ -38,7 +38,7 @@ naps.services.nextcloud = {
     };
     endpoints.https = endpoints;
     configureListen = addr: {
-        services.nginx.virtualHosts.${hostname}.listen.addr = addr;
+        services.nginx.virtualHosts.${hostname}.listen = [ {inherit addr; port=80;}];
     };
 
 };

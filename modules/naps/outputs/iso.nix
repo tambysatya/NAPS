@@ -15,6 +15,7 @@ let
         };
 
     provisionersAddrs = lib.unique (map (builtins.getAttr "provisionerAddr") (builtins.attrValues config.naps.topology.vms));
+    allUsers = lib.mapAttrsToList (_: {users,...}: lib.mkMerge (lib.mapAttrsToList mkUser users)) config.naps.internal.services;
 in {
 
     naps.outputs.iso = {
@@ -35,7 +36,7 @@ in {
                             name = "deploy-flake";
                             path = path;
         };
-        users = utils.mergeAll (lib.mapAttrsToList mkUser config.naps.deploy.users);
+        users = lib.mkMerge allUsers;
 
         networking.hosts = {"127.0.0.1" = ["${config.naps.topology.provisioner.hostname}"];};
         services.haproxy = {

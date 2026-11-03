@@ -54,7 +54,6 @@ let
                modules = [
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/naps
-                  ./modules/haproxy
                 ] ++ modules ++ services;
            });
     compileConfig = args: (compileModule args).config;
@@ -80,8 +79,6 @@ let
                                     modules = [
                                         inputs.disko.nixosModules.disko    
 
-                                        ./modules/firewall
-                                        ./modules/containers
                                         vmconf
                                     ];
                                 })
@@ -312,6 +309,7 @@ let
 
 
           infra = compileNAPS exampleArgs;
+          #infra = utils.sanitize (compileNAPS exampleArgs);
           terranix = compileTerranix exampleArgs;
 
           checks.${system} = gen-config-checks inputs;

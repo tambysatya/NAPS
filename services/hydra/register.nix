@@ -32,7 +32,7 @@ naps.services.hydra ={
     users."hydra" = {service ="hydra"; uid=10007;};
     inherit links endpoints;
     configureListen = addr: {
-        config.services = {
+        services = {
             hydra.listenHost = addr;
             darkhttpd.address = addr;
         };
