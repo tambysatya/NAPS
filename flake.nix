@@ -174,6 +174,7 @@ let
                 provisionerTokens = pkgs.writeShellApplication {
                     name = "provisioner-token";
                     text = ''
+                        set -x
                         PROVISIONER_DIR=$1
                         export TOKEN_DIR="$PROVISIONER_DIR/secrets"
                         ${provisionerExe} \
@@ -185,6 +186,7 @@ let
                 provisionerMTLS = pkgs.writeShellApplication {
                     name = "provisioner-mtls";
                     text = ''
+                        set -x
                         PROVISIONER_DIR=$1
                         export TOKEN_DIR="$PROVISIONER_DIR/mtls/"
                         ${provisionerExe} \
