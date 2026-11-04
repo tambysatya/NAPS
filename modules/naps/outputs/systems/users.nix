@@ -23,12 +23,14 @@ let
             services.openssh.enable = true;
         };
     };
+    mkHAProxy = vmname: _: {${vmname}.config = mkUser "haproxy" 10000;};
+
     processService = 
         srvname: srv@{users, instances,...}:
         let
             processUser = 
                 insname: ins: username: {uid, ...}:
-                lib.mkMerge [
+                utils.mergeAll [
                     {${utils.insEnvUID ins}.config.users = mkUser username uid;}
                     # If the service runs within a container, the user must be created on the VM as well
                     (lib.optionalAttrs (utils.runsInContainer ins) {
@@ -36,14 +38,15 @@ let
                     })
                 ];
             processInstance = 
-                insname: ins: lib.mkMerge (lib.mapAttrsToList (processUser insname ins) users);
-        in lib.mkMerge (lib.mapAttrsToList processInstance instances);
+                insname: ins: utils.mergeAll (lib.mapAttrsToList (processUser insname ins) users);
+        in utils.mergeAll (lib.mapAttrsToList processInstance instances);
 
 in {
     naps.outputs.systems = 
-        lib.mkMerge [
-            (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-            (lib.mkMerge (lib.mapAttrsToList mkRoot config.naps.topology.vms))
+        utils.mergeAll [
+            (utils.mergeAll (lib.mapAttrsToList processService config.naps.internal.services))
+            (utils.mergeAll (lib.mapAttrsToList mkRoot config.naps.topology.vms))
+            (utils.mergeAll (lib.mapAttrsToList mkHAProxy config.naps.topology.vms))
         ];
 }
 
