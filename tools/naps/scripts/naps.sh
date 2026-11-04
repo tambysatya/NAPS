@@ -159,13 +159,14 @@ naps_apply(){
 	yellow "$(bold "Building assets")"
 	naps_build assets "$@"
 
-	yellow "$(bold "Provisioning...")"
-	naps_provisioner "$@"
-
 	yellow "$(bold "Building iso...")"
 	naps_build iso
 	yellow "$(bold "Building kvm configurations...")"
 	naps_build domains
+
+	yellow "$(bold "Provisioning...")"
+	naps_provisioner "$@"
+
 
 	yellow "$(bold "Deploying...")"
 	naps_deploy tofu
