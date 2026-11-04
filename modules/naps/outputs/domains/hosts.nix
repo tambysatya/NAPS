@@ -33,7 +33,7 @@ let
 
   };
 in {
-    naps.outputs.domains = lib.mkMerge (lib.mapAttrsToList generateHost config.naps.topology.hosts);
+    naps.outputs.domains = utils.mergeAll (lib.mapAttrsToList generateHost config.naps.topology.hosts);
 }
 
 

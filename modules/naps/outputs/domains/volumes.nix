@@ -102,7 +102,7 @@ let
 
 in {
     naps.outputs.domains.resource = {
-        libvirt_volume = lib.mkMerge (lib.mapAttrsToList createVMVolumes config.naps.internal.persistent.ir.attachments.perVM);
-        libvirt_domain = lib.mkMerge (lib.mapAttrsToList attachVMVolumes config.naps.internal.persistent.ir.attachments.perVM);
+        libvirt_volume = utils.mergeAll (lib.mapAttrsToList createVMVolumes config.naps.internal.persistent.ir.attachments.perVM);
+        libvirt_domain = utils.mergeAll (lib.mapAttrsToList attachVMVolumes config.naps.internal.persistent.ir.attachments.perVM);
     };
 }
