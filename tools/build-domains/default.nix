@@ -6,6 +6,7 @@ let
     
     script = 
         ''
+            set -x
 
             if ! [[ -e .secrets/git/root_ca.crt ]]; then
                 echo "No PKI interface found. Please run the asset-generator before"
