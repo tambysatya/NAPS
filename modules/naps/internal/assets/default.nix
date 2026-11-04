@@ -31,7 +31,6 @@ let
         in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.internal.assets.all);
     generateScript = ''
         set -euo pipefail
-        set -x
         mkdir -p ${utils.paths.out} ${utils.paths.git}
 
                         

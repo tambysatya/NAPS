@@ -99,7 +99,7 @@ naps_provisioner(){
 			yellow "$(bold "+ Install/Update the secret provisioner...")"
 			# shellcheck disable=SC2119,2154,2029
 		    run_script <<-EOF
-				mkdir -p ~/.confg/systemd/user
+				mkdir -p ~/.config/systemd/user
 				nix build --refresh github:tambysatya/NAPS#provisioner-services
 				for service in result/*.service; do
 				    ln -sf "\$(readlink -f "\$service")" "\$HOME/.config/systemd/user/\$(basename "\$service")"
