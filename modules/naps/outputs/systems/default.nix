@@ -13,7 +13,7 @@ let
                     config.networking.firewall.interfaces = 
                         lib.mapAttrs 
                             (iface: protoconfig: 
-                                lib.mkMerge (
+                                utils.mergeAll (
                                     lib.mapAttrsToList 
                                         (proto: ports: 
                                             if proto == "tcp" then {allowedTCPPorts = ports;}
@@ -42,11 +42,12 @@ let
                                 "net.ipv6.ip_nonlocal_bind" = 1;
                         };
                 };
-        in lib.mkMerge [
+        in utils.mergeAll [
                 (lib.mapAttrs processProxy outputs.proxy)
                 (lib.mapAttrs processFirewall outputs.firewall)
                 (lib.mapAttrs generateEtcHosts config.naps.internal.endpoints.perEnv)
-                (lib.mkMerge (lib.mapAttrsToList allowNonLocalBind config.naps.internal.endpoints.perEnv))
+                (utils.mergeAll (lib.mapAttrsToList allowNonLocalBind config.naps.internal.endpoints.perEnv))
+                (lib.mapAttrs (name: _: {config.services.haproxy.enable = true;}) config.naps.internal.envs.vms)
            ];
 
     processServices = # enable and configures the services on the deployement environment
@@ -59,7 +60,7 @@ let
                     imports = [path];
                 };
             };
-        in lib.mkMerge (lib.mapAttrsToList processInstance instances);
+        in utils.mergeAll (lib.mapAttrsToList processInstance instances);
 
 
 in
@@ -71,13 +72,13 @@ in
                ./users.nix
                ./commons.nix
               ];
-    naps.outputs.systems = lib.mkMerge [
+    naps.outputs.systems = utils.mergeAll [
         config.naps.internal.envs.outputs # basic networking for vms and containers (ip addresses, gateway,...)
         config.naps.internal.persistent.outputs # persistency + root filesystems
         config.naps.internal.assets.outputs.config # assets services (e.g. step-renew for TLS refresh): defined in internal.assets
         config.naps.internal.links.outputs # dependencies across the infrastructure (e.g. wait-uplinks services): defined in internal.links
         proxyAndFirewallConfigs # haproxy + firewall configuration of VMs: defined in internal.endpoints
-        (lib.mkMerge (lib.mapAttrsToList processServices config.naps.internal.services)) # services imports + config (listen...)
+        (utils.mergeAll (lib.mapAttrsToList processServices config.naps.internal.services)) # services imports + config (listen...)
     ];
     #naps.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.naps.deploy.systems);
     /*

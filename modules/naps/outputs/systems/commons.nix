@@ -36,7 +36,7 @@ let
             ${utils.envHostUID ctenv}.config.containers.${ctname} = {
                 autoStart = true;
                 specialArgs = {
-                    inherit flakeRoot; 
+                    inherit flakeRoot path;  
                     inherit (config) naps;
                 };
                 config = {
@@ -57,9 +57,20 @@ let
 
 in {
     naps.outputs.systems = 
-        lib.mkMerge 
+        utils.mergeAll
             (lib.mapAttrsToList defaultVMConf config.naps.internal.envs.vms ++
-            lib.mapAttrsToList defaultContainerConf config.naps.internal.envs.vms);
+            lib.mapAttrsToList defaultContainerConf config.naps.internal.envs.containers ++ 
+
+            # adds the container configuration
+            lib.mapAttrsToList 
+                (ctname: ctenv: 
+                 {
+                    ${utils.envHostUID ctenv}.config.containers.${ctname}= {
+                        config = config.naps.outputs.systems.${ctname}.config // {imports = config.naps.outputs.systems.${ctname}.imports;};
+                     };
+                 }) 
+                config.naps.internal.envs.containers);
+
 }
 
 

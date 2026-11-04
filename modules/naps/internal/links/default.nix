@@ -53,13 +53,13 @@ let
                         };
                     };
                 };
-        in lib.mkMerge (lib.mapAttrsToList processLinkType alllinks);
+        in utils.mergeAll (lib.mapAttrsToList processLinkType alllinks);
 
 in {
     imports = [./options];
     naps.internal.links = lib.mkMerge [
         (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-        {outputs = lib.mkMerge [(lib.mapAttrs generateOutputs config.naps.internal.links.perEnv)];}
+        {outputs = utils.mergeAll [(lib.mapAttrs generateOutputs config.naps.internal.links.perEnv)];}
     ];
 }
  
