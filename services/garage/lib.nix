@@ -17,7 +17,7 @@ let
     createKey = access@{bucket,...}:''
                     echo "Creating ${bucket} key"
                     ${pkgs.garage_2}/bin/garage key import --yes \
-                        ${builtins.readFile (./. + "/${utils.paths.git}/${utils.s3_key_id access}")}
+                        ${builtins.readFile "${path}/${utils.paths.git}/${utils.s3_key_id access}"}
                         $(cat /var/lib/secrets/${utils.s3_key access}) \
                         -n ${bucket} 
                     ${pkgs.garage_2}/bin/garage bucket allow \
