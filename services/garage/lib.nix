@@ -39,7 +39,7 @@ let
                     fi
                     
                     OLD_KEY=$(${pkgs.garage_2}/bin/garage key list | ${lib.getExe pkgs.gawk} '$3 == "${bucket}" {print $1}')
-                    NEW_KEY=$(cat /var/lib/secrets/${utils.s3_root access}/${utils.s3_key_id access})
+                    NEW_KEY=$(cat /var/lib/secrets/${utils.s3_key_id access})
                     if [[ "$OLD_KEY" != "$NEW_KEY" ]]; then
                         if [[ -n "$OLD_KEY" ]]; then
                             echo "Replacing existing key for ${bucket}"
