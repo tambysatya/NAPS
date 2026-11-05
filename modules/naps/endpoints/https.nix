@@ -70,6 +70,24 @@ let
             ${generateForwardBackend vmenv hosts forward}
         '';
 
+
+    generateReverseBackend =
+        vmenv: consumers: reverse: # Map EndpointName (Map InstanceUID ServiceInstance)
+        let
+            vmname = utils.envUID vmenv;
+            mkBackend = 
+                epname: instances:
+                let 
+                    ep = config.naps.internal.endpoints.all."https".${epname};
+                    eptype = ep.extraArgs.tls; # termination or passthrough
+                    mode = if eptype == "termination" then "http" else "tcp";
+                in ''
+                    backend reverse_${eptype}_be_http_${ep.hostname}_443
+                        mode ${mode}
+                        ${utils.backendsConfig vmname ep instances}
+                '';
+
+        in utils.concatMapAttrsStringsSep "\n" mkBackend reverse;
     generateReverse =
         vmenv: consumers:
         reverse: # Map EndpointName (Map InstanceUID ServiceInstance)
@@ -107,6 +125,8 @@ let
                 http-request set-header X-Forwarded-Proto https
                 http-request set-header X-Forwarded-Port 443
                 use_backend %[req.hdr(host),lower,map_dom(${mapTermination},be_http_404)]
+            
+            ${generateReverseBackend vmenv consumers reverse}
         '';
 
 in 
