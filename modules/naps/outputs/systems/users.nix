@@ -23,7 +23,7 @@ let
             services.openssh.enable = true;
         };
     };
-    mkHAProxy = vmname: _: {${vmname}.config = mkUser "haproxy" 10000;};
+    mkHAProxy = vmname: _: {${vmname}.config.users = mkUser "haproxy" 10000;};
 
     processService = 
         srvname: srv@{users, instances,...}:
