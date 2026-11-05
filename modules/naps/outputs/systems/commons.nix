@@ -28,6 +28,7 @@ let
                     defaultEditor = true;
                 };
                 environment.systemPackages = systemPackages;
+                networking.hostName = vmname;
             };
         };
     defaultContainerConf =
