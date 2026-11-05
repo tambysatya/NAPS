@@ -1,10 +1,10 @@
-{flakeRoot, lib, inputs, pkgs, config, naps, vmname, ...}:
+{flakeRoot, lib, inputs, pkgs, config, naps, vmname, path, ...}:
 
 let 
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
 
-    s3lib = import ./lib.nix {inherit lib inputs pkgs flakeRoot;};
+    s3lib = import ./lib.nix {inherit lib inputs pkgs flakeRoot path;};
     accesses = lib.concatMap ({links,...}: links.s3 or []) (builtins.attrValues naps.services);
     
 
