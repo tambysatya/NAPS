@@ -36,7 +36,7 @@ in {
                             name = "deploy-flake";
                             path = path;
         };
-        users = lib.mkMerge allUsers;
+        users = lib.mkMerge (allUsers ++ [(mkUser "haproxy" {service="haproxy"; uid=10000;})]);
 
         networking.hosts = {"127.0.0.1" = ["${config.naps.topology.provisioner.hostname}"];};
         services.haproxy = {
