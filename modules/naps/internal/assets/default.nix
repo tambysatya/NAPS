@@ -201,20 +201,28 @@ let
                     nativeLinkAssets_ = map (generateAsset (utils.insEnv ins) hosts) accesses;
                     nativeLinkAssets = lib.foldl' lib.recursiveUpdate {} nativeLinkAssets_;
 
-                    allLinkEndpoints = config.naps.links.${linktype}.endpoints;
-                in   lib.mkMerge [
-                        (processEndpoints allLinkEndpoints insname ins)
-                        (lib.mkMerge (processShippedAssets nativeLinkAssets))
-                     ];
+                    #allLinkEndpoints = config.naps.links.${linktype}.endpoints;
+                in   #processEndpoints allLinkEndpoints insname ins;
+                    lib.mkMerge (processShippedAssets nativeLinkAssets);
         in lib.mkMerge (lib.mapAttrsToList processLinkType alllinks);
         
+    processProvides =
+        provides: insname: ins:
+        let
+            processProvide =
+                provide:
+                let allLinkEndpoints = config.naps.links.${provide}.endpoints;
+                in processEndpoints allLinkEndpoints insname ins;
+        in lib.mkMerge (map processProvide provides);
+
     processService = 
-        srvname: {instances, assets, links, endpoints,...}:
+        srvname: {instances, provides, assets, links, endpoints,...}:
         let
             stdAssets = lib.mapAttrsToList (processAssets assets) instances;
             endpointsAssets = lib.mapAttrsToList (processEndpoints endpoints) instances;
             linksAssets = lib.mapAttrsToList (processLinks links) instances;
-        in lib.mkMerge (stdAssets ++ endpointsAssets ++ linksAssets);
+            providesAssets = lib.mapAttrsToList (processProvides provides) instances;
+        in lib.mkMerge (stdAssets ++ endpointsAssets ++ linksAssets ++ providesAssets);
 
     generateConfig = 
         envuid: allassets:
