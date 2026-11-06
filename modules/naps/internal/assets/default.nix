@@ -95,12 +95,15 @@ let
                     ${lib.optionalString (utils.isContainer env) 
                         ''
                             TMP_PREFIX="$PREFIX" 
+                            TMP_SRCPREFIX="$SRCPREFIX" 
                             PREFIX="$PREFIX${utils.paths.secrets}/${envuid}"
+                            SRCPREFIX="$SRCPREFIX/${envuid}"
                         ''}
                     ${lib.concatStringsSep "\n" scriptsPerProviders}
                     ${lib.optionalString (utils.isContainer env) 
                         ''
                             PREFIX="$TMP_PREFIX"
+                            SRCPREFIX="$TMP_SRCPREFIX"
                         ''}
                 '';
             processVM = 

@@ -29,7 +29,7 @@ let
         let mnttgt = ''"$PREFIX"${path}'';
             group' = if group == null then owner else group;
         in ''
-           cp -R "$1/${filename}" ${mnttgt}
+           cp -R "$SRCPREFIX/${filename}" ${mnttgt}
            chown -R ${owner} ${mnttgt}
            chgrp -R ${group'} ${mnttgt}
            chmod -R ${mode} ${mnttgt}

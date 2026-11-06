@@ -36,7 +36,7 @@ let
         let tgt = ''"$PREFIX"${path}'';
             group' = if group == null then owner else group;
         in ''
-           cp -R "$1/${utils.store_base_name keyname}" ${tgt}
+           cp -R "$SRCPREFIX/${utils.store_base_name keyname}" ${tgt}
            chmod 711 ${tgt}
            chown -R ${owner}:${group'} ${tgt}
            chmod ${mode} ${tgt}/*
@@ -49,8 +49,8 @@ let
             group' = if group == null then owner else group;
         in ''
             install -d -m 700 -o ${owner} -g ${owner} ${tgt}
-            cp "$1/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}" ${tgt}/id_ed25519
-            cp "$1/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}.pub" ${tgt}/id_ed25519.pub
+            cp "$SRCPREFIX/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}" ${tgt}/id_ed25519
+            cp "$SRCPREFIX/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}.pub" ${tgt}/id_ed25519.pub
             ${pkgs.openssh}/bin/ssh-keyscan -H github.com > ${tgt}/known_hosts #adding the github pubkey
             chown -R ${owner}:${group'} ${tgt}
 

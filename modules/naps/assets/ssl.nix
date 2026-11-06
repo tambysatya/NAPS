@@ -105,7 +105,7 @@ let
         secname:
         generateArgs@{hostname}:
         let pemdir = ''"$PREFIX"${utils.paths.pemdir}'';
-            srcbasename = ''"$1"/${secname}/${hostname}'';
+            srcbasename = ''"$SRCPREFIX"/${secname}/${hostname}'';
             owner = "root";
         in ''
             install -d -o ${owner} -g haproxy -m 0750 ${pemdir} 
