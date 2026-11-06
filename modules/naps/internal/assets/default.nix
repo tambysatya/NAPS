@@ -100,7 +100,7 @@ let
                     ${lib.concatStringsSep "\n" scriptsPerProviders}
                     ${lib.optionalString (utils.isContainer env) 
                         ''
-                            PREFIX=TMP_PREFIX 
+                            PREFIX="$TMP_PREFIX"
                         ''}
                 '';
             processVM = 
