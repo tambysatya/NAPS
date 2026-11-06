@@ -151,27 +151,45 @@ let
                     (processAsset provider recipientsUID)  
                  assets);
 
+    # process standard assets
     processAssets =
         allassets: insname: ins:
         lib.mkMerge (lib.mapAttrsToList (processProvider [(utils.insEnvUID ins)]) allassets);
+
+    # Process shipped assets: assets decorated with their recipients (used within links/endpoints description)
+    # Map Provider (Map AssetName ShippedAsset) -> {config.naps.internal.assets = MergedState}
+    processShippedAssets = 
+        allassets:
+        utils.concatMapAttrsToList
+            (provider: shippedassets:
+                lib.mapAttrsToList 
+                    (assetname: {asset, recipients}:
+                        processAsset provider recipients assetname asset)
+                    shippedassets)
+            allassets;
   
-    processEndpoints =
+    # generates a set of assets of a list of endpoints of the same type
+    # Ins -> EPtype -> [Endpoint] -> Map Provider (Map AssetName ShippedAssets)
+    generateShippedAssets = 
+        ins: eptype: eps:
+        let generateAssets = config.naps.endpoints.${eptype}.generateAssets;
+            allEndpointsAssets = map (ep: generateAssets ep (utils.insEnv ins)) eps;
+        in lib.foldl' lib.recursiveUpdate {} allEndpointsAssets;
+
+    # InsName -> Ins -> EpType -> [Endpoits] -> [{states to merges}]
+    processEndpointAssets =
+        ins: eptype: eps: 
+        processShippedAssets 
+            (generateShippedAssets ins eptype eps);
+
+    processEndpoints = 
         allendpoints: insname: ins:
         let
             processEndpointType =
-                endpointType: endpoints:
-                let generateAssets = config.naps.endpoints.${endpointType}.generateAssets;
-                    allEndpointAssets = lib.foldl' (attrs: attrs': attrs // attrs') {} (map (ep: generateAssets ep (utils.insEnv ins)) endpoints);
-                in lib.mkMerge 
-                        (utils.concatMapAttrsToList 
-                            (provider: endpointAssets: 
-                                lib.mapAttrsToList
-                                    (assetname: endpointAsset@{asset, recipients}:
-                                        processAsset provider recipients assetname asset)
-                                    endpointAssets)
-                            allEndpointAssets);
-                        
-        in lib.mkMerge (lib.mapAttrsToList processEndpointType allendpoints); 
+                eptype: eps:
+                processEndpointAssets ins eptype eps;
+        in lib.mkMerge (utils.concatMapAttrsToList processEndpointType allendpoints); 
+
 
     processLinks =
         alllinks: insname: ins:
@@ -180,16 +198,14 @@ let
                 linktype: accesses:
                 let hosts = lib.mapAttrsToList (inshost: host: utils.insEnv host) config.naps.internal.links.all.${linktype}.providers;
                     generateAsset = config.naps.links.${linktype}.assets;
-                    allLinkAssets_ = map (generateAsset (utils.insEnv ins) hosts) accesses;
-                    allLinkAssets = lib.foldl' (attrs: attrs': attrs //attrs') {} allLinkAssets_;
-                in lib.mkMerge 
-                        (utils.concatMapAttrsToList 
-                            (provider: linkAssets:
-                                lib.mapAttrsToList
-                                    (assetname: linkAsset@{asset, recipients}:
-                                        processAsset provider recipients assetname asset)
-                                    linkAssets)
-                            allLinkAssets);
+                    nativeLinkAssets_ = map (generateAsset (utils.insEnv ins) hosts) accesses;
+                    nativeLinkAssets = lib.foldl' lib.recursiveUpdate {} nativeLinkAssets_;
+
+                    allLinkEndpoints = config.naps.links.${linktype}.endpoints;
+                in   lib.mkMerge [
+                        (processEndpoints allLinkEndpoints insname ins)
+                        (lib.mkMerge (processShippedAssets nativeLinkAssets))
+                     ];
         in lib.mkMerge (lib.mapAttrsToList processLinkType alllinks);
         
     processService = 
