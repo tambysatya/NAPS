@@ -34,11 +34,11 @@ let
         then
             ''
                if [[ "$IS_CONTAINER" == "Y" ]]; then
-                    mkdir -p "$PREFIX/var/lib/secrets/$CTNAME"
-                    chown root:root "$PREFIX/var/lib/secrets/$CTNAME"
-                    mkdir -p $(${pkgs.coreutils}/bin/dirname ${tgt})
-                    chown -R root:root $(${pkgs.coreutils}/bin/dirname ${tgt})
-                    chmod -R 700 $(${pkgs.coreutils}/bin/dirname ${tgt})
+                    mkdir -p "$PREFIX/var/lib/secrets/$CT_NAME"
+                    chown root:root "$PREFIX/var/lib/secrets/$CT_NAME"
+                    mkdir -p "$(${pkgs.coreutils}/bin/dirname ${tgt})"
+                    chown -R root:root "$(${pkgs.coreutils}/bin/dirname ${tgt})"
+                    chmod -R 700 "$(${pkgs.coreutils}/bin/dirname ${tgt})"
                fi
                cp -R ${src} ${tgt}
                chown -R ${owner} ${tgt}
