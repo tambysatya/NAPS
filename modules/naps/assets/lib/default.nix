@@ -26,17 +26,29 @@ let
         filename: 
         type: # if type == dir, the directory will be in 111 and the permissions specified in 'mode' will be applied to all files
         {path, owner, group ? null, mode ? "0400",  ...}: 
-        let mnttgt = ''"$PREFIX"${path}'';
+        let src = ''"$SRCPREFIX/${filename}"'';
+            tgt = ''"$PREFIX${path}"'';
             group' = if group == null then owner else group;
-        in ''
-           cp -R "$SRCPREFIX/${filename}" ${mnttgt}
-           chown -R ${owner} ${mnttgt}
-           chgrp -R ${group'} ${mnttgt}
-           chmod -R ${mode} ${mnttgt}
-           ${lib.optionalString 
-                (type == "dir")
-                "chmod 111 ${mnttgt}"}
-        '';
+        in 
+        if type == "dir"
+        then
+            ''
+               if [[ "$IS_CONTAINER" == "Y" ]]; then
+                    mkdir -p "$PREFIX/var/lib/secrets/$CTNAME"
+                    chown root:root "$PREFIX/var/lib/secrets/$CTNAME"
+                    mkdir -p $(${pkgs.coreutils}/bin/dirname ${tgt})
+                    chown -R root:root $(${pkgs.coreutils}/bin/dirname ${tgt})
+                    chmod -R 700 $(${pkgs.coreutils}/bin/dirname ${tgt})
+               fi
+               cp -R ${src} ${tgt}
+               chown -R ${owner} ${tgt}
+               chgrp -R ${group'} ${tgt}
+               chmod -R ${mode} ${tgt}
+               ${lib.optionalString 
+                    (type == "dir")
+                    "chmod 111 ${tgt}"}
+            ''
+        else "install -D -m ${mode} -o ${owner} -g ${group} ${src} ${tgt}";
 
 
 

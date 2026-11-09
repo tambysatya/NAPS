@@ -33,28 +33,31 @@ let
     installNixStore = 
         keyname:
         installArgs@{path, owner, group ? null, mode,...}:
-        let tgt = ''"$PREFIX"${path}'';
+        let filename = utils.store_base_name keyname;
+            tgt = ''"$PREFIX"${path}'';
             group' = if group == null then owner else group;
-        in ''
+        in  utils.install filename "dir" installArgs;
+        /*''
+           if [[ "$IS_CONTAINER" == "Y" ]]; then
+                mkdir -p 
+           fi
            cp -R "$SRCPREFIX/${utils.store_base_name keyname}" ${tgt}
            chmod 711 ${tgt}
            chown -R ${owner}:${group'} ${tgt}
            chmod ${mode} ${tgt}/*
-        '';
+        ''*/;
 
     installSSH = 
         keyname:
         installArgs@{path, owner, group ? null, mode,  ...}:
         let tgt = ''"$PREFIX"${path}'';
             group' = if group == null then owner else group;
+            src = ''"$SRCPREFIX/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}"'';
         in ''
-            install -d -m 700 -o ${owner} -g ${owner} ${tgt}
-            cp "$SRCPREFIX/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}" ${tgt}/id_ed25519
-            cp "$SRCPREFIX/${utils.ssh_base_name keyname}/${utils.ssh_base_name keyname}.pub" ${tgt}/id_ed25519.pub
+            install -D -m 700 -o ${owner} -g ${group'} ${src} ${tgt}/id_ed25519
+            install -D -m 700 -o ${owner} -g ${group'} ${src}.pub ${tgt}/id_ed25519.pub
             ${pkgs.openssh}/bin/ssh-keyscan -H github.com > ${tgt}/known_hosts #adding the github pubkey
             chown -R ${owner}:${group'} ${tgt}
-
-
             chmod ${mode} ${tgt}/*
         '';
 

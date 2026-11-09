@@ -108,7 +108,9 @@ let
             srcbasename = ''"$SRCPREFIX"/${secname}/${hostname}'';
             owner = "root";
         in ''
-            install -d -o ${owner} -g haproxy -m 0750 ${pemdir} 
+            mkdir -p ${pemdir}
+            chown ${owner}:haproxy ${pemdir}
+            cmod 0750 ${pemdir}
             cat ${srcbasename}.crt ${srcbasename}.key > ${pemdir}/${hostname}.pem
             chown ${owner} ${pemdir}/${hostname}.pem
             chgrp -R haproxy ${pemdir}

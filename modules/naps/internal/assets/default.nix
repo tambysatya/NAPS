@@ -92,13 +92,16 @@ let
                         else ''"$PREFIX"'';
                 in ''
                     install -d -m 0711 -o root -g root "$PREFIX"${utils.paths.secrets}${lib.optionalString (utils.isContainer env) "/${envuid}"}
-                    ${lib.optionalString (utils.isContainer env) 
+                    ${if (utils.isContainer env) 
                         ''
+                            IS_CONTAINER=Y
+                            CT_NAME="${utils.envUID env}"
                             TMP_PREFIX="$PREFIX" 
                             TMP_SRCPREFIX="$SRCPREFIX" 
                             PREFIX="$PREFIX${utils.paths.secrets}/${envuid}"
                             SRCPREFIX="$SRCPREFIX/${envuid}"
-                        ''}
+                        ''
+                       else '' IS_CONTAINER=N ''}
                     ${lib.concatStringsSep "\n" scriptsPerProviders}
                     ${lib.optionalString (utils.isContainer env) 
                         ''
