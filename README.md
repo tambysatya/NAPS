@@ -211,6 +211,8 @@ Migration:
 - VERIFY if the cehck services restarts when the secrets change (e.g. by adding an endpoint or a dbaccess somewhere)
 
 -TLS: increase the lifetime of the certificates to 7d (in case of power cuts...)
+- In health-checks: haproxy does NOT check the ssl certificate. Is it a problem ? THe TLS is checked between the frontend HTTP-passtrhough and the frontend HTTP-termination (both on the same HAProxy isntance...) TODO
+
 - we rely on ANYCORN which is not packaged by nixos so we have to maintain it ouerselve
 
 -provisionign should shutdown itself after a certain moment + tokens should be erased after a certain deadline
