@@ -49,7 +49,7 @@ let
         };
     };
 
-    mkInitDirServices = locations: sharedResources: #Initializes the shared volumes (creates the expected directories if they does not exist)
+    mkInitDirServices = config: locations: sharedResources: #Initializes the shared volumes (creates the expected directories if they does not exist)
         let reload = lib.unique 
                         (lib.concatMap 
                             (resource@{instance,reload,...}: 
@@ -60,12 +60,15 @@ let
             script = utils.concatMapAttrsStringsSep "\n" initDir sharedResources;
             mntservices = lib.unique (lib.mapAttrsToList (rname: _: utils.pathToMountUnit locations.${rname}.mount) sharedResources);
             initDir = 
-                rname: {path, mode, owner,...}: 
-                ''
-                    if [[ ! -d ${path} ]]; then
-                        mkdir -p ${path}
-                        chown ${owner} ${path}
-                        chmod ${mode} ${path}
+                rname: {mode, owner,...}: 
+                let
+                    disk = config.naps.internal.persistent.ir.resourcesLocation.${rname};
+                    persistentPath = "${disk.mount}/${rname}";
+                in ''
+                    if [[ ! -d ${persistentPath} ]]; then
+                        mkdir -p ${persistentPath}
+                        chown ${owner} ${persistentPath}
+                        chmod ${mode} ${persistentPath}
                     fi
                 '';
         in {

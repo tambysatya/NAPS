@@ -107,7 +107,7 @@ let
             # shared resources used by a native service should be bind-mounted using systemd-mount
             sharedUsedNatively = lib.filterAttrs (_: resource@{instance,...}: ! utils.runsInContainer instance) sharedResources;
 
-            service = utils.mkInitDirServices locations sharedResources;
+            service = utils.mkInitDirServices config locations sharedResources;
         in lib.optionalAttrs (sharedResources != {}){
             ${vmname}.config.systemd = {
                 services = service;

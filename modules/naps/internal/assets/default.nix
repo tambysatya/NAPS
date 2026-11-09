@@ -251,7 +251,10 @@ let
                 envuid: assetname: asset@{installArgs,...}:
                 {${vmname}.config.containers.${envuid}.bindMounts.${installArgs.path} = {hostPath = "${utils.paths.secrets}/${envuid}${installArgs.path}"; isReadOnly = true;};};
             processContainerProvider =
-                envuid: provider: assets: lib.mkMerge (lib.mapAttrsToList (processContainerAsset envuid) assets);
+                envuid: provider: assets:
+                lib.optionalAttr 
+                    (provider != "plain") 
+                    lib.mkMerge (lib.mapAttrsToList (processContainerAsset envuid) assets);
             processEnv =
                 envuid: allassets:
                 let env = config.naps.internal.envs.all.${envuid};
