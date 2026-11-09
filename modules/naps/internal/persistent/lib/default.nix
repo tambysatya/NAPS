@@ -1,6 +1,10 @@
 {flakeRoot, lib, inputs, ...}:
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
+
+    # mount does not likes ":" in names. Therefore, shared persistence is stored under /mnt/point/ins-name/...
+    rnameToPath = rname: lib.replaceStrings [":"] ["/"] rname;
+
     genDisko = {mount, options, filesystem, letter, ...}: {
         "vd${letter}" ={
             device = "/dev/vd${letter}";
@@ -63,7 +67,7 @@ let
                 rname: {mode, owner,...}: 
                 let
                     disk = config.naps.internal.persistent.ir.resourcesLocation.${rname};
-                    persistentPath = "${disk.mount}/${rname}";
+                    persistentPath = "${disk.mount}/${rnameToPath rname}";
                 in ''
                     if [[ ! -d ${persistentPath} ]]; then
                         mkdir -p ${persistentPath}
@@ -91,7 +95,7 @@ let
         locations: rname: resource@{reload, path,...}:
         let
             disk = locations.${rname};
-            what = "${disk.mount}/${rname}";
+            what = "${disk.mount}/${rnameToPath rname}";
             where = path;
         in {
             inherit what where;

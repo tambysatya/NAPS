@@ -81,7 +81,8 @@ let
             disk = config.naps.internal.persistent.ir.resourcesLocation.${rname};
             vmname = utils.insHostUID instance;
             envuid = utils.insEnvUID instance;
-            location = if disk.shared then "${disk.mount}/${rname}" else disk.mount;
+            # we use rnameToPath because systemd does not like ':' in paths.
+            location = if disk.shared then "${disk.mount}/${utils.rnameToPath rname}" else disk.mount;
         in {
             ${vmname}.config = {
                 # container-mounts
