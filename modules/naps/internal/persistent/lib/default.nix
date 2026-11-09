@@ -105,6 +105,7 @@ let
             type = "none";
         };  
 in utils // {
+    inherit rnameToPath;
     inherit genDisko genDiskoRoot;
     inherit mkInitDirServices; #initializes shared volumes
     inherit genMountService;  # bind-mount directories
