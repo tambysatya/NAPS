@@ -9,6 +9,7 @@ let
             outputs = config.naps.internal.endpoints.outputs;
             processProxy = envuid: str: {
                 config.services.haproxy.config = ''
+                        ssl-server-verify none
                     defaults
                         timeout connect 5s
 
