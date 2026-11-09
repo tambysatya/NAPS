@@ -45,7 +45,7 @@ let
            chmod 711 ${tgt}
            chown -R ${owner}:${group'} ${tgt}
            chmod ${mode} ${tgt}/*
-        ''*/;
+        ''*/
 
     installSSH = 
         keyname:
