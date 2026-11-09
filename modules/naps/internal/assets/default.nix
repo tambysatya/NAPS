@@ -93,6 +93,7 @@ let
                 in ''
                     install -d -m 0711 -o root -g root "$PREFIX"${utils.paths.secrets}${lib.optionalString (utils.isContainer env) "/${envuid}"}
                     ${if (utils.isContainer env) 
+                        then
                         ''
                             IS_CONTAINER=Y
                             CT_NAME="${utils.envUID env}"
