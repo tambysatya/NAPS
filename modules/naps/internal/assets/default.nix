@@ -101,6 +101,8 @@ let
                             TMP_SRCPREFIX="$SRCPREFIX" 
                             PREFIX="$PREFIX${utils.paths.secrets}/${envuid}"
                             SRCPREFIX="$SRCPREFIX/${envuid}"
+
+                            echo "Installing $CT_NAME secrets:"
                         ''
                        else '' IS_CONTAINER=N ''}
                     ${lib.concatStringsSep "\n" scriptsPerProviders}
