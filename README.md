@@ -27,6 +27,8 @@ see `examples/`
     nix flake new -t github:tambysatya/NAPS my-infra/
 ```
 
+If you use a SSH provisioner, a ssh session must be running during the deployement (otherwise the service is stopped by systemd) TODO
+
 ## Compilation:
 
 Each service declares the resources it needs (secrets, endpoints, postgres bases...). The compilation is split into two phases.
