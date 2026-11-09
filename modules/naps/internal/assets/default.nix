@@ -254,7 +254,7 @@ let
                 envuid: provider: assets:
                 lib.optionalAttrs 
                     (provider != "plain") 
-                    lib.mkMerge (lib.mapAttrsToList (processContainerAsset envuid) assets);
+                    (lib.mkMerge (lib.mapAttrsToList (processContainerAsset envuid) assets));
             processEnv =
                 envuid: allassets:
                 let env = config.naps.internal.envs.all.${envuid};
