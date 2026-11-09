@@ -48,7 +48,7 @@ let
                     (type == "dir")
                     "chmod 111 ${tgt}"}
             ''
-        else "install -D -m ${mode} -o ${owner} -g ${group} ${src} ${tgt}";
+        else "install -D -m ${mode} -o ${owner} -g ${group'} ${src} ${tgt}";
 
 
 
