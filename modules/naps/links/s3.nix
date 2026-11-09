@@ -17,7 +17,7 @@ in {
 naps.links.s3 = {
     inherit access;
     endpoints.https = [
-        {hostname = "s3.${config.naps.topology.domain}"; port = 3000; extraArgs = {tls="termination";};}
+        {hostname = "s3.${config.naps.topology.domain}"; port = 3900; extraArgs = {tls="termination";};}
     ];
     assets = env: hosts: access: {
         "password"."${utils.s3_key access}" = {

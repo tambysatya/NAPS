@@ -12,7 +12,6 @@ let
 in {
 config = 
     { 
-        networking.firewall.allowedTCPPorts = [3900 3903]; #TODO rpc bind ??
         services.garage = 
         {
             enable = true;

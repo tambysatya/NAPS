@@ -10,7 +10,6 @@ in {
 
     config = 
     {
-        networking.firewall.allowedTCPPorts = [443 80];
         services.nextcloud = {
             enable = true;	
             #https = true; /*IMPORTANT IF HTTPS*/
