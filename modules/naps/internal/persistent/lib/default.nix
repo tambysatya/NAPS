@@ -78,7 +78,10 @@ let
                 requiredBy = reload;
                 after = mntservices;
                 requires = mntservices;
-                serviceConfig.Type = "oneshot";
+                serviceConfig = {
+                    Type = "oneshot";
+                    RemainAfterExit = "yes";
+                };
                 inherit script;
             };
         };
