@@ -32,7 +32,7 @@ let
                     interfaces."ve-${ctname}" = { #manually config the interface of the host;
                         ipv4 = {
                             addresses = [{address = utils.envPrivateHostIP env; prefixLength = 30;}];
-                            routes = [{address = utils.envIP env; prefixLength=30;}];
+                            routes = [{address = utils.envIP env; prefixLength=32;}];
                         };
                     };
                 };
