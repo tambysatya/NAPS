@@ -110,7 +110,7 @@ let
         in ''
             mkdir -p ${pemdir}
             chown ${owner}:haproxy ${pemdir}
-            cmod 0750 ${pemdir}
+            chmod 0750 ${pemdir}
             cat ${srcbasename}.crt ${srcbasename}.key > ${pemdir}/${hostname}.pem
             chown ${owner} ${pemdir}/${hostname}.pem
             chgrp -R haproxy ${pemdir}
