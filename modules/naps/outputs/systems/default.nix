@@ -7,7 +7,19 @@ let
     proxyAndFirewallConfigs = 
         let
             outputs = config.naps.internal.endpoints.outputs;
-            processProxy = envuid: str: {config.services.haproxy.config = str;};
+            processProxy = envuid: str: {
+                config.services.haproxy.config = ''
+                    defaults
+                        timeout connect 5s
+
+                        # connections are handled by the kernels
+                        timeout client 0
+                        timeout server 0
+                        option tcpka
+
+                    ${str}
+                '';
+            };
             processFirewall = 
                 envuid: fwconfig: {
                     config.networking.firewall.interfaces = 
