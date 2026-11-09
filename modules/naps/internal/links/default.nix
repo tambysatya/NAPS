@@ -48,7 +48,7 @@ let
                         requiredBy = allReloads;
                         serviceConfig = {
                             Type = "oneshot";
-                            RemainAfterExit = "oneshot";
+                            RemainAfterExit = "yes";
                             ExecStart = pkgs.writeShellScript "wait-uplink-${linktype}" waitLinkUp;
                         };
                     };
