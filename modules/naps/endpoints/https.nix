@@ -58,7 +58,10 @@ let
                 ''
                 backend forward_be_http_${hostname}_443
                     mode tcp
-                    ${utils.backendsConfig vmname ep (hosts.${utils.epToString ep})}
+                    ${utils.backendsConfig 
+                        vmname 
+                        (ep // {port = 443;}) # we override the port in forward mode: we always use HTTPs
+                        (hosts.${utils.epToString ep})}
                 '';
             allEndpoints = lib.foldl' (attr: attr': attr // attr') {} (builtins.attrValues forward);
         in utils.concatMapAttrsStringsSep "\n" mkBackend allEndpoints;
