@@ -20,7 +20,7 @@ config =
             {
                 data_dir = "/srv/data";
                 metadata_dir = "/srv/meta";
-                rpc_bind_addr = "[::]:3901";
+                rpc_bind_addr = "[::]:3901"; #TODO
                 rpc_secret_file = "/var/lib/secrets/garage-rpc.key";
                 replication_factor = 1;
                 s3_api = {

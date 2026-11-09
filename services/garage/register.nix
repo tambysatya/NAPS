@@ -18,7 +18,7 @@ config.naps.services.garage = {
     configureListen = addr: {
         services.garage.settings = {
             s3_api.api_bind_addr = "${addr}:3900";
-            admin.api_bind_addr = "${addr}:3900";
+            admin.api_bind_addr = "${addr}:3902";
         };
     };
     users."garage" = {service = "garage"; uid=10001;};
