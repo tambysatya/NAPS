@@ -102,7 +102,7 @@ let
             processReverse =
                  epname: insname: ins: 
                  let
-                    port = config.naps.internal.endpoints.tcp.${epname};
+                    port = config.naps.internal.endpoints.all.tcp.${epname}.port;
                  in lib.mkMerge [
                     (lib.optionalAttrs (utils.runsInContainer ins) 
                      {
@@ -127,16 +127,17 @@ let
                             (lib.mapAttrsToList (_: {port,...}: port) endpoints);
                     processPort =
                         port: {
-                            ${utils.envUID vmenv}.${localenv.host.veth}.tcp= [port];
+                            ${utils.envUID vmenv}."ve-${localenvuid}".tcp= [port];
+                            #${utils.envUID vmenv}.${localenv.host.veth}.tcp= [port];
                         };
                 in lib.optionalAttrs 
                     (utils.isContainer localenv) #open the forward port only for containers
-                    lib.mkMerge (lib.mapAttrsToList processPort allPorts);
+                    (lib.mkMerge (map processPort allPorts));
             allForwardFw = lib.mkMerge (lib.mapAttrsToList mkForwardFw forward);
         in lib.mkMerge [allReverseFw allForwardFw];
 in {
     naps.endpoints.tcp = {
-        inherit generateProxy;
+        inherit generateProxy generateFirewall;
     };
 }
 

@@ -101,14 +101,14 @@ let
                 eptype: ir:
                 let fun = config.naps.endpoints.${eptype}.generateFirewall;
                 in fun vmenv ir;
-        in lib.mkMerge (lib.mapAttrsToList process alleps); 
+        in utils.mergeAll (lib.mapAttrsToList process alleps); 
 
 in {
     imports = [./options];
     naps.internal.endpoints = lib.mkMerge [
             (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
             {outputs.proxy= lib.mapAttrs generateProxy config.naps.internal.endpoints.ir;}
-            {outputs.firewall= lib.mkMerge (lib.mapAttrsToList generateFirewall config.naps.internal.endpoints.ir);}
+            {outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.internal.endpoints.ir);}
         ];
 
 }

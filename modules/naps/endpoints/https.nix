@@ -202,7 +202,8 @@ in
                                 (lib.mapAttrsToList (epname: ep: ep.port) endpoints);
                         fwCtForward =
                             port: {
-                                ${utils.envHostUID localenv}.${localenv.host.veth}.tcp = [443];
+                                ${utils.envHostUID localenv}."ve-${localenvuid}".tcp = [443];
+                                #${utils.envHostUID localenv}.${localenv.host.veth}.tcp = [443]; #TODO use veth0, veth1...
                             };
                     in lib.optionalAttrs (utils.isContainer localenv) (lib.mkMerge (map fwCtForward ctFwdPorts));
                 allForwardFirewall = lib.mkMerge (lib.mapAttrsToList fwForward forward);
