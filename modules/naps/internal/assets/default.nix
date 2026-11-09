@@ -252,7 +252,7 @@ let
                 {${vmname}.config.containers.${envuid}.bindMounts.${installArgs.path} = {hostPath = "${utils.paths.secrets}/${envuid}${installArgs.path}"; isReadOnly = true;};};
             processContainerProvider =
                 envuid: provider: assets:
-                lib.optionalAttr 
+                lib.optionalAttrs 
                     (provider != "plain") 
                     lib.mkMerge (lib.mapAttrsToList (processContainerAsset envuid) assets);
             processEnv =
