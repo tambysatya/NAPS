@@ -124,13 +124,13 @@ let
 
 
 in {
-    naps.assets.step-ca = {
+    naps.assets.providers.step-ca = {
         apply = {
             generate = acc: secname:  _:  [(generateCA domain)] ++ acc;
             install = secname: _: installCA secname;
         };
     };
-    naps.assets.tls = {
+    naps.assets.providers.tls = {
         inputs = {
             installArgs = types.submodule {
                 options = {

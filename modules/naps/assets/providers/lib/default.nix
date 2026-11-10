@@ -16,7 +16,7 @@ let
     give = config: filename: envs: 
         let filepath = "${utils.paths.out}/${filename}";
             target = envname:
-                let env = config.naps.internal.envs.all.${envname};
+                let env = config.naps.envs.all.${envname};
                     path = if utils.isContainer env 
                            then "${utils.envHostUID env}/${envname}" else envname;
                 in "${utils.paths.perVM}/${path}/${filename}";

@@ -1,73 +1,118 @@
-{flakeRoot, lib, inputs,...}:
-
+{flakeRoot, lib, inputs, config, ...}:
 let
     types = lib.types // (import "${flakeRoot}/lib/types" {inherit lib inputs;});
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
 
-    provider = types.submodule {
+    assetScripts = types.submodule {
         options = {
-            inputs = lib.mkOption {
-                description = "Inputs types";
-                type = types.submodule {
-                    options = {
-                        generateArgs = lib.mkOption {
-                            description = "Types of the attrset passed to the generator. If set to null, any attrset is valid.";
-                            type = types.raw;
-                            default = null;
-                        };
-                        installArgs = lib.mkOption {
-                            description = "Types of the attrset passed to the installer. If set to null, any attrset is valid.";
-                            type = types.raw;
-                            default = types.submodule {
-                                options = {inherit (types) owner;};
-                                freeformType = types.attrs;
-                            };
-                            defaultText = lib.literalExpression #to avoid stack overflow during doc generation
-                                ''
-                                    types.submodule {
-                                      options = {
-                                        inherit (types) owner;
-                                      };
-                                    }
-                                '';
-                        };
-                    };
-                };
-
+            generate = lib.mkOption {
+                description = "Asset generation script for the entire infrastructure.";
+                type = types.str;
+                default = ""; 
             };
-            apply = lib.mkOption {
-                description = "Functions to generate and install assets";
-                type = types.submodule {
-                    options = {
-                        generate = lib.mkOption {
-                            description = "A function to generate the asset. Should have type: [String] -> assetname -> generatorEntry -> [String]. The first argument is an accumulator of all previously outputted scripts, allowing the generator to add its output BEFORE the others (useful e.g. for the CA which should be generated BEFORE the TLS certificates)";
-                            type = types.functionTo (types.functionTo (types.functionTo (types.listOf types.str)));
-                        };
-                        install = lib.mkOption {
-                            description = "A function to install the asset. Should have type: assetname -> installerEntry -> Script";
-                            type = types.functionTo (types.functionTo types.str);
-                        };
-                        config = lib.mkOption {
-                            description = ''
-                                Extra Configuration appended to the system config.
-                                Asset -> ConfigModule
-                            '';
-                            type = types.functionTo types.attrs;
-                            default = asset: {};
-                        };
-                    };
-                };
+            install = lib.mkOption {
+                description = "Asset installation script per VM: format is VM => script";
+                type = types.attrsOf types.str;
+                default = {};
             };
         };
     };
 
+    assetsOutputs = types.submodule {
+        options = {
+            scripts = lib.mkOption {
+                description = "Actual generations and installation script, per VM. The generator is a single script, the installers are defined per VM";
+                type = assetScripts;
+            };
+            config = lib.mkOption {
+                description = "Extra configuration of each environment: Map EnvUID Config";
+                type = types.attrsOf types.config;
+                default = {};
+            };
 
+        };
+    };
+
+    applyMerge =
+        type: value:
+        if type == null then value else type.merge [] [{inherit value; file = "modules.naps.internal.assets.default";}];
+    checkAsset = 
+        provider: {generateArgs, installArgs, reload}:
+        let 
+            inputs = config.naps.assets.providers.${provider}.inputs;
+            generateArgs' = applyMerge inputs.generateArgs generateArgs;
+            installArgs' = applyMerge inputs.installArgs installArgs;
+        in {inherit reload; generateArgs=generateArgs'; installArgs=installArgs';};
+
+    addPath = 
+        assetname: asset@{installArgs,...}:
+        if builtins.hasAttr "path" installArgs && installArgs.path != null && installArgs.path != ""
+            then asset else asset // {installArgs = installArgs // {path = "${utils.paths.secrets/${assetname}}";};};
+
+
+    ir = types.submodule {
+        options = {
+            all = lib.mkOption {
+                description = "All assets, sorted by Provider: Map Provider (Map AssetName Asset)";
+                type = types.attrsOf (types.attrsOf types.asset);
+                default = {};
+            };
+            recipients = lib.mkOption {
+                description = "Agregation of the recipients of each asset: Map Provider (Map AssetName [EnvUID])";
+                type = types.attrsOf (types.attrsOf (types.listOf types.str));
+                default = {};
+                apply = lib.mapAttrs (_: lib.mapAttrs (_: lib.unique));
+            };
+            perEnv = lib.mkOption {
+                description = "List of the assets per environment: Map EnvName (Map Provider (Map AssetName Asset))";
+                type = types.attrsOf (types.attrsOf (types.attrsOf types.asset));
+                default = {};
+            };
+            perVM = lib.mkOption {
+                description = "List of the assets per VM: Map VMName (Map EnvUID (Map Provider (Map AssetName Asset)))";
+                type = types.attrsOf (types.attrsOf (types.attrsOf (types.attrsOf types.asset)));
+                default = {};
+            };
+        };
+    };
 in 
 
 {
+    imports = [./providers.nix];
     options.naps.assets = lib.mkOption {
-        description = "A set of asset provisioner, declaring how to generate and install them";
-        type = types.attrsOf provider;
-        default = {};
+        description = "Assets dispatched across the infrastructure";
+        type = types.submodule {
+            options = {
+                inputs = lib.mkOption {
+                    description = ''
+                        Inputs of the module. The type of each assets, according to the provider specifications, is checked here.
+                        naps.internal.assets :: Map Provider (Map AssetName ShippedAsset = (asset, [recipientsEnvUID]))
+                    '';
+                    type = types.attrsOf (types.attrsOf types.shippedAsset);
+                    default = {};
+                    apply = lib.mapAttrs 
+                                (provider: 
+                                    lib.mapAttrs 
+                                        (assetname: shipped@{asset, recipients}: {
+                                            inherit recipients;
+                                            asset = addPath assetname (checkAsset provider asset);
+                                         }));
+                };
+
+                ir = lib.mkOption {
+                    description = "Intermediate representation";
+                    type = ir;
+                };
+                outputs = lib.mkOption {
+                    description = ''
+                        Outputs of this modules, containing assets generation and installation script, as well as 
+                        the specific configuration of each environment
+                    '';
+                    type = assetsOutputs;
+                };
+                
+            };
+        };
     };
+
 }

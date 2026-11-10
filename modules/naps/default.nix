@@ -10,10 +10,10 @@ in {
   imports = [./topology # Inventory of the deployement (which service on which vm on which host)
              ./services # Requirements of each available service
              ./envs # Deployement environments
+             ./assets # assets management
 
              ./endpoints # Endpoints providers
              ./links     # Links providers
-             ./assets    # Assets providers
 
 
              # Intermediate representations

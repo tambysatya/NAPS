@@ -64,7 +64,7 @@ let
 
 in {
 
-naps.assets.ssh-keygen = {
+naps.assets.providers.ssh-keygen = {
     inputs = {
         installArgs = types.submodule {
             options = {
@@ -83,7 +83,7 @@ naps.assets.ssh-keygen = {
         install = assetname: args: installSSH args.generateArgs.keyname args.installArgs;
     };
 };
-naps.assets.nix-store = {
+naps.assets.providers.nix-store = {
     inputs = {
         installArgs = types.submodule {
             options = {

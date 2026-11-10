@@ -4,7 +4,7 @@ let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
 
-    processAssets = 
+    assetsProcessor = 
         insname: ins: allassets:
         let 
             processProvider = 
@@ -15,20 +15,16 @@ let
                 };
         in lib.mapAttrs (provider: assets: lib.mkMerge (lib.mapAttrsToList (processProvider provider) assets)) allassets;
 
-    processInstance =
-        srvuid: srv@{assets, provides, links, endpoints,...}: 
-        insname: ins:
-        lib.mkMerge [
-            {assets.inputs = processAssets insname ins assets;}
-        ];
-
-
-
+    /* Applies a "processor" function on each instance */
     processService =
-        srvuid: srv@{instances, assets, provides, links, endpoints, ...}:
-        lib.mkMerge (lib.mapAttrsToList (processInstance srvuid srv) instances);
+        processor: # insname: ins: fieldValue -> AttrSet
+        fieldName: # fieldName
+        srvuid: srv:
+        lib.mkMerge (lib.mapAttrsToList (insname: ins: processor insname ins srv.${fieldName}) srv.instances);
             
 in {
    imports = [./options];
-   naps.internal = lib.mkMerge (lib.mapAttrsToList processService config.naps.services);
+   naps = {
+        assets.inputs = lib.mkMerge (lib.mapAttrsToList (processService assetsProcessor "assets") config.naps.services);
+    };
 }

@@ -121,6 +121,7 @@ Migration:
     + The inputs of the module is standardized
     + The modules builds the IR based on its inputs
     + Other Modules interacting with this module just add stuff to the input
+    + To avoid infinite recursion, modules should have: name.inputs name.ir  and name.outputs ?
 
 - naps.secrets:  
     + implements constructors to create serets declaration (mkS3Secrets, mkDBSecrets...)

@@ -21,7 +21,7 @@ in {
 options.naps.internal.links = lib.mkOption {
     description = "All deployement environments";
     type = types.submodule {
-        options = {
+      options = {
             all = lib.mkOption {
                 description = "All links. linktype -> {requesters, providers}";
                 type = types.attrsOf links;
