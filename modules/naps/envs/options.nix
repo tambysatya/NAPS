@@ -3,10 +3,13 @@
 let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
 in {
-options.naps.internal.envs = lib.mkOption {
+options.naps.envs = lib.mkOption {
     description = "All deployement environments";
     type = types.submodule {
         options = {
+            inputs = lib.mkOption {
+            
+            };
             instances = lib.mkOption {
                 description = "All service declarations, with the priority and the tags";
                 type = types.attrsOf types.serviceInstance;

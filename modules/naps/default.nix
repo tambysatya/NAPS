@@ -9,7 +9,7 @@ let
 in {
   imports = [./topology # Inventory of the deployement (which service on which vm on which host)
              ./services # Requirements of each available service
-             ./global # Global configuration 
+             ./envs # Deployement environments
 
              ./endpoints # Endpoints providers
              ./links     # Links providers

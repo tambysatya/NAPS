@@ -79,20 +79,23 @@ let
                     type = types.attrsOf (types.listOf types.access) ;
                     default = {};
                 };
-                defaultOn = lib.mkOption {
-                    description = "If set, this service is deployed by default everywhere, but can be disabled explicitely in each vm configuration";
-                    type = types.nullOr (types.enum ["containers" "vms" "all"]);
-                    default = null;
-                };
                 configureListen = lib.mkOption {
                     description = "A function to sets the listening IP(s) address(es). Mandatory if endpoints are provided. Note that the prefix config. should NOT be specified. Address -> AttrSet";
                     type = types.nullOr (types.functionTo types.attrs);
                     default = null;
                     example = "addr: {services.darkhttpd.address = addr;}";
                 };
+                instances = lib.mkOption {
+                    description = "Map InstanceName ServiceInstance";
+                    internal = true;
+                    type = types.attrsOf types.serviceInstance;
+                    default = {};
+                };
+
             };
     };
 
+    /*
     # a simple decoration of serviceOptions
     internalServiceOptions = config: {...}: {
         imports = [(serviceOptions config)]; #TODO good practice ? Or config is implicit ?
@@ -105,8 +108,8 @@ let
             };
         };
     };
-
+*/
 in {
     serviceOptions = config: types.submodule (serviceOptions config);
-    internalServiceOptions = config: types.submodule (internalServiceOptions config);
+    #internalServiceOptions = config: types.submodule (internalServiceOptions config);
 }

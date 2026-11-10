@@ -15,28 +15,13 @@ let
     copyService =  #copy the service declaration (from naps.services to naps.internal.services)
         srvname: srvconf: {${srvname} = srvconf;};
 
+    generateAsset = 
+        srvname: srvconf: {};
+
 
 in {
-    imports = [./options];
-    config.naps.internal.services = lib.mkMerge (
-            (lib.mapAttrsToList processInstance config.naps.internal.envs.instances)
-            ++ (lib.mapAttrsToList copyService config.naps.services)
-    );
+    imports = [
+        ./options
+    ];
+    naps.services = lib.mkMerge (lib.mapAttrsToList processInstance config.naps.internal.envs.instances);
 }
-   /*
-   #config.naps.internal.envs.services = 
-   config.naps.internal.services = utils.mergeAll [
-                                        config.naps.services  
-                                        (utils.mergeAll (lib.mapAttrsToList computeHosts config.naps.topology.vms))
-                                    ];
-   config.naps.topology.services =
-        utils.mergeAll (lib.concatLists
-                            (lib.mapAttrsToList 
-                                (vmname: vmconf: map (srvname: {${mkDefaultServiceUID vmname srvname}.is = srvname;}) (vmDefaultsServices vmconf))
-                                config.naps.topology.vms));
-   config.naps.internal.envs.services =
-        utils.mergeAll (lib.concatLists
-                            (lib.mapAttrsToList 
-                                (vmname: vmconf: map (srvname: {${mkDefaultServiceUID vmname srvname}.is = srvname;}) (vmDefaultsServices vmconf))
-                                config.naps.topology.vms));
-    */

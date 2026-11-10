@@ -268,6 +268,7 @@ in {
     imports = [
         ./options  
     ];
+    /*
     naps.internal.assets = lib.mkMerge [
                                 (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
                                 {outputs.scripts.generate = generateScript;}
@@ -275,46 +276,5 @@ in {
                                 {outputs.config = utils.mergeAll (lib.mapAttrsToList generateConfig config.naps.internal.assets.perEnv);}
                                 {outputs.config = utils.mergeAll (lib.mapAttrsToList generateContainersBinds config.naps.internal.assets.perVM);} # bind-mounts of containers secrets
                             ];
-
-    /*
-    naps.internal.assets.perEnv = perEnv;
-    naps.internal.assets.generator = lib.mapAttrs  
-                                          (_: assets: # {uid, assetname, env} => uid = {assetname, recipient=[env]}
-                                                utils.mergeAll (map ({name, generateArgs, env, ...}: {${name} = {args = generateArgs; recipients=[env];}; }) assets) )
-                                            assetsPerType;
-    naps.internal.assets.installer = 
-        utils.mergeAll (lib.mapAttrsToList (envname: envassets: { ${utils.envHost (getEnv envname)} = mkInstallerForEnv envname envassets;}) config.naps.internal.assets.perEnv);
-    naps.internal.assets.scripts = {
-        generate = ''
-            set -euo pipefail
-            mkdir -p ${utils.paths.out} ${utils.paths.git}
-
-                            
-            # Initializes the perVM repository
-            ${lib.concatMapStringsSep 
-                "\n"
-                (vmname:
-                    ''
-                    [[ -d ${utils.paths.perVM}/${vmname} ]] && rm -R ${utils.paths.perVM}/${vmname}
-                    mkdir -p ${utils.paths.perVM}/${vmname}
-                    echo ${vmname} > ${utils.paths.perVM}/${vmname}/FLAKE
-                    '')
-                (builtins.attrNames config.naps.internal.assets.installer)}
-            
-            # Generates the secrets
-            ${generateScript}
-
-            # Generates the provisioner tls certificates
-            mkdir -p .secrets/provisioner/{ssl,secrets,mtls}
-            rm -Rf .secrets/provisioner/ssl/* #clean the repository
-            ${lib.concatStringsSep "\n" 
-                (config.naps.assets.tls.apply.generate
-                    [] "vm-provisioning.${domain}"
-                    {hostname=config.naps.topology.provisioner.hostname;})}
-            cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/
-            mv .secrets/out/${config.naps.topology.provisioner.hostname}/* .secrets/provisioner/ssl/
-        '';
-        install = installScript;
-    };
-    */
+*/
 }

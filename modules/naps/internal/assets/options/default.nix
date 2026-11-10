@@ -1,4 +1,4 @@
-{flakeRoot, lib, inputs, ...}:
+{flakeRoot, lib, inputs, config, ...}:
 let
     types = lib.types // (import "${flakeRoot}/lib/types" {inherit lib inputs;});
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
@@ -33,6 +33,22 @@ let
         };
     };
 
+    applyMerge =
+        type: value:
+        if type == null then value else type.merge [] [{inherit value; file = "modules.naps.internal.assets.default";}];
+    checkAsset = 
+        provider: {generateArgs, installArgs, reload}:
+        let 
+            inputs = config.naps.assets.${provider}.inputs;
+            generateArgs' = applyMerge inputs.generateArgs generateArgs;
+            installArgs' = applyMerge inputs.installArgs installArgs;
+        in {inherit reload; generateArgs=generateArgs'; installArgs=installArgs';};
+
+    addPath = 
+        assetname: asset@{installArgs,...}:
+        if builtins.hasAttr "path" installArgs && installArgs.path != null && installArgs.path != ""
+            then asset else asset // {installArgs = installArgs // {path = "${utils.paths.secrets/${assetname}}";};};
+
 in 
 
 {
@@ -40,6 +56,21 @@ in
         description = "Assets dispatched across the infrastructure";
         type = types.submodule {
             options = {
+                inputs = lib.mkOption {
+                    description = ''
+                        Inputs of the module. The type of each assets, according to the provider specifications, is checked here.
+                        naps.internal.assets :: Map Provider (Map AssetName ShippedAsset = (asset, [recipientsEnvUID]))
+                    '';
+                    type = types.attrsOf (types.attrsOf types.shippedAsset);
+                    default = {};
+                    apply = lib.mapAttrs 
+                                (provider: 
+                                    lib.mapAttrs 
+                                        (assetname: shipped@{asset, recipients}: {
+                                            inherit recipients;
+                                            asset = addPath assetname (checkAsset provider asset);
+                                         }));
+                };
                 all = lib.mkOption {
                     description = "All assets, sorted by Provider: Map Provider (Map AssetName Asset)";
                     type = types.attrsOf (types.attrsOf types.asset);

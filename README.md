@@ -117,6 +117,11 @@ Migration:
  
 ### Refactor
 
+- modules should be self-contained:
+    + The inputs of the module is standardized
+    + The modules builds the IR based on its inputs
+    + Other Modules interacting with this module just add stuff to the input
+
 - naps.secrets:  
     + implements constructors to create serets declaration (mkS3Secrets, mkDBSecrets...)
     + TODO enable logging
@@ -225,7 +230,11 @@ Migration:
 - disable healthcheck on the haproxy backend pointing to the provisioning
 
 
-- add an interface to define "constant services" services that are deployed by default. Now its handled manually. Ideas of "constant services"
+- add an interface to define "constant services" services that are deployed by default. Now its handled manually.
+    => Default services should be declared in the infrastructure description: not by themselves (service description just declares the behavior)
+    => The infrastructure description can import a sef of "default config" that can be override (via the usual options mechanism)
+    => This way, services just declare what they do, but not HOW to use them
+    Ideas of "constant services"
     - journald-remote (logging service)
     - step-renew (handled differently now)
     - assets-* (services fetchings the assets at each rebuild)
