@@ -33,16 +33,6 @@ let
         };
     };
 
-    applyMerge =
-        type: value:
-        if type == null then value else type.merge [] [{inherit value; file = "modules.naps.internal.assets.default";}];
-    checkAsset = 
-        provider: {generateArgs, installArgs, reload}:
-        let 
-            inputs = config.naps.assets.providers.${provider}.inputs;
-            generateArgs' = applyMerge inputs.generateArgs generateArgs;
-            installArgs' = applyMerge inputs.installArgs installArgs;
-        in {inherit reload; generateArgs=generateArgs'; installArgs=installArgs';};
 
     addPath = 
         assetname: asset@{installArgs,...}:
@@ -75,6 +65,23 @@ let
             };
         };
     };
+
+    checkAsset = 
+        provider: assetname: shippedasset@{asset, ...}:
+        let  
+            inherit (asset) generateArgs installArgs reload;
+            inputs = config.naps.assets.providers.${provider}.inputs;
+            generateArgs' = utils.checkType "modules/naps/assets/options/default.nix" inputs.generateArgs generateArgs;
+            installArgs' = utils.checkType "modules/naps/assets/options/default.nix" inputs.installArgs installArgs;
+        in 
+           shippedasset // {asset = {inherit reload; generateArgs=generateArgs'; installArgs=installArgs';};};
+
+    checkProvider = 
+        provider: allshippedassets:
+        let 
+            providerExists = builtins.hasAttr provider config.naps.assets.providers;
+        in assert providerExists || throw "Unknown asset provider: ${provider}";
+           lib.mapAttrs (checkAsset provider) allshippedassets;
 in 
 
 {
@@ -90,13 +97,8 @@ in
                     '';
                     type = types.attrsOf (types.attrsOf types.shippedAsset);
                     default = {};
-                    apply = lib.mapAttrs 
-                                (provider: 
-                                    lib.mapAttrs 
-                                        (assetname: shipped@{asset, recipients}: {
-                                            inherit recipients;
-                                            asset = addPath assetname (checkAsset provider asset);
-                                         }));
+                    apply = lib.mapAttrs checkProvider;
+                                    
                 };
 
                 ir = lib.mkOption {

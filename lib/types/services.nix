@@ -48,7 +48,7 @@ let
                     apply = eps: 
                         let check = 
                                 eptype: ep:
-                                assert (builtins.hasAttr eptype config.naps.endpoints) || throw "Unknown endpoint ${eptype}";
+                                assert (builtins.hasAttr eptype config.naps.endpoints.protocols) || throw "Unknown endpoint ${eptype}";
                                 ep;
 
                         in lib.mapAttrs check eps;

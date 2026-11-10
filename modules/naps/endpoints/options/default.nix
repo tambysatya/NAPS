@@ -6,17 +6,35 @@ let
 
 
 
-    perEnvConf = types.submodule {
+    checkEndpoint =
+        protocol: epname: ep@{extraArgs,...}:
+        let
+            argsType = config.naps.endpoints.protocols.${protocol}.extraArgsType;
+        in ep // {extraArgs = utils.checkType "modules/naps/endpoints/options/default.nix" argsType extraArgs;};
+
+    checkProtocol =
+        protocol: endpoints:
+        let 
+            protocolExists = builtins.hasAttr protocol config.naps.endpoints.protocols;
+        in 
+            assert protocolExists || throw "Unknown protocol: ${protocol}";
+            lib.mapAttrs (checkEndpoint protocol) endpoints;
+
+
+    inputs = types.submodule {
         options = {
             exposes = lib.mkOption {
-                description = "Endpoints exposed by the environment: Map EndpointType (Map hostname:port Endpoint)";
+                description = "Endpoints exposed by the environment: Map Protocol (Map hostname:port Endpoint)";
                 type = types.attrsOf (types.attrsOf types.endpoint);
                 default = {};
+                apply = lib.mapAttrs checkProtocol;
+                
             };
             reaches = lib.mkOption {
-                description = "Endpoints reached by the environment: [hostname]";
+                description = "Endpoints reached by the environment: Map Protocol (Map hostname:port Endpoint)"; 
                 type = types.attrsOf (types.attrsOf types.endpoint);
                 default = {};
+                apply = lib.mapAttrs checkProtocol;
             };
         };
     };
@@ -28,7 +46,7 @@ in {
     imports = [./protocols.nix];
     options.naps.endpoints.inputs = lib.mkOption {
         description = "Endpoints exposed and reached by each environment: Map EnvUID perEnvConf";
-        type = types.attrsOf perEnvConf;
+        type = types.attrsOf inputs;
     };
 
     /*
