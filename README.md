@@ -7,6 +7,8 @@
 
 *With NAPS, enjoy more naps !*
 
+Logo art inspired from [Disko](https://github.com/nix-community/disko)
+
 Status: WIP, experimental
 
 Features: 
