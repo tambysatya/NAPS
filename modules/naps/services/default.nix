@@ -38,7 +38,7 @@ let
 in {
    imports = [./options];
    naps = {
-        assets.inputs = lib.mkMerge (lib.mapAttrsToList (processService assetsProcessor "assets") config.naps.services);
+        inputs.assets = lib.mkMerge (lib.mapAttrsToList (processService assetsProcessor "assets") config.naps.services);
         endpoints.inputs = lib.mkMerge (lib.mapAttrsToList (processService endpointsProcessor "endpoints") config.naps.services);
     };
 }

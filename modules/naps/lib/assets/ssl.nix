@@ -1,7 +1,7 @@
 {flakeRoot, lib, inputs, pkgs, path, config, ...}:
 let
 
-    utils = import ./lib {inherit flakeRoot lib inputs path pkgs;};
+    utils = import ./utils {inherit flakeRoot lib inputs path pkgs;};
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     paths = utils.paths;
 
@@ -124,13 +124,13 @@ let
 
 
 in {
-    naps.assets.providers.step-ca = {
+    naps.lib.assets.step-ca = {
         apply = {
             generate = acc: secname:  _:  [(generateCA domain)] ++ acc;
             install = secname: _: installCA secname;
         };
     };
-    naps.assets.providers.tls = {
+    naps.lib.assets.tls = {
         inputs = {
             installArgs = types.submodule {
                 options = {

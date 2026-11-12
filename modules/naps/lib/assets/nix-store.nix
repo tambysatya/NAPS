@@ -1,7 +1,7 @@
 {flakeRoot, lib, inputs, pkgs, path, config, ...}:
 let
 
-    utils = import ./lib {inherit flakeRoot lib inputs path pkgs;};
+    utils = import ./utils {inherit flakeRoot lib inputs path pkgs;};
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     paths = utils.paths;
     domain = config.naps.topology.domain;
@@ -64,7 +64,7 @@ let
 
 in {
 
-naps.assets.providers.ssh-keygen = {
+naps.lib.assets.ssh-keygen = {
     inputs = {
         installArgs = types.submodule {
             options = {
@@ -83,7 +83,7 @@ naps.assets.providers.ssh-keygen = {
         install = assetname: args: installSSH args.generateArgs.keyname args.installArgs;
     };
 };
-naps.assets.providers.nix-store = {
+naps.lib.assets.nix-store = {
     inputs = {
         installArgs = types.submodule {
             options = {

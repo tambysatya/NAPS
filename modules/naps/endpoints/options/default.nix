@@ -49,29 +49,30 @@ in {
         type = types.attrsOf inputs;
     };
 
-    /*
     options.naps.endpoints.all = lib.mkOption {
-        description = "Endpoints detail from name: Map EndpointType (Map hostname:port Endpoint)";
+        description = "Endpoints detail from name: Map Protocol (Map hostname:port Endpoint)";
         type = types.attrsOf (types.attrsOf types.endpoint);
         default = {};
     };
     options.naps.endpoints.perEnv = lib.mkOption {
         description = "Endpoints exposed by each environment: Map EnvUID perEnvConf";
-        type = types.attrsOf perEnvConf;
+        type = types.attrsOf inputs;
+        readOnly = true;
+        default = config.naps.endpoints.inputs;
     };
 
     options.naps.endpoints.global.hosts = lib.mkOption {
-        description = "Endpoints hosts: EndpointType -> hostname:port -> ServiceID -> ServiceInstance";
+        description = "Endpoints hosts: Protocol -> hostname:port -> ServiceID -> ServiceInstance";
         type = types.attrsOf (types.attrsOf (types.attrsOf types.serviceInstance));
         default = {};
     };
     options.naps.endpoints.global.consumers = lib.mkOption {
-        description = "Which services consume each endpoint: EndpointType -> hostname:port -> ServiceID -> ServiceInstance";
+        description = "Which services consume each endpoint: Protocol -> hostname:port -> ServiceID -> ServiceInstance";
         type = types.attrsOf (types.attrsOf (types.attrsOf types.serviceInstance));
         default = {};
     };
     options.naps.endpoints.ir = lib.mkOption {
-        description = "Proxy configuration of each VM: VM -> EndpointType -> ProxyIR";
+        description = "Proxy configuration of each VM: VM -> Protocol -> ProxyIR";
         type = types.attrsOf (types.attrsOf types.proxyIR);
         default = {};
     };
@@ -89,7 +90,6 @@ in {
         default = {};
         apply = lib.mapAttrs (_: lib.mapAttrs (_: lib.mapAttrs (_: lib.unique)));
     };
-    */
 
 }
 

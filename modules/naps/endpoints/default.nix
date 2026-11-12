@@ -19,6 +19,38 @@ let
     # ServiceInstance -> [Endpoints] -> {EndpointName = {ServiceInstance}}
     mkEndpointsHosts = insname: eps: map (ep: {${utils.epToString ep}.${insname} = config.naps.internal.envs.instances.${insname};}) eps;
 
+    processReachesEP = 
+        insname: ins: protocol: epname: ep@{hostname, port, ...}:
+        {
+            global.consumers.${protocol}.${epname}.${insname} = ins;
+            ir.${utils.insHostUID ins}.${protocol}.forward.${utils.insUID ins}.${epname} = ep;
+        };
+    processExposesEP = 
+        insname: ins: protocol: epname: ep@{hostname, port, ...}:
+        {
+            global.hosts.${protocol}.${epname}.${insname} = ins;
+            ir.${utils.insHostUID ins}.${protocol}.reverse.${epname}.${insname} = ins;
+        };
+    processEP =
+        processor: # either processReachesEP or processExposesEP
+        insname: ins: protocol: epname: ep@{hostname, port, ...}:
+        lib.mkMerge [
+            {all.${protocol}.${epname} = ep;}
+            (processor insname ins protocol epname ep)
+        ];
+
+    processProtocol = 
+        processor: # either processReachesEP or processExposesEP
+        insname: ins: protocol: eps:
+        lib.mkMerge (lib.mapAttrsToList (processEP processor insname ins protocol) eps);
+    processInput = 
+        insname: {exposes, reaches}:
+        let ins = config.naps.envs.all.${insname};
+            exposesAttr = lib.mapAttrsToList (processProtocol processExposesEP insname) exposes;
+            reachesAttr = lib.mapAttrsToList (processProtocol processReachesEP insname) reaches;
+        in lib.mkMerge (exposesAttr ++ reachesAttr);
+        
+    /*
     processEndpoint = 
         hostsOrReaches: insname: ins:
         eptype: ep@{hostname, port,...}:
@@ -102,11 +134,15 @@ let
                 let fun = config.naps.endpoints.${eptype}.generateFirewall;
                 in fun vmenv ir;
         in utils.mergeAll (lib.mapAttrsToList process alleps); 
+        */
 
 in {
     imports = [
         ./options
         ./protocols
+    ];
+    naps.endpoints = lib.mkMerge [
+        #(lib.mkMerge (lib.mapAttrsToList processInput config.naps.endpoints.inputs))
     ];
     /*
     naps.internal.endpoints = lib.mkMerge [

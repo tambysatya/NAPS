@@ -7,13 +7,16 @@ let
     serviceModules = map (name: "${flakeRoot}/services/${name}/register.nix") types.serviceNames;
 
 in {
-  imports = [./topology # Inventory of the deployement (which service on which vm on which host)
+  imports = [
+             ./lib # extensions: asset providers, endpoints types, ...
+             ./inputs
+             ./topology # Inventory of the deployement (which service on which vm on which host)
              ./services # Requirements of each available service
              ./envs # Deployement environments
              ./assets # assets management
 
              ./endpoints # Endpoints providers
-             ./links     # Links providers
+             #./links     # Links providers
 
 
              # Intermediate representations

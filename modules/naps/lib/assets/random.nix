@@ -4,7 +4,7 @@
 
 let
 
-    utils = import ./lib {inherit flakeRoot lib inputs path pkgs;};
+    utils = import ./utils {inherit flakeRoot lib inputs path pkgs;};
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     paths = utils.paths;
     domain = config.naps.topology.domain;
@@ -68,31 +68,31 @@ let
 
 in {
 
-naps.assets.providers.plain = {
+naps.lib.assets.plain = {
     apply = {
         generate = acc: assetname: args: acc ++ [(generatePlain assetname args)];
         install = assetname: args: ""; #no installation script since the file goes in the store
     };
 };
-naps.assets.providers.password = {
+naps.lib.assets.password = {
     apply = {
         generate = acc: assetname: args: acc ++ [(utils.generateSSLString assetname args)];
         install = assetname: args: utils.install assetname "file" args.installArgs;
     };
 };
-naps.assets.providers.postgres = {
+naps.lib.assets.postgres = {
     apply = {
         generate = acc: assetname: args: acc ++ [(generateDB assetname args)];
         install = assetname: args: installDB assetname args.generateArgs args.installArgs;
     };
 };
-naps.assets.providers.s3 = {
+naps.lib.assets.s3 = {
     apply = {
         generate = acc: assetname: args: acc ++ [(generateS3 assetname args)];
         install = assetname: args: installS3 assetname args.generateArgs args.installArgs;
     };
 };
-naps.assets.providers.ldapssha = {
+naps.lib.assets.ldapssha = {
     apply = {
         generate = acc: assetname: args: acc ++ [(generateLDAP assetname args)];
         install = assetname: args: installLDAP assetname args.generateArgs args.installArgs;

@@ -1,4 +1,4 @@
-{flakeRoot, lib, inputs,...}:
+{flakeRoot, lib, inputs,config,...}:
 
 let
     types = lib.types // (import "${flakeRoot}/lib/types" {inherit lib inputs;});
@@ -60,13 +60,10 @@ let
             };
         };
     };
-
-
 in 
-
 {
-    options.naps.assets.providers = lib.mkOption {
-        description = "A set of asset provisioner, declaring how to generate and install them";
+    options.naps.lib.assets= lib.mkOption {
+        description = "The assets provisioner library, declaring how to generate and install them";
         type = types.attrsOf provider;
         default = {};
     };

@@ -1,7 +1,7 @@
 {flakeRoot, lib, inputs, config, path, pkgs,...}:
 let
 
-    utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import "${flakeRoot}/modules/naps/assets/providers/lib" {inherit lib inputs path pkgs flakeRoot;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;} // import "${flakeRoot}/modules/naps/lib/assets/utils" {inherit lib inputs path pkgs flakeRoot;};
    
             
     domain = config.naps.topology.domain;
@@ -25,7 +25,7 @@ let
                     in genFun acc assetname generateArgs ++ [(utils.give config assetname recipients)];
             processProvider =
                 acc: providername: assets:
-                let provider = config.naps.assets.providers.${providername};
+                let provider = config.naps.lib.assets.${providername};
                     genFun = provider.apply.generate;
                 in lib.foldlAttrs (generateAsset providername genFun) acc assets;
         in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.assets.ir.all);
@@ -63,7 +63,7 @@ let
         mkdir -p .secrets/provisioner/{ssl,secrets,mtls}
         rm -Rf .secrets/provisioner/ssl/* #clean the repository
         ${lib.concatStringsSep "\n" 
-            (config.naps.assets.providers.tls.apply.generate
+            (config.naps.lib.assets.tls.apply.generate
                 [] "vm-provisioning.${domain}"
                 {hostname=config.naps.topology.provisioner.hostname;})}
         cp .secrets/git/root_ca.crt .secrets/provisioner/ssl/
@@ -77,7 +77,7 @@ let
                 lib.concatMapStringsSep "\n" installFun args;
             processProvider = 
                 providername: assets:
-                let provider = config.naps.assets.providers.${providername};
+                let provider = config.naps.lib.assets.${providername};
                     installFun = provider.apply.install;
                 in lib.concatStringsSep "\n"
                         (lib.mapAttrsToList installFun assets);
@@ -254,11 +254,10 @@ let
 in {
     imports = [
         ./options  
-        ./providers
     ];
     naps.assets = lib.mkMerge [
         {
-            ir = processShippedAssets config.naps.assets.inputs;
+            ir = processShippedAssets config.naps.inputs.assets;
             outputs.scripts.generate = generateScript;
             outputs.scripts.install = installScript;
             outputs.config = 
