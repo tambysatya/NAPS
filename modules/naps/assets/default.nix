@@ -21,14 +21,14 @@ let
     generateAssets = 
         let generateAsset =
                 providername: genFun: acc: assetname: {generateArgs,...}:
-                    let recipients = config.naps.assets.ir.recipients.${providername}.${assetname};
+                    let recipients = config.naps.assets.recipients.${providername}.${assetname};
                     in genFun acc assetname generateArgs ++ [(utils.give config assetname recipients)];
             processProvider =
                 acc: providername: assets:
                 let provider = config.naps.lib.assets.${providername};
                     genFun = provider.apply.generate;
                 in lib.foldlAttrs (generateAsset providername genFun) acc assets;
-        in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.assets.ir.all);
+        in lib.concatStringsSep "\n" (lib.foldlAttrs processProvider [] config.naps.assets.all);
     generateScript = ''
         set -euo pipefail
         mkdir -p ${utils.paths.out} ${utils.paths.git}
@@ -119,7 +119,7 @@ let
                     install -d -m 0711 -o root -g root "$PREFIX"${utils.paths.secrets}
                     ${lib.concatStringsSep "\n" scriptsPerProviders}
                 '';
-        in lib.mapAttrs processVM config.naps.assets.ir.perVM;
+        in lib.mapAttrs processVM config.naps.assets.perVM;
 
     processAsset = 
         provider: 
@@ -256,14 +256,15 @@ in {
         ./options  
     ];
     naps.assets = lib.mkMerge [
+        (processShippedAssets config.naps.inputs.assets)
         {
-            ir = processShippedAssets config.naps.inputs.assets;
+            
             outputs.scripts.generate = generateScript;
             outputs.scripts.install = installScript;
             outputs.config = 
                 utils.mergeAll 
-                    (lib.mapAttrsToList generateConfig config.naps.assets.ir.perEnv ++ 
-                     lib.mapAttrsToList generateContainersBinds config.naps.assets.ir.perVM); # bind-mounts of containers secrets
+                    (lib.mapAttrsToList generateConfig config.naps.assets.perEnv ++ 
+                     lib.mapAttrsToList generateContainersBinds config.naps.assets.perVM); # bind-mounts of containers secrets
 
         }
 

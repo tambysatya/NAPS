@@ -5,6 +5,12 @@ let
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
 
 
+    addDefaultInstallPath = 
+        assetname: installArgs@{path ? "", ...}:
+        if path == "" || path == null
+            then installArgs // {path = "/var/lib/secrets/${assetname}";}
+            else installArgs;
+
     checkAsset = 
         provider: assetname: shippedasset@{asset, ...}:
         let  
@@ -13,7 +19,7 @@ let
             generateArgs' = utils.checkType "modules/naps/assets/options/default.nix" inputs.generateArgs generateArgs;
             installArgs' = utils.checkType "modules/naps/assets/options/default.nix" inputs.installArgs installArgs;
         in 
-           shippedasset // {asset = {inherit reload; generateArgs=generateArgs'; installArgs=installArgs';};};
+           shippedasset // {asset = {inherit reload; generateArgs=generateArgs'; installArgs= addDefaultInstallPath assetname installArgs';};};
 
     checkProvider = 
         provider: allshippedassets:
@@ -21,6 +27,8 @@ let
             providerExists = builtins.hasAttr provider config.naps.lib.assets;
         in assert providerExists || throw "Unknown asset provider: ${provider}";
            lib.mapAttrs (checkAsset provider) allshippedassets;
+
+        
 
 in 
 

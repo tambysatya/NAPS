@@ -4,17 +4,17 @@ let
 
     getLinkEP = linktype: config.naps.links.${linktype}.endpoints;
 
-    checkEndpoint = eptype: ep@{extraArgs,...}:
+    checkEndpoint = proto: ep@{extraArgs,...}:
        let applyMerge =
                 type: value: 
                 if type == null then value else type.merge [] [{inherit value; file = "module.naps.internal.endpoints.default.nix";}];
-           check = config.naps.endpoints.${eptype}.extraArgsType;
+           check = config.naps.endpoints.${proto}.extraArgsType;
        in ep // {extraArgs = applyMerge check extraArgs;};
 
     # Transforms a list of endpoints into a set of hostname:port => endpoint.
     # Performs type checking of the extraArgs as well
     # [Endpoints] -> attrset hostname:port endpoint
-    mkEndpointsAttrs = eptype: eps: map (ep: {${utils.epToString ep} = checkEndpoint eptype ep;}) eps;
+    mkEndpointsAttrs = proto: eps: map (ep: {${utils.epToString ep} = checkEndpoint proto ep;}) eps;
     
     # ServiceInstance -> [Endpoints] -> {EndpointName = {ServiceInstance}}
     mkEndpointsHosts = insname: eps: map (ep: {${utils.epToString ep}.${insname} = config.naps.internal.envs.instances.${insname};}) eps;
@@ -24,6 +24,7 @@ let
         {
             all.${protocol}.${epname} = ep;
             hosts.${protocol}.${epname}.${insname} = ins;
+            perEnv.${utils.insEnvUID ins}.${protocol}.${epname} = ep;
             perVM.${utils.insHostUID ins}.${protocol}.${epname}.${insname} = ins;
         };
 
@@ -38,7 +39,7 @@ let
     /*
     processEndpoint = 
         hostsOrReaches: insname: ins:
-        eptype: ep@{hostname, port,...}:
+        proto: ep@{hostname, port,...}:
         let
             envuid = utils.insEnvUID ins;
             epname = utils.epToString ep;
@@ -50,17 +51,17 @@ let
                 else {${epname}.${insname} = ins;};
             perEnvField = if hostsOrReaches == "hosts" then "exposes" else "reaches";
         in {
-            all.${eptype}.${epname} = ep;
-            perEnv.${envuid}.${perEnvField}.${eptype}.${epname} = ep;
-            global.${globalField}.${eptype}.${epname}.${insname} = ins;
-            ir.${utils.insHostUID ins}.${eptype}.${proxyField} = proxyValue;
+            all.${proto}.${epname} = ep;
+            perEnv.${envuid}.${perEnvField}.${proto}.${epname} = ep;
+            global.${globalField}.${proto}.${epname}.${insname} = ins;
+            ir.${utils.insHostUID ins}.${proto}.${proxyField} = proxyValue;
         };
     processEndpointType = 
-        hostsOrReaches: insname: ins: eptype: endpoints: 
+        hostsOrReaches: insname: ins: proto: endpoints: 
         lib.mkMerge 
             (map 
-                (processEndpoint hostsOrReaches insname ins eptype) 
-                (map (checkEndpoint eptype) endpoints)); #we validate here the type of the endpoint
+                (processEndpoint hostsOrReaches insname ins proto) 
+                (map (checkEndpoint proto) endpoints)); #we validate here the type of the endpoint
     processProvidesField =
         insname: ins: provides:
         let
@@ -74,7 +75,7 @@ let
     processEndpointsField =
         insname: ins: endpoints:
         let
-            process = eptype: eps: processEndpointType "hosts" insname ins eptype eps;
+            process = proto: eps: processEndpointType "hosts" insname ins proto eps;
         in lib.mkMerge 
             (lib.mapAttrsToList process endpoints);
 
@@ -106,8 +107,8 @@ let
         let
             vmenv = config.naps.envs.all.${vmname};
             process =
-                eptype: ir:
-                let fun = config.naps.lib.endpoints.${eptype}.reverseProxy;
+                proto: ir:
+                let fun = config.naps.lib.endpoints.${proto}.reverseProxy;
                 in fun vmenv ir;
         in utils.concatMapAttrsStringsSep "\n" process alleps; 
     generateFirewall  =
@@ -115,12 +116,23 @@ let
         let
             vmenv = config.naps.envs.all.${vmname};
             process =
-                eptype: ir:
-                let fun = config.naps.lib.endpoints.${eptype}.reverseFirewall;
+                proto: ir:
+                let fun = config.naps.lib.endpoints.${proto}.reverseFirewall;
                 in fun vmenv ir;
         in utils.mergeAll (lib.mapAttrsToList process alleps); 
 
-    # generateAssets = 
+    protocolAssets = 
+        env: proto: eps:
+        let
+            genAssets = config.naps.lib.endpoints.${proto}.generateAssets;
+            assets = lib.mapAttrsToList (epname: ep: genAssets ep env) eps;
+        in lib.mkMerge assets;
+
+     generateAssets = 
+        envname: alleps:
+        let
+            env = config.naps.envs.all.${envname};
+        in lib.mkMerge (lib.mapAttrsToList (protocolAssets env) alleps);
 
 in {
     imports = [
@@ -131,6 +143,7 @@ in {
         {outputs.proxy= lib.mapAttrs generateProxy config.naps.endpoints.perVM;}
         {outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.perVM);}
     ];
+    naps.inputs.assets = lib.mkMerge (lib.mapAttrsToList generateAssets config.naps.endpoints.perEnv);
     /*
     naps.internal.endpoints = lib.mkMerge [
             (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))

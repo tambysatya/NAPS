@@ -21,6 +21,11 @@ in {
         type = types.attrsOf (types.attrsOf (types.attrsOf types.serviceInstance));
         default = {};
     };
+    options.naps.endpoints.perEnv = lib.mkOption {
+        description = "Exposed endpoints per environment (IR of the reverse-proxy): Map EnvUID (Map Protocol (Map EndpointName Endpoint))";
+        type = types.attrsOf (types.attrsOf (types.attrsOf types.endpoint));
+        default = {};
+    };
     options.naps.endpoints.perVM = lib.mkOption {
         description = "Exposed endpoints perVM (IR of the reverse-proxy): Map VM (Map Protocol (Map Endpoint (Map InstanceUID ServiceInstance)))";
         type = types.attrsOf (types.attrsOf (types.attrsOf (types.attrsOf types.serviceInstance)));

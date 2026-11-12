@@ -40,31 +40,6 @@ let
             then asset else asset // {installArgs = installArgs // {path = "${utils.paths.secrets/${assetname}}";};};
 
 
-    ir = types.submodule {
-        options = {
-            all = lib.mkOption {
-                description = "All assets, sorted by Provider: Map Provider (Map AssetName Asset)";
-                type = types.attrsOf (types.attrsOf types.asset);
-                default = {};
-            };
-            recipients = lib.mkOption {
-                description = "Agregation of the recipients of each asset: Map Provider (Map AssetName [EnvUID])";
-                type = types.attrsOf (types.attrsOf (types.listOf types.str));
-                default = {};
-                apply = lib.mapAttrs (_: lib.mapAttrs (_: lib.unique));
-            };
-            perEnv = lib.mkOption {
-                description = "List of the assets per environment: Map EnvName (Map Provider (Map AssetName Asset))";
-                type = types.attrsOf (types.attrsOf (types.attrsOf types.asset));
-                default = {};
-            };
-            perVM = lib.mkOption {
-                description = "List of the assets per VM: Map VMName (Map EnvUID (Map Provider (Map AssetName Asset)))";
-                type = types.attrsOf (types.attrsOf (types.attrsOf (types.attrsOf types.asset)));
-                default = {};
-            };
-        };
-    };
 
 in 
 
@@ -73,11 +48,26 @@ in
         description = "Assets dispatched across the infrastructure";
         type = types.submodule {
             options = {
-
-
-                ir = lib.mkOption {
-                    description = "Intermediate representation";
-                    type = ir;
+                all = lib.mkOption {
+                    description = "All assets, sorted by Provider: Map Provider (Map AssetName Asset)";
+                    type = types.attrsOf (types.attrsOf types.asset);
+                    default = {};
+                };
+                recipients = lib.mkOption {
+                    description = "Agregation of the recipients of each asset: Map Provider (Map AssetName [EnvUID])";
+                    type = types.attrsOf (types.attrsOf (types.listOf types.str));
+                    default = {};
+                    apply = lib.mapAttrs (_: lib.mapAttrs (_: lib.unique));
+                };
+                perEnv = lib.mkOption {
+                    description = "List of the assets per environment: Map EnvName (Map Provider (Map AssetName Asset))";
+                    type = types.attrsOf (types.attrsOf (types.attrsOf types.asset));
+                    default = {};
+                };
+                perVM = lib.mkOption {
+                    description = "List of the assets per VM: Map VMName (Map EnvUID (Map Provider (Map AssetName Asset)))";
+                    type = types.attrsOf (types.attrsOf (types.attrsOf (types.attrsOf types.asset)));
+                    default = {};
                 };
                 outputs = lib.mkOption {
                     description = ''
