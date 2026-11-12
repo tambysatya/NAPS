@@ -100,15 +100,15 @@ let
                 ];
         in lib.mkMerge (lib.mapAttrsToList processInstance instances);
 
+        */
     generateProxy =
         vmname: alleps:
         let
             vmenv = config.naps.envs.all.${vmname};
-            global = config.naps.endpoints.global;
             process =
                 eptype: ir:
-                let fun = config.naps.lib.endpoints.${eptype}.generateProxy;
-                in fun vmenv global.hosts.${eptype} global.consumers.${eptype} ir;
+                let fun = config.naps.lib.endpoints.${eptype}.reverseProxy;
+                in fun vmenv ir;
         in utils.concatMapAttrsStringsSep "\n" process alleps; 
     generateFirewall  =
         vmname: alleps:
@@ -116,12 +116,11 @@ let
             vmenv = config.naps.envs.all.${vmname};
             process =
                 eptype: ir:
-                let fun = config.naps.lib.endpoints.${eptype}.generateFirewall;
+                let fun = config.naps.lib.endpoints.${eptype}.reverseFirewall;
                 in fun vmenv ir;
         in utils.mergeAll (lib.mapAttrsToList process alleps); 
 
-    generateAssets = 
-        */
+    # generateAssets = 
 
 in {
     imports = [
@@ -129,8 +128,8 @@ in {
     ];
     naps.endpoints = lib.mkMerge [
         (lib.mkMerge (lib.mapAttrsToList processInput config.naps.inputs.endpoints))
-        #{outputs.proxy= lib.mapAttrs generateProxy config.naps.endpoints.ir;}
-        #{outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.ir);}
+        {outputs.proxy= lib.mapAttrs generateProxy config.naps.endpoints.perVM;}
+        {outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.perVM);}
     ];
     /*
     naps.internal.endpoints = lib.mkMerge [

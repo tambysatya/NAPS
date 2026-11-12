@@ -22,16 +22,15 @@ let
                 type = types.functionTo (types.functionTo (types.attrsOf (types.attrsOf types.shippedAsset)));
                 default = ep: env: {};
             };
-            generateProxy = lib.mkOption {
+            reverseProxy = lib.mkOption {
                 description = ''
-                    Given the intermediate representation of the VM proxy and
-                    the set of all the hosts and consumers of each endpoint
-                    over the infrastructure, generate the haproxy configuration.
-                    Type: VMEnv -> Hosts -> Consumers -> ProxyIR -> HAProxy configuration
+                    Given the intermediate representation of the VM exposed endpoints
+                    generate the haproxy configuration.
+                    Type: VMEnv -> Map Protocol (Map EndpointName (Map InstanceUID Instance)) -> HAProxy configuration
                 '';
-                type = types.functionTo (types.functionTo (types.functionTo (types.functionTo types.str)));
+                type = types.functionTo (types.functionTo types.str);
             };
-            generateFirewall = lib.mkOption { # TODO block also connections to the outside ?
+            reverseFirewall = lib.mkOption { # TODO block also connections to the outside ?
                 description = ''
                     Given the set of exposed endpoints, generates the firewall configuration
                     of the VM /containers. 

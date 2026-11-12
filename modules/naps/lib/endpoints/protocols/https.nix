@@ -21,7 +21,7 @@ let
 
 
     backend_404 = ''
-        backend be_http_404
+        backend be_rev_http_404
             mode http
             http-request return status 404
     '';
@@ -30,52 +30,8 @@ let
     mkMap = forwardOrReverse: endpoints: pkgs.writeText "haproxy.map" (lib.concatMapStringsSep "\n" (ep@{hostname,...}: "${hostname}     ${mkBackendName forwardOrReverse ep}") endpoints + "\n");
 
 
-
-    generateForwardFrontend = # One forward frontend per environment
-        vmenv: hosts: envname: 
-        eps: # Map EndpointName Endpoint
-        let
-           localmap = mkMap "forward" (builtins.attrValues eps);
-        in ''
-            frontend forward_http_${envname}
-                mode tcp
-                bind ${utils.envPrivateHostIP config.naps.internal.envs.all.${envname}}:443
-                tcp-request inspect-delay 5s
-                tcp-request content accept if { req_ssl_hello_type 1 }
-                use_backend %[req.ssl_sni,lower,map_dom(${localmap},be_http_404)]
-        '';
-    /*
-        As usual, forward proxies relies on the same "global" backends (since the backends are 
-        global, there is no need to create different forward backends pointing to the same 
-        endpoints) 
-    */
-    generateForwardBackend =  
-        vmenv: hosts: 
-        forward: # Map EnvironmentUID (Map EndpointName Endpoint)
-        let
-            vmname = utils.envUID vmenv;
-            mkBackend = epname: ep@{hostname,...}: 
-                ''
-                backend forward_be_http_${hostname}_443
-                    mode tcp
-                    ${utils.backendsConfig 
-                        vmname 
-                        (ep // {port = 443;}) # we override the port in forward mode: we always use HTTPs
-                        (hosts.${utils.epToString ep})}
-                '';
-            allEndpoints = lib.foldl' (attr: attr': attr // attr') {} (builtins.attrValues forward);
-        in utils.concatMapAttrsStringsSep "\n" mkBackend allEndpoints;
-    generateForward =
-        vmenv: hosts:
-        forward: # For each environment, which endpoints are reached 
-        ''
-            ${utils.concatMapAttrsStringsSep "\n" (generateForwardFrontend vmenv hosts) forward}
-            ${generateForwardBackend vmenv hosts forward}
-        '';
-
-
     generateReverseBackend =
-        vmenv: consumers: reverse: # Map EndpointName (Map InstanceUID ServiceInstance)
+        vmenv: reverse: # Map EndpointName (Map InstanceUID ServiceInstance)
         let
             vmname = utils.envUID vmenv;
             mkBackend = 
@@ -92,7 +48,7 @@ let
 
         in utils.concatMapAttrsStringsSep "\n" mkBackend reverse;
     generateReverse =
-        vmenv: consumers:
+        vmenv:
         reverse: # Map EndpointName (Map InstanceUID ServiceInstance)
         let
             allEndpoints = lib.mapAttrs (epname: _: config.naps.endpoints.all."https".${epname}) reverse; # get the endpoints descriptions
@@ -129,7 +85,7 @@ let
                 http-request set-header X-Forwarded-Port 443
                 use_backend %[req.hdr(host),lower,map_dom(${mapTermination},be_http_404)]
             
-            ${generateReverseBackend vmenv consumers reverse}
+            ${generateReverseBackend vmenv reverse}
         '';
 
 in 
@@ -161,6 +117,13 @@ in
                             recipients = [(utils.envHostUID env)];
                     };
                 };
+        reverseProxy= vmenv: reverse:
+        ''
+            # HTTPs Reverse Proxy (Checks Passthrough then termination)
+            ${generateReverse vmenv reverse}
+            ${backend_404}
+        '';
+        /*
         generateProxy = vmenv: hosts: consumers: ir@{forward, reverse}:
         ''
             # HTTPs Forward Proxy (always TLS passthrough)
@@ -170,8 +133,9 @@ in
             ${generateReverse vmenv consumers reverse}
             ${backend_404}
         '';
-        generateFirewall = 
-            vmenv: {forward, reverse}:
+        */
+        reverseFirewall = 
+            vmenv: reverse:
             let
                 # Reverse proxies are always open both on the host and the container 
                 processFwReverseInstance =
@@ -195,22 +159,7 @@ in
                 fwReverse = endpoint: instances:
                     lib.mkMerge (lib.mapAttrsToList (processFwReverseInstance endpoint) instances);
                 allReverseFirewall = lib.mkMerge (lib.mapAttrsToList fwReverse reverse);
-
-                fwForward =
-                    localenvuid: endpoints:
-                    let 
-                        localenv = config.naps.internal.envs.all.${localenvuid};
-                        ctFwdPorts = 
-                            lib.unique
-                                (lib.mapAttrsToList (epname: ep: ep.port) endpoints);
-                        fwCtForward =
-                            port: {
-                                ${utils.envHostUID localenv}."ve-${localenvuid}".tcp = [443];
-                                #${utils.envHostUID localenv}.${localenv.host.veth}.tcp = [443]; #TODO use veth0, veth1...
-                            };
-                    in lib.optionalAttrs (utils.isContainer localenv) (lib.mkMerge (map fwCtForward ctFwdPorts));
-                allForwardFirewall = lib.mkMerge (lib.mapAttrsToList fwForward forward);
-            in lib.mkMerge [allReverseFirewall allForwardFirewall];
+            in allReverseFirewall;
     };
 }
 

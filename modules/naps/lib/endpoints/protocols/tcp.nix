@@ -14,49 +14,6 @@ let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     utils = import ./lib {inherit flakeRoot lib inputs;};
 
-    generateForwardFrontend = 
-        vmname:
-        hosts: envname: 
-        reached: # endpoints reached by the environment: Map EndpointName Endpoint
-        let
-            env = config.naps.internal.envs.all.${envname}; 
-            mkFrontend = 
-                epname: ep@{port, ...}:
-                ''
-                    frontend forward_tcp_${envname}_${epname}
-                        mode tcp
-                        bind ${utils.envPrivateHostIP env}:${lib.toString port}
-                        default_backend forward_be_tcp_${epname}
-                '';
-
-                
-        in utils.concatMapAttrsStringsSep "\n" mkFrontend reached;
-    generateForwardBackend =  #Forward backends are shared per endpoint
-        vmname: hosts: 
-        forward: # Map Environment (Map EndpointName Endpoint)
-        let
-            
-            allReachedEndpoints = lib.foldl' (attr: attr': attr // attr') {} (builtins.attrValues forward);
-            mkBackend = epname: ep:
-            ''
-                backend forward_be_tcp_${epname}
-                    mode tcp
-                    ${utils.backendsConfig vmname ep (hosts.${epname})}
-            '';
-        in utils.concatMapAttrsStringsSep "\n" mkBackend allReachedEndpoints;
-
-    generateForward = 
-        vmenv: hosts: forward:
-        let 
-            vmname = utils.envUID vmenv;
-            frontends = utils.concatMapAttrsStringsSep "\n" (generateForwardFrontend vmname hosts) forward;
-            backends = generateForwardBackend vmname hosts forward;
-        in ''
-            # TCP Forward proxy
-            ${frontends}
-            ${backends}
-        '';
-
     generateReverseFrontend =
         vmenv: epname: _:
         let
@@ -81,23 +38,21 @@ let
         '';
     generateReverse = 
         vmenv:
-        consumers: 
         reverse: # Map Endpoint (Map InstanceName ServiceInstance)
         ''
             # TCP Reverse proxy
             ${utils.concatMapAttrsStringsSep "\n" (generateReverseFrontend vmenv) reverse}
             ${utils.concatMapAttrsStringsSep "\n" (generateReverseBackends (utils.envUID vmenv)) reverse}
         '';
-    generateProxy =
-        vmenv: hosts: consumers: {forward, reverse}:
+    reverseProxy =
+        vmenv: reverse:
         let
 
         in ''
-            ${generateForward vmenv hosts forward}
-            ${generateReverse vmenv consumers reverse}
+            ${generateReverse vmenv reverse}
         ''; #(forwardProxies ++ reverseProxies);
-    generateFirewall =
-        vmenv: {forward, reverse}:
+    reverseFirewall =
+        vmenv: reverse:
         let
             processReverse =
                  epname: insname: ins: 
@@ -117,27 +72,10 @@ let
                 endpoint: instances: 
                     lib.mkMerge (lib.mapAttrsToList (processReverse endpoint) instances);
             allReverseFw = lib.mkMerge (lib.mapAttrsToList mkReverseFw reverse);
-
-            mkForwardFw = 
-                localenvuid: endpoints: 
-                let
-                    localenv = config.naps.internal.envs.all.${localenvuid};
-                    allPorts = 
-                        lib.unique 
-                            (lib.mapAttrsToList (_: {port,...}: port) endpoints);
-                    processPort =
-                        port: {
-                            ${utils.envUID vmenv}."ve-${localenvuid}".tcp= [port];
-                            #${utils.envUID vmenv}.${localenv.host.veth}.tcp= [port];
-                        };
-                in lib.optionalAttrs 
-                    (utils.isContainer localenv) #open the forward port only for containers
-                    (lib.mkMerge (map processPort allPorts));
-            allForwardFw = lib.mkMerge (lib.mapAttrsToList mkForwardFw forward);
-        in lib.mkMerge [allReverseFw allForwardFw];
+        in allReverseFw;
 in {
     naps.lib.endpoints.tcp = {
-        inherit generateProxy generateFirewall;
+        inherit reverseProxy reverseFirewall;
     };
 }
 
