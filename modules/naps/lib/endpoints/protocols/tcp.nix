@@ -136,7 +136,7 @@ let
             allForwardFw = lib.mkMerge (lib.mapAttrsToList mkForwardFw forward);
         in lib.mkMerge [allReverseFw allForwardFw];
 in {
-    naps.endpoints.protocols.tcp = {
+    naps.lib.endpoints.tcp = {
         inherit generateProxy generateFirewall;
     };
 }

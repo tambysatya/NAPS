@@ -45,7 +45,7 @@ let
        
 in 
 {
-    options.naps.endpoints.protocols = lib.mkOption {
+    options.naps.lib.endpoints = lib.mkOption {
         description = "All available endpoints types. Map EndpointType Provider";
         type = types.attrsOf endpointType;
         default = {};

@@ -9,13 +9,13 @@ let
     checkEndpoint =
         protocol: epname: ep@{extraArgs,...}:
         let
-            argsType = config.naps.endpoints.protocols.${protocol}.extraArgsType;
+            argsType = config.naps.lib.endpoints.${protocol}.extraArgsType;
         in ep // {extraArgs = utils.checkType "modules/naps/endpoints/options/default.nix" argsType extraArgs;};
 
     checkProtocol =
         protocol: endpoints:
         let 
-            protocolExists = builtins.hasAttr protocol config.naps.endpoints.protocols;
+            protocolExists = builtins.hasAttr protocol config.naps.lib.endpoints;
         in 
             assert protocolExists || throw "Unknown protocol: ${protocol}";
             lib.mapAttrs (checkEndpoint protocol) endpoints;
@@ -43,7 +43,6 @@ let
       
 
 in {
-    imports = [./protocols.nix];
     options.naps.endpoints.inputs = lib.mkOption {
         description = "Endpoints exposed and reached by each environment: Map EnvUID perEnvConf";
         type = types.attrsOf inputs;

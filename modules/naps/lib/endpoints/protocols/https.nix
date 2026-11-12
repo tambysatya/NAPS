@@ -134,7 +134,7 @@ let
 
 in 
 {
-    naps.endpoints.protocols.https = {
+    naps.lib.endpoints.https = {
         extraArgsType = types.submodule {
             options = {
                 tls = lib.mkOption {

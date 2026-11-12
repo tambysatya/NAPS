@@ -139,7 +139,6 @@ let
 in {
     imports = [
         ./options
-        ./protocols
     ];
     naps.endpoints = lib.mkMerge [
         #(lib.mkMerge (lib.mapAttrsToList processInput config.naps.endpoints.inputs))

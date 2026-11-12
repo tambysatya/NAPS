@@ -45,13 +45,7 @@ let
                 endpoints = lib.mkOption {
                     description = "Various endpoints exposed by the service";
                     type = types.attrsOf (types.listOf types.endpoint);
-                    apply = eps: 
-                        let check = 
-                                eptype: ep:
-                                assert (builtins.hasAttr eptype config.naps.endpoints.protocols) || throw "Unknown endpoint ${eptype}";
-                                ep;
-
-                        in lib.mapAttrs check eps;
+                    default = {};
                 };
                 assets = lib.mkOption {
                     description = ''
@@ -62,16 +56,6 @@ let
                     '';
                     type = types.attrsOf (types.attrsOf types.asset);
                     default = {};
-                    apply =
-                        lib.mapAttrs 
-                            (assetType: assets:
-                                lib.mapAttrs 
-                                    (assetname: asset@{installArgs ? {}, ...}:  #sets the default value of path
-                                        let installArgs' = if builtins.hasAttr "path" installArgs && installArgs.path != null && installArgs.path != ""
-                                                           then installArgs
-                                                           else installArgs // {path = "${utils.paths.secrets}/${assetname}";};
-                                        in asset // {installArgs = installArgs';})
-                                     assets);
 
                 };
                 links = lib.mkOption {
