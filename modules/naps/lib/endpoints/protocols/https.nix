@@ -81,7 +81,7 @@ let
             mkBackend = 
                 epname: instances:
                 let 
-                    ep = config.naps.internal.endpoints.all."https".${epname};
+                    ep = config.naps.endpoints.all."https".${epname};
                     eptype = ep.extraArgs.tls; # termination or passthrough
                     mode = if eptype == "termination" then "http" else "tcp";
                 in ''
@@ -95,7 +95,7 @@ let
         vmenv: consumers:
         reverse: # Map EndpointName (Map InstanceUID ServiceInstance)
         let
-            allEndpoints = lib.mapAttrs (epname: _: config.naps.internal.endpoints.all."https".${epname}) reverse; # get the endpoints descriptions
+            allEndpoints = lib.mapAttrs (epname: _: config.naps.endpoints.all."https".${epname}) reverse; # get the endpoints descriptions
 
             # splits the endpoints between these that do terminate TLS by themselve (passthrough) and these that request TLS termination 
             # from HAproxy
@@ -177,7 +177,7 @@ in
                 processFwReverseInstance =
                     epname: insname: ins:
                     let
-                        port = config.naps.internal.endpoints.all."https".${epname}.port;
+                        port = config.naps.endpoints.all."https".${epname}.port;
                     in lib.mkMerge [
                        # On containers only we open the backend port (not on native instances)
                         (lib.optionalAttrs 

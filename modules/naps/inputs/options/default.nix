@@ -5,5 +5,6 @@ let
 in {
     imports = [
         ./assets.nix
+        ./endpoints.nix
     ];
 }

@@ -60,7 +60,7 @@ let
     generateReverseFrontend =
         vmenv: epname: _:
         let
-           ep = config.naps.internal.endpoints.all.tcp.${epname}; 
+           ep = config.naps.endpoints.all.tcp.${epname}; 
         in ''
             frontend reverse_tcp_${epname}
                 mode tcp
@@ -72,7 +72,7 @@ let
         vmname: epname: 
         exposed: # Local services exposing the endpoint: Map InstanceName ServiceInstances
         let
-           ep = config.naps.internal.endpoints.all.tcp.${epname}; 
+           ep = config.naps.endpoints.all.tcp.${epname}; 
         in
         ''
             backend reverse_be_tcp_${epname}
@@ -102,7 +102,7 @@ let
             processReverse =
                  epname: insname: ins: 
                  let
-                    port = config.naps.internal.endpoints.all.tcp.${epname}.port;
+                    port = config.naps.endpoints.all.tcp.${epname}.port;
                  in lib.mkMerge [
                     (lib.optionalAttrs (utils.runsInContainer ins) 
                      {

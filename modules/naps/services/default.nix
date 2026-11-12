@@ -23,7 +23,7 @@ let
                 protocol: ep:
                 let epname = utils.epToString ep;
                 in {
-                    ${utils.insEnvUID ins}.exposes.${protocol}.${epname} = ep;
+                    ${insname}.exposes.${protocol}.${epname} = ep;
                 };
         in lib.mkMerge (lib.mapAttrsToList (protocol: endpoints: lib.mkMerge (map (processProtocol protocol) endpoints)) allendpoints);
 
@@ -39,6 +39,6 @@ in {
    imports = [./options];
    naps = {
         inputs.assets = lib.mkMerge (lib.mapAttrsToList (processService assetsProcessor "assets") config.naps.services);
-        endpoints.inputs = lib.mkMerge (lib.mapAttrsToList (processService endpointsProcessor "endpoints") config.naps.services);
+        inputs.endpoints = lib.mkMerge (lib.mapAttrsToList (processService endpointsProcessor "endpoints") config.naps.services);
     };
 }
