@@ -14,18 +14,13 @@ let
     types = lib.types // filestypes // nettypes // endpointstypes // volumes // assets // links // deployement // users;
 
 
-    link = config: lib.mkOption {
-        description = "List of links provided by this service";
-        type = types.listOf types.str;
-        default = [];
-        apply = ls: if ls != [] && ! builtins.all (l: builtins.hasAttr l config.naps.links) ls then throw "${ls} contains invalid links" else lib.unique ls;
-    };
-
-
-
     serviceOptions = config: {...}: {
             options = {
-                provides = link config;
+                provides =  lib.mkOption {
+                    description = "List of links provided by this service";
+                    type = types.listOf types.str;
+                    default = [];
+                };
 
                 path = lib.mkOption {
                     description = "Path to the configuration file";

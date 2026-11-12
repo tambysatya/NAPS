@@ -14,7 +14,7 @@ let
     };
 in {
 
-naps.links.s3 = {
+naps.lib.links.s3 = {
     inherit access;
     endpoints.https = [
         {hostname = "s3.${config.naps.topology.domain}"; port = 3900; extraArgs = {tls="termination";};}

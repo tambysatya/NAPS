@@ -16,7 +16,7 @@ in {
              ./assets # assets management
 
              ./endpoints # Endpoints providers
-             #./links     # Links providers
+             ./links     # Links providers
 
 
              # Intermediate representations

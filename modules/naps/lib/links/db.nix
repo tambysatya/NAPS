@@ -28,7 +28,7 @@ let
 
 in {
 
-naps.links.postgres = {
+naps.lib.links.postgres = {
     inherit access;
     endpoints.tcp = [
         {hostname = "postgres.${config.naps.topology.domain}"; port = 5432;}

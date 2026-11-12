@@ -6,5 +6,6 @@ in {
     imports = [
         ./assets.nix
         ./endpoints.nix
+        ./links.nix
     ];
 }

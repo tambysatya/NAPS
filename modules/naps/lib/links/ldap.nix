@@ -18,7 +18,7 @@ let
     hostname = "ldap.${config.naps.topology.domain}";
 
 in {
-    naps.links.ldap = {
+    naps.lib.links.ldap = {
         inherit access;
         endpoints.tcp = [
             {inherit hostname; port=389;}

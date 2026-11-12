@@ -1,53 +1,48 @@
-{flakeRoot, lib, inputs, config, ...}:
+{flakeRoot, lib, inputs, config,...}:
 
 let
-    utils = import ../lib {inherit inputs lib flakeRoot;};    
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
-    
 
-    linkProvider = types.submodule {
+    links = types.submodule {
         options = {
-            endpoints = lib.mkOption {
-                description = "Which endpoints are necessarily exposed by a service providing the link: EndpointType -> [Endpoints]";
-                type = types.attrsOf (types.listOf types.endpoint);
-                default = {};
-                apply = eps: if eps == {} then throw "Link unreachable: some endpoints must be specified" else eps;
+            requesters = lib.mkOption {
+                description = "Recipients of the link: ServiceName -> DeployementEnvironment";
+                type = types.attrsOf types.deployementEnvironment;
             };
-            access = lib.mkOption {
-                description = "The type of the access. Is a submodule containing at least the field reload";
-                type = types.access;
-                default = null;
-            };
-            accessuid = lib.mkOption {
-                description = "Construct a unique ID from the access";
-                type = types.functionTo types.str;
-            };
-            assets = lib.mkOption {
-                description = ''
-                    A function that produces the set of assets consumed by the link, based on the deployement environment
-                    and the link providers environments:
-                    Env -> [Env] -> Access -> Map Provider (Map AssetName ShippedAsset)
-                '';
-                type = types.functionTo(types.functionTo (types.functionTo (types.attrsOf (types.attrsOf types.shippedAsset))));
-                default = _: _: _: {};
-            };
-            waitLinkUp = lib.mkOption {
-                description = "A script that should wait until the link is up";
-                type = types.str;
+            providers = lib.mkOption {
+                description = "Services providing the link: ServiceName -> ServiceInstance";
+                type = types.attrsOf types.serviceInstance;
             };
 
         };
     };
 
-
-    #TODO LDAP links
 in {
-
 options.naps.links = lib.mkOption {
-    description = "Links providers";
-    type = types.attrsOf linkProvider;
-    default = {};
-
+    description = "All deployement environments";
+    type = types.submodule {
+      options = {
+            all = lib.mkOption {
+                description = "All links. linktype -> {requesters, providers}";
+                type = types.attrsOf links;
+                default = {};
+            };
+            perEnv = lib.mkOption {
+                description = "All links requested by each environment, by type. Map Env (Map Type (Map UID Access))";
+                type = types.attrsOf (types.attrsOf (types.attrsOf types.access));
+                default = {};
+            };
+            perVM = lib.mkOption {
+                description = "All links requested by each vm (which includes the links requested by the containers hosted by the vm), grouped by type. VMEnv -> Type -> EnvUID -> AccessUID -> Access ";
+                type = types.attrsOf (types.attrsOf (types.attrsOf (types.attrsOf types.access)));
+                default = {};
+            };
+            outputs = lib.mkOption {
+                description = "Extra-configuration to be merged with the configuration of each environment: Map EnvUID Config";
+                type = types.attrsOf types.config;
+                default = {};
+            };
+        };
+    };
 };
-
 }

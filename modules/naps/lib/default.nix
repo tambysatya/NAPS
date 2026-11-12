@@ -1,5 +1,5 @@
 {...}:
 
 {
-    imports = [./assets ./endpoints];
+    imports = [./assets ./endpoints ./links];
 }
