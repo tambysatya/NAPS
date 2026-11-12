@@ -16,19 +16,14 @@ in {
         default = {};
     };
 
-    options.naps.endpoints.global.hosts = lib.mkOption {
+    options.naps.endpoints.hosts = lib.mkOption {
         description = "Endpoints hosts: Protocol -> hostname:port -> ServiceID -> ServiceInstance";
         type = types.attrsOf (types.attrsOf (types.attrsOf types.serviceInstance));
         default = {};
     };
-    options.naps.endpoints.global.consumers = lib.mkOption {
-        description = "Which services consume each endpoint: Protocol -> hostname:port -> ServiceID -> ServiceInstance";
-        type = types.attrsOf (types.attrsOf (types.attrsOf types.serviceInstance));
-        default = {};
-    };
-    options.naps.endpoints.ir = lib.mkOption {
-        description = "Proxy configuration of each VM: VM -> Protocol -> ProxyIR";
-        type = types.attrsOf (types.attrsOf types.proxyIR);
+    options.naps.endpoints.perVM = lib.mkOption {
+        description = "Exposed endpoints perVM (IR of the reverse-proxy): Map VM (Map Protocol (Map Endpoint (Map InstanceUID ServiceInstance)))";
+        type = types.attrsOf (types.attrsOf (types.attrsOf (types.attrsOf types.serviceInstance)));
         default = {};
     };
     options.naps.endpoints.outputs.proxy = lib.mkOption {

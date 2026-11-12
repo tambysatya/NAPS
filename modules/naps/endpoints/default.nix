@@ -19,36 +19,21 @@ let
     # ServiceInstance -> [Endpoints] -> {EndpointName = {ServiceInstance}}
     mkEndpointsHosts = insname: eps: map (ep: {${utils.epToString ep}.${insname} = config.naps.internal.envs.instances.${insname};}) eps;
 
-    processReachesEP = 
+    processEP = 
         insname: ins: protocol: epname: ep@{hostname, port, ...}:
         {
-            global.consumers.${protocol}.${epname}.${insname} = ins;
-            ir.${utils.insHostUID ins}.${protocol}.forward.${utils.insUID ins}.${epname} = ep;
+            all.${protocol}.${epname} = ep;
+            hosts.${protocol}.${epname}.${insname} = ins;
+            perVM.${utils.insHostUID ins}.${protocol}.${epname}.${insname} = ins;
         };
-    processExposesEP = 
-        insname: ins: protocol: epname: ep@{hostname, port, ...}:
-        {
-            global.hosts.${protocol}.${epname}.${insname} = ins;
-            ir.${utils.insHostUID ins}.${protocol}.reverse.${epname}.${insname} = ins;
-        };
-    processEP =
-        processor: # either processReachesEP or processExposesEP
-        insname: ins: protocol: epname: ep@{hostname, port, ...}:
-        lib.mkMerge [
-            {all.${protocol}.${epname} = ep;}
-            (processor insname ins protocol epname ep)
-        ];
 
     processProtocol = 
-        processor: # either processReachesEP or processExposesEP
         insname: ins: protocol: eps:
-        lib.mkMerge (lib.mapAttrsToList (processEP processor insname ins protocol) eps);
+        lib.mkMerge (lib.mapAttrsToList (processEP insname ins protocol) eps);
     processInput = 
-        insname: {exposes, reaches}:
+        insname: allendpoints:
         let ins = config.naps.envs.instances.${insname};
-            exposesAttr = lib.mapAttrsToList (processProtocol processExposesEP insname ins) exposes;
-            reachesAttr = lib.mapAttrsToList (processProtocol processReachesEP insname ins) reaches;
-        in  lib.mkMerge (exposesAttr ++ reachesAttr);
+        in  lib.mkMerge (lib.mapAttrsToList (processProtocol insname ins) allendpoints);
         
     /*
     processEndpoint = 
@@ -115,7 +100,6 @@ let
                 ];
         in lib.mkMerge (lib.mapAttrsToList processInstance instances);
 
-        */
     generateProxy =
         vmname: alleps:
         let
@@ -136,14 +120,17 @@ let
                 in fun vmenv ir;
         in utils.mergeAll (lib.mapAttrsToList process alleps); 
 
+    generateAssets = 
+        */
+
 in {
     imports = [
         ./options
     ];
     naps.endpoints = lib.mkMerge [
         (lib.mkMerge (lib.mapAttrsToList processInput config.naps.inputs.endpoints))
-        {outputs.proxy= lib.mapAttrs generateProxy config.naps.endpoints.ir;}
-        {outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.ir);}
+        #{outputs.proxy= lib.mapAttrs generateProxy config.naps.endpoints.ir;}
+        #{outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.ir);}
     ];
     /*
     naps.internal.endpoints = lib.mkMerge [

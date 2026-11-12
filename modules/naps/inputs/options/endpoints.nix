@@ -21,6 +21,7 @@ let
             lib.mapAttrs (checkEndpoint protocol) endpoints;
 
 
+/*
     inputs = types.submodule {
         options = {
             exposes = lib.mkOption {
@@ -38,10 +39,13 @@ let
             };
         };
     };
+*/
+
 
 in {
     options.naps.inputs.endpoints = lib.mkOption {
-        description = "Endpoints exposed and reached by each environment: Map InstanceUID Inputs";
-        type = types.attrsOf inputs;
+        description = "Endpoints exposed by each service: Map InstanceUID (Map Protocol (Map hostname:port Endpoint))";
+        type = types.attrsOf (types.attrsOf (types.attrsOf types.endpoint));
+        default = {};
     };
 } 
