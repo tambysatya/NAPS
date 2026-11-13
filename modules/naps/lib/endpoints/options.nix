@@ -26,9 +26,22 @@ let
                 description = ''
                     Given the intermediate representation of the VM exposed endpoints
                     generate the haproxy configuration.
-                    Type: VMEnv -> Map Protocol (Map EndpointName (Map InstanceUID Instance)) -> HAProxy configuration
+                    Type: VMEnv -> Map EndpointName {endpoint, hosts} -> HAProxy configuration
+                    with endpoint: endpoint description
+                         hosts: Map ServiceID ServiceInstances: local instances exposing the endpoint
                 '';
                 type = types.functionTo (types.functionTo types.str);
+            };
+            forwardProxy = lib.mkOption {
+                description = ''
+                    Given the intermediate representation of the VM exposed endpoints
+                    generate the haproxy configuration.
+                    Type: VMEnv -> Map EndpointName AllHosts -> Map EndpointName {endpoint, hosts} -> HAProxy configuration
+                    with AllHosts: All ServiceInstances exposing each endpoint
+                         endpoint: endpoint description
+                         hosts: Map ServiceID ServiceInstances: local instances exposing the endpoint
+                '';
+                type = types.functionTo (types.functionTo (types.functionTo types.str));
             };
             reverseFirewall = lib.mkOption { # TODO block also connections to the outside ?
                 description = ''

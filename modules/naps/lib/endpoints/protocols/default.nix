@@ -2,7 +2,7 @@
 
 {
     imports = [
-        ./tcp.nix
-        ./https.nix
+        ./tcp
+        ./https
     ];
 }
