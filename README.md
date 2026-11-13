@@ -264,6 +264,7 @@ CHECKS:
 - Assets: each asset type should have a provider
 - check if there is no clash in the endpoints ports/hostnames (across all the registered services)
 - configureListen must be defined if an endpoint is exposed
+- CHECK naps.inputs
 
 
 SERVICES:

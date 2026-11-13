@@ -19,7 +19,7 @@ let
     linkIR = types.submodule {
         options = {
             endpoints = lib.mkOption {
-                description = "Endpoints exposed by this link resource: Map EndpointType (Map EndpointName Endpoint)";
+                description = "Endpoints exposed by this link resource: Map Protocol (Map EndpointName Endpoint)";
                 type = types.attrsOf (types.attrsOf types.endpoint);
                 default = {};
             };
@@ -49,6 +49,11 @@ options.naps.links = lib.mkOption {
                         - the set of instances providing the links
                         - the set of instances consuming the links = (instance description, set of accesses)
                     Map LinkName LinkIR
+                    LinkIR = {
+                        endpoints : Map Protocol (Map EndpointName Endpoint)
+                        provides : Map InstanceUID Instance
+                        consumers : {instance: ServiceInstance, accesses = Map AccessUID Access}
+                    }
                 '';
                 type = types.attrsOf linkIR;
                 default = {};
