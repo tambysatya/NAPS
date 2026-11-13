@@ -99,24 +99,7 @@ in
                 };
             };
         };
-        generateAssets = 
-            {extraArgs,hostname,...}: 
-            env:
-            lib.optionalAttrs 
-                (extraArgs.tls == "termination")
-                {
-                    "tls".${hostname} = {
-                            asset = {
-                                generateArgs = {inherit hostname;};
-                                installArgs = {
-                                    owner = "haproxy";
-                                    sslFormat = "haproxy";
-                                };
-                                reload = ["haproxy.service"];
-                            };
-                            recipients = [(utils.envHostUID env)];
-                    };
-                };
+
         reverseProxy= vmenv: reverse:
         ''
             # HTTPs Reverse Proxy (Checks Passthrough then termination)
