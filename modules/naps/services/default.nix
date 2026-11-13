@@ -23,7 +23,7 @@ let
                 protocol: ep:
                 let epname = utils.epToString ep;
                 in {
-                    ${insname}.${protocol}.${epname} = ep;
+                    ${insname}.exposes.${protocol}.${epname} = ep;
                 };
         in lib.mkMerge (lib.mapAttrsToList (protocol: endpoints: lib.mkMerge (map (processProtocol protocol) endpoints)) allendpoints);
     provideProcessor = 

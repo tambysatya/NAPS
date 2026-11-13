@@ -18,16 +18,26 @@ let
     };
     linkIR = types.submodule {
         options = {
-            endpoints = lib.mkOption {
-                description = "Endpoints exposed by this link resource: Map Protocol (Map EndpointName Endpoint)";
-                type = types.attrsOf (types.attrsOf types.endpoint);
-                default = {};
-            };
             providers = lib.mkOption {
                 description = "Service Instances providing this link resource: Map ServiceUID ServiceInstance";
                 type = types.attrsOf types.serviceInstance;
                 default = {};
             };
+            consumers = lib.mkOption {
+                description = "Service Instances consuming this link resource: Map ServiceUID Consumer";
+                type = types.attrsOf consumer;
+                default = {};
+            };
+        };
+    };
+
+    reverseProxyIR = types.submodule {
+        options = {
+             endpoint = lib.mkOption {
+                description = "Endpoints exposed by this link resource: Map Protocol (Map EndpointName Endpoint)";
+                type = types.attrsOf types.endpoint;
+                default = {};
+            };           
             consumers = lib.mkOption {
                 description = "Service Instances consuming this link resource: Map ServiceUID Consumer";
                 type = types.attrsOf consumer;

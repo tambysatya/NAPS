@@ -2,39 +2,31 @@
 let
     utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
-    getLinkEP = linktype: config.naps.links.${linktype}.endpoints;
 
-    checkEndpoint = proto: ep@{extraArgs,...}:
-       let applyMerge =
-                type: value: 
-                if type == null then value else type.merge [] [{inherit value; file = "module.naps.internal.endpoints.default.nix";}];
-           check = config.naps.endpoints.${proto}.extraArgsType;
-       in ep // {extraArgs = applyMerge check extraArgs;};
-
-    # Transforms a list of endpoints into a set of hostname:port => endpoint.
-    # Performs type checking of the extraArgs as well
-    # [Endpoints] -> attrset hostname:port endpoint
-    mkEndpointsAttrs = proto: eps: map (ep: {${utils.epToString ep} = checkEndpoint proto ep;}) eps;
-    
-    # ServiceInstance -> [Endpoints] -> {EndpointName = {ServiceInstance}}
-    mkEndpointsHosts = insname: eps: map (ep: {${utils.epToString ep}.${insname} = config.naps.internal.envs.instances.${insname};}) eps;
-
-    processEP = 
-        insname: ins: protocol: epname: ep@{hostname, port, ...}:
-        {
-            all.${protocol}.${epname} = ep;
-            hosts.${protocol}.${epname}.${insname} = ins;
-            perEnv.${utils.insEnvUID ins}.${protocol}.${epname} = ep;
-            perVM.${utils.insHostUID ins}.${protocol}.${epname}.${insname} = ins;
+    processExposes = 
+        insname: ins: protocol: epname: endpoint@{hostname, port, ...}: {
+            all.${protocol}.${epname} = endpoint;
+            providers.${protocol}.${epname} = {inherit endpoint; hosts.${insname} = ins;};
+            perVM.${utils.insHostUID ins}.${protocol}.exposes.${epname} = {inherit endpoint; hosts.${insname} = ins;};
         };
-
-    processProtocol = 
-        insname: ins: protocol: eps:
-        lib.mkMerge (lib.mapAttrsToList (processEP insname ins protocol) eps);
+    processReaches = 
+        insname: ins: protocol: epname: endpoint@{hostname, port, ...}: {
+            all.${protocol}.${epname} = endpoint;
+            consumers.${protocol}.${epname} = {inherit endpoint; hosts.${insname} = ins;};
+            perVM.${utils.insHostUID ins}.${protocol}.consumes.${epname} = {inherit endpoint; hosts.${insname} = ins;};
+        };
+    processExposesProtocol = 
+        insname: ins: protocol: exposes:
+        lib.mkMerge (lib.mapAttrsToList (processExposes insname ins protocol) exposes);
+    processReachesProtocol = 
+        insname: ins: protocol: reaches:
+        lib.mkMerge (lib.mapAttrsToList (processReaches insname ins protocol) reaches);
     processInput = 
-        insname: allendpoints:
+        insname: {exposes, reaches}:
         let ins = config.naps.envs.instances.${insname};
-        in  lib.mkMerge (lib.mapAttrsToList (processProtocol insname ins) allendpoints);
+        in  lib.mkMerge 
+                (lib.mapAttrsToList (processExposesProtocol insname ins) exposes ++
+                 lib.mapAttrsToList (processReachesProtocol insname ins) reaches);
         
     /*
     processEndpoint = 
@@ -102,6 +94,7 @@ let
         in lib.mkMerge (lib.mapAttrsToList processInstance instances);
 
         */
+        /*
     generateProxy =
         vmname: alleps:
         let
@@ -133,17 +126,17 @@ let
         let
             env = config.naps.envs.all.${envname};
         in lib.mkMerge (lib.mapAttrsToList (protocolAssets env) alleps);
-
+    */
 in {
     imports = [
         ./options
     ];
     naps.endpoints = lib.mkMerge [
         (lib.mkMerge (lib.mapAttrsToList processInput config.naps.inputs.endpoints))
-        {outputs.proxy= lib.mapAttrs generateProxy config.naps.endpoints.perVM;}
-        {outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.perVM);}
+        #{outputs.proxy= lib.mapAttrs generateProxy config.naps.endpoints.perVM;}
+        #{outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.perVM);}
     ];
-    naps.inputs.assets = lib.mkMerge (lib.mapAttrsToList generateAssets config.naps.endpoints.perEnv);
+    #naps.inputs.assets = lib.mkMerge (lib.mapAttrsToList generateAssets config.naps.endpoints.perEnv);
     /*
     naps.internal.endpoints = lib.mkMerge [
             (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))

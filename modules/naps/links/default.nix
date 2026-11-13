@@ -31,31 +31,15 @@ let
         insname: {provides, consumes}:
         let
             instance = config.naps.envs.instances.${insname};
-            addLinkGeneralInfo =
-                linkname: 
-                let
-                    inherit (config.naps.lib.links.${linkname}) endpoints; # Map Protocol [Endpoints];
-                in {
-                    ${linkname}.endpoints = 
-                        # Need to assign each endpoint to an unique name using epToString
-                        lib.mapAttrs (proto: eps: lib.mkMerge (map (ep: {${utils.epToString ep} = ep;}) eps)) endpoints;
-                   };
             addToProviders = 
-                linkname:
-                lib.mkMerge [
-                    {all = addLinkGeneralInfo linkname;}
-                    {all.${linkname}.providers.${insname} = instance;}
-                ];
+                linkname: {all.${linkname}.providers.${insname} = instance;};
             addToConsumers = 
                 linkname: accesses:
-                lib.mkMerge [
-                    {all = addLinkGeneralInfo linkname;}
                     {
                         all.${linkname}.consumers.${insname} = {
                             inherit instance accesses;
                         };
-                    }
-                ];
+                    };
         in lib.mkMerge (map addToProviders provides ++ lib.mapAttrsToList addToConsumers consumes);
 in {
     imports = [./options];
