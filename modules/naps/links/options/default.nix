@@ -29,7 +29,7 @@ let
                 default = {};
             };
             consumers = lib.mkOption {
-                description = "Service Instances consuming this link resource: Map ServiceUID ServiceInstance";
+                description = "Service Instances consuming this link resource: Map ServiceUID Consumer";
                 type = types.attrsOf consumer;
                 default = {};
             };

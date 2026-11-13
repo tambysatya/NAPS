@@ -28,17 +28,40 @@ let
         in utils.mergeAll (lib.mapAttrsToList processLinkType alllinks);
 
     processInputs = 
-        envuid: {provides, consumes}:
+        insname: {provides, consumes}:
         let
-            addLink =
-                linkname:
+            instance = config.naps.envs.instances.${insname};
+            addLinkGeneralInfo =
+                linkname: 
                 let
-                    endpoints = config.naps.lib.links.${linkname}.endpoints;
-                in {};
-        in {};
+                    inherit (config.naps.lib.links.${linkname}) endpoints; # Map Protocol [Endpoints];
+                in {
+                    ${linkname}.endpoints = 
+                        # Need to assign each endpoint to an unique name using epToString
+                        lib.mapAttrs (proto: eps: lib.mkMerge (map (ep: {${utils.epToString ep} = ep;}) eps)) endpoints;
+                   };
+            addToProviders = 
+                linkname:
+                lib.mkMerge [
+                    (addLinkGeneralInfo linkname)
+                    {${linkname}.providers.${insname} = instance;}
+                ];
+            addToConsumers = 
+                linkname: accesses:
+                lib.mkMerge [
+                    (addLinkGeneralInfo linkname)
+                    {
+                        ${linkname}.consumers.${insname} = {
+                            inherit instance accesses;
+                        };
+                    }
+                ];
+
+        in lib.mkMerge (map addToProviders provides ++ lib.mapAttrsToList addToConsumers consumes);
 in {
     imports = [./options];
     naps.links = lib.mkMerge [
+        {all = lib.mkMerge (lib.mapAttrsToList processInputs config.naps.inputs.links);}
         #(lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
         #{outputs = utils.mergeAll [(lib.mapAttrs generateOutputs config.naps.internal.links.perEnv)];}
     ];

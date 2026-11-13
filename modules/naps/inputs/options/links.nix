@@ -33,7 +33,7 @@ let
 
     checkAccess =
         link: accessuid: access:
-        utils.checkType "modules/naps/inputs/options/links.nix" config.naps.lib.${link}.access access;
+        utils.checkType "modules/naps/inputs/options/links.nix" config.naps.lib.links.${link}.access access;
     checkAccesses = 
         link: conf: # conf: Map AccessUID Access
         lib.mapAttrs (checkAccess link) conf;
@@ -42,7 +42,7 @@ let
     checkConsumes = link: conf:
         assert (linkExists link) || throw "Unknown link ${link}. Please define it in naps.lib.links";
         assert (linkProvided link) || throw "No service provides ${link}. Refusing to evaluate";
-        checkAccesses conf;
+        checkAccesses link conf;
 
     checkProvides = link:
         assert (linkExists link) || throw "Unknown link ${link}. Please define it in naps.lib.links";
