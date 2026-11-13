@@ -43,15 +43,15 @@ let
             addToProviders = 
                 linkname:
                 lib.mkMerge [
-                    (addLinkGeneralInfo linkname)
-                    {${linkname}.providers.${insname} = instance;}
+                    {all = addLinkGeneralInfo linkname;}
+                    {all.${linkname}.providers.${insname} = instance;}
                 ];
             addToConsumers = 
                 linkname: accesses:
                 lib.mkMerge [
-                    (addLinkGeneralInfo linkname)
+                    {all = addLinkGeneralInfo linkname;}
                     {
-                        ${linkname}.consumers.${insname} = {
+                        all.${linkname}.consumers.${insname} = {
                             inherit instance accesses;
                         };
                     }
@@ -60,7 +60,7 @@ let
 in {
     imports = [./options];
     naps.links = lib.mkMerge [
-        {all = lib.mkMerge (lib.mapAttrsToList processInputs config.naps.inputs.links);}
+        (lib.mkMerge (lib.mapAttrsToList processInputs config.naps.inputs.links))
         #(lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
         #{outputs = utils.mergeAll [(lib.mapAttrs generateOutputs config.naps.internal.links.perEnv)];}
     ];
