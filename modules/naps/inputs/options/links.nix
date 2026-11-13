@@ -2,6 +2,7 @@
 
 let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
     linksInputs = types.submodule {
         options = {
@@ -30,11 +31,18 @@ let
     linkProvided = link: builtins.elem link allProvidedLinks;
     linkConsumed = link: builtins.elem link allConsumedLinks;
 
+    checkAccess =
+        link: accessuid: access:
+        utils.checkType "modules/naps/inputs/options/links.nix" config.naps.lib.${link}.access access;
+    checkAccesses = 
+        link: conf: # conf: Map AccessUID Access
+        lib.mapAttrs (checkAccess link) conf;
+
     # Weird name: but checks the consumes FIELD
     checkConsumes = link: conf:
         assert (linkExists link) || throw "Unknown link ${link}. Please define it in naps.lib.links";
         assert (linkProvided link) || throw "No service provides ${link}. Refusing to evaluate";
-        conf;
+        checkAccesses conf;
 
     checkProvides = link:
         assert (linkExists link) || throw "Unknown link ${link}. Please define it in naps.lib.links";

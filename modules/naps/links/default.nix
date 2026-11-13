@@ -27,6 +27,15 @@ let
                 };
         in utils.mergeAll (lib.mapAttrsToList processLinkType alllinks);
 
+    processInputs = 
+        envuid: {provides, consumes}:
+        let
+            addLink =
+                linkname:
+                let
+                    endpoints = config.naps.lib.links.${linkname}.endpoints;
+                in {};
+        in {};
 in {
     imports = [./options];
     naps.links = lib.mkMerge [
