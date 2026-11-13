@@ -56,7 +56,6 @@ let
                         };
                     }
                 ];
-
         in lib.mkMerge (map addToProviders provides ++ lib.mapAttrsToList addToConsumers consumes);
 in {
     imports = [./options];
