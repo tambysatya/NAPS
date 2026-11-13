@@ -82,7 +82,7 @@
 
         ip = "10.0.0.53";
         services = ["nc-bkup"]; 
-        containers = ["nc-main" "git-main"]; 
+        #containers = ["nc-main" "git-main"]; 
         disks = [
             {type="qcow"; location="persistent"; filesystem="ext4"; shared=true; options = ["nofail"];}
             {type="qcow"; location="test"; mount="/srv/persistent"; filesystem="ext4"; shared=false; options = ["nofail"];}

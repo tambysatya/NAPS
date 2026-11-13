@@ -5,7 +5,7 @@ let
 
 
     assetsProcessor = 
-        insname: ins: allassets:
+        insname: ins: srvuid: allassets:
         let 
             processProvider = 
                 provider:
@@ -17,7 +17,7 @@ let
 
 
     endpointsProcessor = 
-        insname: ins: allendpoints:
+        insname: ins: srvuid: allendpoints:
         let
             processProtocol =
                 protocol: ep:
@@ -27,23 +27,20 @@ let
                 };
         in lib.mkMerge (lib.mapAttrsToList (protocol: endpoints: lib.mkMerge (map (processProtocol protocol) endpoints)) allendpoints);
     provideProcessor = 
-        insname: ins: provides:
+        insname: ins: srvuid: provides:
         let
             processProvide =
-                provide:
-                {
-                    ${provide}.${insname} = ins;
-                };
+                linkname: {${insname}.provides = [linkname];};
         in lib.mkMerge (map processProvide provides);
     linksProcessor = 
-        insname: ins: links:
+        insname: ins: srvuid: links:
         let
+            endpoints = config.naps.service.${srvuid}.endpoints or {};
             processLink =
                 linkname: accesses:
                 let mkUID = config.naps.lib.links.${linkname}.accessuid;
                 in {
-                    ${linkname}.${insname} = 
-                        lib.mkMerge (map (access: {${mkUID access} = access;}) accesses);
+                    ${insname}.consumes.${linkname} = lib.mkMerge (map (access: {${mkUID access} = access;}) accesses);
                 };
         in lib.mkMerge (lib.mapAttrsToList processLink links);
 
@@ -57,14 +54,16 @@ let
         processor: # insname: ins: fieldValue -> AttrSet
         fieldName: # fieldName
         srvuid: srv:
-        lib.mkMerge (lib.mapAttrsToList (insname: ins: processor insname ins srv.${fieldName}) srv.instances);
+        lib.mkMerge (lib.mapAttrsToList (insname: ins: processor insname ins srvuid srv.${fieldName}) srv.instances);
             
 in {
    imports = [./options];
    naps = {
         inputs.assets = lib.mkMerge (lib.mapAttrsToList (processService assetsProcessor "assets") config.naps.services);
         inputs.endpoints = lib.mkMerge (lib.mapAttrsToList (processService endpointsProcessor "endpoints") config.naps.services);
-        inputs.links.providers = lib.mkMerge (lib.mapAttrsToList (processService provideProcessor "provides") config.naps.services);
-        inputs.links.consumers = lib.mkMerge (lib.mapAttrsToList (processService linksProcessor "links") config.naps.services);
+        inputs.links = lib.mkMerge [
+            (lib.mkMerge (lib.mapAttrsToList (processService provideProcessor "provides") config.naps.services))
+            (lib.mkMerge (lib.mapAttrsToList (processService linksProcessor "links") config.naps.services))
+        ];
     };
 }

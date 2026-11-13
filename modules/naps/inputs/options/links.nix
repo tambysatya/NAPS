@@ -2,15 +2,49 @@
 
 let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
-in {
-    options.naps.inputs.links.providers = lib.mkOption {
-        description = "Instances providing a link. Map LinkName (Map InstanceUID Instance)";
-        type = types.attrsOf (types.attrsOf types.serviceInstance);
-        default = {};
+
+    linksInputs = types.submodule {
+        options = {
+            provides = lib.mkOption {
+                description = "List of links provided by the environment";
+                type = types.listOf types.str;
+                default = [];
+                apply = links: lib.map checkProvides (lib.unique links); #TODO checks if the link exists. Warns if the link is not consumed
+            };
+            consumes = lib.mkOption {
+                description = ''
+                    Links consumed by the environment, using unique access identifiers
+                    Map LinkName (Map AccessUID Access)
+                '';
+                type = types.attrsOf (types.attrsOf types.access);
+                default = {}; # TODO checks if the links exists AND is provided
+                apply = lib.mapAttrs checkConsumes;
+            };
+        };
     };
-    options.naps.inputs.links.consumers = lib.mkOption {
-        description = "Instances consuming a link. Map LinkName (Map InstanceUID (Map AccessName Access))";
-        type = types.attrsOf (types.attrsOf (types.attrsOf types.anything));
+
+
+    allProvidedLinks = lib.concatLists (lib.mapAttrsToList (_: {provides, consumes}: provides) config.naps.inputs.links); 
+    allConsumedLinks = lib.concatLists (lib.mapAttrsToList (_: {provides, consumes}: builtins.attrNames consumes) config.naps.inputs.links); 
+    linkExists = link: builtins.hasAttr link config.naps.lib.links;
+    linkProvided = link: builtins.elem link allProvidedLinks;
+    linkConsumed = link: builtins.elem link allConsumedLinks;
+
+    # Weird name: but checks the consumes FIELD
+    checkConsumes = link: conf:
+        assert (linkExists link) || throw "Unknown link ${link}. Please define it in naps.lib.links";
+        assert (linkProvided link) || throw "No service provides ${link}. Refusing to evaluate";
+        conf;
+
+    checkProvides = link:
+        assert (linkExists link) || throw "Unknown link ${link}. Please define it in naps.lib.links";
+        assert (linkConsumed link) || builtins.trace "Warning: link ${link} is provided but not consumed." true;
+        link;
+
+in {
+    options.naps.inputs.links = lib.mkOption {
+        description = "Instances providing a link. Map ServiceUID LinkInputs";
+        type = types.attrsOf linksInputs;
         default = {};
     };
 }
