@@ -117,32 +117,7 @@ in
             ${backend_404}
         '';
         */
-        reverseFirewall = 
-            vmenv: reverse:
-            let
-                # Reverse proxies are always open both on the host and the container 
-                processFwReverseInstance =
-                    epname: insname: ins:
-                    let
-                        port = config.naps.endpoints.all."https".${epname}.port;
-                    in lib.mkMerge [
-                       # On containers only we open the backend port (not on native instances)
-                        (lib.optionalAttrs 
-                            (utils.runsInContainer ins) 
-                            {
-                                ${utils.insEnvUID ins}."eth0".tcp = [port];
-                            })
-                        /* We always open the 443 public port on the host
-                           (the only way to reach https endpoints) */
-                        {
-                            ${utils.envUID vmenv}."enp1s0".tcp = [443];
-                        }
 
-                    ];
-                fwReverse = endpoint: instances:
-                    lib.mkMerge (lib.mapAttrsToList (processFwReverseInstance endpoint) instances);
-                allReverseFirewall = lib.mkMerge (lib.mapAttrsToList fwReverse reverse);
-            in allReverseFirewall;
     };
 }
 

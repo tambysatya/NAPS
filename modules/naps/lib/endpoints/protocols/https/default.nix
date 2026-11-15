@@ -1,6 +1,8 @@
-{flakeRoot, lib, inputs, config, ...}:
+{flakeRoot, lib, inputs, config, pkgs, ...}:
 let
+    types = lib.types;
     utils = import ./lib {inherit flakeRoot lib inputs;};
+    rev = import ./reverse.nix {inherit flakeRoot lib inputs config pkgs;};
     extraArgsType = types.submodule {
         options = {
             tls = lib.mkOption {
@@ -32,5 +34,9 @@ let
                 };
             };
 in {
-    imports = [./reverse.nix ./forward.nix];
+    naps.lib.endpoints.https = {
+        inherit generateAssets extraArgsType;
+        reverseProxy = vmenv: epIR: "";
+        forwardProxy = vmenv: allhosts: envIR: "";
+    };
 }

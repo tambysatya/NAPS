@@ -1,4 +1,8 @@
-{...}:
+{flakeRoot, lib, inputs, config, ...}:
 {
-    imports = [./reverse.nix ./forward.nix];
+    naps.lib.endpoints.tcp= {
+        reverseProxy = vmenv: epIR: "";
+        forwardProxy = vmenv: allhosts: envIR: "";
+    };
+
 }
