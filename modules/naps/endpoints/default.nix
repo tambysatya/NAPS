@@ -6,13 +6,13 @@ let
     processExposes = 
         insname: ins: protocol: epname: endpoint@{hostname, port, ...}: {
             all.${protocol}.${epname} = endpoint;
-            providers.${protocol}.${epname} = {inherit endpoint; hosts.${insname} = ins;};
-            perVM.${utils.insHostUID ins}.${protocol}.exposes.${epname} = {inherit endpoint; hosts.${insname} = ins;};
+            providers.${protocol}.${epname} = {inherit endpoint; instances.${insname} = ins;};
+            perVM.${utils.insHostUID ins}.${protocol}.exposes.${epname} = {inherit endpoint; instances.${insname} = ins;};
         };
     processReaches = 
         insname: ins: protocol: epname: endpoint@{hostname, port, ...}: {
             all.${protocol}.${epname} = endpoint;
-            consumers.${protocol}.${epname} = {inherit endpoint; hosts.${insname} = ins;};
+            consumers.${protocol}.${epname} = {inherit endpoint; instances.${insname} = ins;};
             perVM.${utils.insHostUID ins}.${protocol}.reaches.${utils.insEnvUID ins} = {
                 env = utils.insEnv ins;
                 endpoints.${epname} = endpoint;

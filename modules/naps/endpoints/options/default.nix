@@ -11,8 +11,8 @@ let
                 description = "Endpoint description";
                 type = types.endpoint;
             };
-            hosts = lib.mkOption {
-                description = "(Local) Hosts exposing or reaching the endpoint: Map ServiceID ServiceInstance";
+            instances = lib.mkOption {
+                description = "Instances exposing or reaching the endpoint: Map ServiceID ServiceInstance";
                 type = types.attrsOf types.serviceInstance;
                 default = {};
             };
@@ -27,7 +27,7 @@ let
             };
             endpoints = lib.mkOption {
                 description = "Endponts reached by the environment: Map EndpointName Endpoint";
-                type = types.attrsOf types.endpoints;
+                type = types.attrsOf types.endpoint;
                 default = {};
             };
         };
@@ -36,7 +36,7 @@ let
     vmIR = types.submodule {
         options = {
             exposes = lib.mkOption {
-                description = "Exposed endpoints: Map EndpointName EndpointIR = {endpoint, hosts}";
+                description = "Exposed endpoints: Map EndpointName EndpointIR = {endpoint, instances}";
                 type = types.attrsOf endpointIR;
                 default = {};
             };
