@@ -19,6 +19,20 @@ let
         };
     };
 
+    envIR = types.submodule {
+        options = {
+            env = lib.mkOption {
+                description = "Environment description";
+                type = types.deployementEnvironment;
+            };
+            endpoints = lib.mkOption {
+                description = "Endponts reached by the environment: Map EndpointName Endpoint";
+                type = types.attrsOf types.endpoints;
+                default = {};
+            };
+        };
+    };
+
     vmIR = types.submodule {
         options = {
             exposes = lib.mkOption {
@@ -27,8 +41,8 @@ let
                 default = {};
             };
             reaches = lib.mkOption {
-                description = "Reached endpoints: Map EndpointName EndpointIR = {endpoint, hosts}";
-                type = types.attrsOf endpointIR;
+                description = "Reached endpoints: Map EnvUID EnvIR = {Env, Map EndpointsName Endpoints}";
+                type = types.attrsOf envIR;
                 default = {};
             };
         };

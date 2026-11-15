@@ -2,7 +2,7 @@
 
 {
     imports = [
-        ./tcp
-        ./https
+        #./tcp
+        #./https
     ];
 }

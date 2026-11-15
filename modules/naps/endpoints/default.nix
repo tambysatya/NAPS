@@ -13,7 +13,10 @@ let
         insname: ins: protocol: epname: endpoint@{hostname, port, ...}: {
             all.${protocol}.${epname} = endpoint;
             consumers.${protocol}.${epname} = {inherit endpoint; hosts.${insname} = ins;};
-            perVM.${utils.insHostUID ins}.${protocol}.consumes.${epname} = {inherit endpoint; hosts.${insname} = ins;};
+            perVM.${utils.insHostUID ins}.${protocol}.reaches.${utils.insEnvUID ins} = {
+                env = utils.insEnv ins;
+                endpoints.${epname} = endpoint;
+            };
         };
     processExposesProtocol = 
         insname: ins: protocol: exposes:
