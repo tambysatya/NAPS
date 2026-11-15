@@ -1,6 +1,18 @@
 {flakeRoot, lib, inputs, config, ...}:
 let
     utils = import ./lib {inherit flakeRoot lib inputs;};
+    extraArgsType = types.submodule {
+        options = {
+            tls = lib.mkOption {
+                description = ''
+                    How TLS is implemented through HAproxy. 
+                    Passthrough means that the service handles TLS while termination means that 
+                    HAProxy terminates TLS and the endpoints receives an HTTP connection.
+                '';
+                type = types.enum ["passthrough" "termination"];
+            };
+        };
+    };
     generateAssets = 
         {extraArgs,hostname,...}: 
         env:
