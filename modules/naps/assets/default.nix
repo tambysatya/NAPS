@@ -163,64 +163,6 @@ let
                             shippedassets))
                 allassets);
   
-    /*
-    # generates a set of assets of a list of endpoints of the same type
-    # Ins -> EPtype -> [Endpoint] -> Map Provider (Map AssetName ShippedAssets)
-    generateShippedAssets = 
-        ins: eptype: eps:
-        let generateAssets = config.naps.endpoints.${eptype}.generateAssets;
-            allEndpointsAssets = map (ep: generateAssets ep (utils.insEnv ins)) eps;
-        in lib.foldl' lib.recursiveUpdate {} allEndpointsAssets;
-
-    # InsName -> Ins -> EpType -> [Endpoits] -> [{states to merges}]
-    processEndpointAssets =
-        ins: eptype: eps: 
-        processShippedAssets 
-            (generateShippedAssets ins eptype eps);
-
-    processEndpoints = 
-        allendpoints: insname: ins:
-        let
-            processEndpointType =
-                eptype: eps:
-                processEndpointAssets ins eptype eps;
-        in lib.mkMerge (utils.concatMapAttrsToList processEndpointType allendpoints); 
-
-
-    processLinks =
-        alllinks: insname: ins:
-        let
-            processLinkType =
-                linktype: accesses:
-                let hosts = lib.mapAttrsToList (inshost: host: utils.insEnv host) config.naps.internal.links.all.${linktype}.providers;
-                    generateAsset = config.naps.links.${linktype}.assets;
-                    nativeLinkAssets_ = map (generateAsset (utils.insEnv ins) hosts) accesses;
-                    nativeLinkAssets = lib.foldl' lib.recursiveUpdate {} nativeLinkAssets_;
-
-                    #allLinkEndpoints = config.naps.links.${linktype}.endpoints;
-                in   #processEndpoints allLinkEndpoints insname ins;
-                    lib.mkMerge (processShippedAssets nativeLinkAssets);
-        in lib.mkMerge (lib.mapAttrsToList processLinkType alllinks);
-        
-    processProvides =
-        provides: insname: ins:
-        let
-            processProvide =
-                provide:
-                let allLinkEndpoints = config.naps.links.${provide}.endpoints;
-                in processEndpoints allLinkEndpoints insname ins;
-        in lib.mkMerge (map processProvide provides);
-
-    processService = 
-        srvname: {instances, provides, assets, links, endpoints,...}:
-        let
-            stdAssets = lib.mapAttrsToList (processAssets assets) instances;
-            endpointsAssets = lib.mapAttrsToList (processEndpoints endpoints) instances;
-            linksAssets = lib.mapAttrsToList (processLinks links) instances;
-            providesAssets = lib.mapAttrsToList (processProvides provides) instances;
-        in lib.mkMerge (stdAssets ++ endpointsAssets ++ linksAssets ++ providesAssets);
-
-    */
     generateConfig = 
         envuid: allassets:
         let
@@ -229,8 +171,8 @@ let
                 assets:
                 let
                     mkConfig = config.naps.assets.${provider}.apply.config;
-                in lib.mapAttrsToList (assetname: asset: mkConfig asset) assets;
-        in {${envuid} = utils.mergeAll (utils.concatMapAttrsToList providerConfig allassets);};
+                in utils.mergeAll (lib.mapAttrsToList (assetname: asset: mkConfig asset) assets);
+        in {${envuid} = utils.mergeAll (lib.mapAttrsToList providerConfig allassets);};
         
     generateContainersBinds =
         vmname: envassets:
