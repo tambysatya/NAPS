@@ -4,8 +4,9 @@ let
 
     utils = import "${flakeRoot}/lib" {inherit inputs lib;};
     domain = naps.topology.domain;
-    services = naps.internal.services;
-    dbaccesses = lib.concatMap ({links,...}: links.postgres or []) (builtins.attrValues services); #list of dbAccesses in the napsstructure
+    services = naps.services;
+    #dbaccesses = lib.concatMap ({links,...}: links.postgres or []) (builtins.attrValues services); #list of dbAccesses in the napsstructure
+    dbaccesses = lib.concatLists (lib.mapAttrsToList (insname: {accesses,...}: builtins.attrValues accesses) naps.links.all.postgres.consumers);
     users = lib.map (access: 
                         {
                             name = access.database;

@@ -65,7 +65,7 @@ let
         let conf = compileConfig args; 
             naps = conf.naps;
             vmconfs = lib.filterAttrs 
-                            (name: _: naps.internal.envs.all.${name}.type == "vm")
+                            (name: _: naps.envs.all.${name}.type == "vm")
                             naps.outputs.systems;
             configs = lib.mapAttrs
                             (vmname: vmconf:
@@ -97,7 +97,7 @@ let
                                     pkgs.step-cli
                                     pkgs.gzip
                                 ];
-                                text = naps.internal.assets.outputs.scripts.generate;
+                                text = naps.assets.outputs.scripts.generate;
                            };
                 in {
                     packages.${system}."gen-assets"= pkg;
@@ -127,7 +127,7 @@ let
                             meta.description = "Install assets for ${name}";
                         };
                     };
-            in utils.mergeAll (lib.mapAttrsToList build naps.internal.assets.outputs.scripts.install);
+            in utils.mergeAll (lib.mapAttrsToList build naps.assets.outputs.scripts.install);
 
 
         compileBuildDomains = 
@@ -336,7 +336,7 @@ let
           };
 
           /* Additional outputs for debugging */
-          services = lib.mapAttrs (_: x: builtins.removeAttrs x ["configureListen"] ) (compileNAPS exampleArgs).internal.services;
+          services = lib.mapAttrs (_: x: builtins.removeAttrs x ["configureListen"] ) (compileNAPS exampleArgs).services;
       }
 
       ];
