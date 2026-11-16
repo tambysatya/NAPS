@@ -5,7 +5,7 @@ let
 
 
     s3lib = import ./lib.nix {inherit lib inputs pkgs flakeRoot path;};
-    accesses = lib.concatMap ({links,...}: links.s3 or []) (builtins.attrValues naps.services);
+    accesses = lib.concatLists (lib.mapAttrsToList (insname: {accesses,...}: builtins.attrValues accesses) naps.links.all.s3.consumers);
     
 
 
