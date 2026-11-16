@@ -66,7 +66,7 @@ let
             initDir = 
                 rname: {mode, owner,...}: 
                 let
-                    disk = config.naps.internal.persistent.ir.resourcesLocation.${rname};
+                    disk = config.naps.persistent.ir.resourcesLocation.${rname};
                     persistentPath = "${disk.mount}/${rnameToPath rname}";
                 in ''
                     if [[ ! -d ${persistentPath} ]]; then

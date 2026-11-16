@@ -18,10 +18,11 @@ in {
              ./endpoints # Endpoints providers
              ./links     # Links providers
 
+             ./persistent # data persistency
+
 
              # Intermediate representations
              ####
-             ./internal
             
              ./outputs];
 

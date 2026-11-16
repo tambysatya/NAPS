@@ -8,7 +8,7 @@ let
         let 
             processDisk = 
                 disk@{type, location,...}: letter: {
-                    disks."${host}:${location}" = disk // {env = config.naps.internal.envs.all.${vmname}; inherit letter;};
+                    disks."${host}:${location}" = disk // {env = config.naps.envs.all.${vmname}; inherit letter;};
                 };
         in lib.zipListsWith processDisk disks (lib.stringToCharacters "bcdefghiklmnopqrstuvwxyz");
 
@@ -46,7 +46,7 @@ let
         let
             env = utils.insEnv instance;
             dname = assignResourceToDisk rname resource;
-            disk = config.naps.internal.persistent.disks.${dname};
+            disk = config.naps.persistent.disks.${dname};
         in {
             attachments = {
                 perEnv.${utils.insEnvUID instance} = {
@@ -78,7 +78,7 @@ let
     generateResourceConfig =
         rname: resource@{instance, path, ...}:
         let
-            disk = config.naps.internal.persistent.ir.resourcesLocation.${rname};
+            disk = config.naps.persistent.ir.resourcesLocation.${rname};
             vmname = utils.insHostUID instance;
             envuid = utils.insEnvUID instance;
             # we use rnameToPath because systemd does not like ':' in paths.
@@ -100,7 +100,7 @@ let
     generateVMSharedResourcesInitConfig = # initializes shared volumes if their resources does not exist
         vmname: {resources,...}:
         let
-            locations = config.naps.internal.persistent.ir.resourcesLocation;
+            locations = config.naps.persistent.ir.resourcesLocation;
             # a resource is shared when living on a shared volume
             isShared = rname: resource: locations.${rname}.shared;
             sharedResources = lib.filterAttrs isShared resources;
@@ -120,20 +120,20 @@ let
     
 in {
     imports = [./options];
-    naps.internal.persistent = 
+    naps.persistent = 
         lib.mkMerge [
             (lib.mkMerge (utils.concatMapAttrsToList processVM config.naps.topology.vms))
-            (lib.mkMerge (utils.concatMapAttrsToList processService config.naps.internal.services))
-            {ir = lib.mkMerge (lib.mapAttrsToList processResource config.naps.internal.persistent.resources);} 
+            (lib.mkMerge (utils.concatMapAttrsToList processService config.naps.services))
+            {ir = lib.mkMerge (lib.mapAttrsToList processResource config.naps.persistent.resources);} 
             # Disko configuration of VMs
-            {outputs = lib.mkMerge (lib.mapAttrsToList generateVMDiskoConfig config.naps.internal.persistent.ir.attachments.perVM);} 
+            {outputs = lib.mkMerge (lib.mapAttrsToList generateVMDiskoConfig config.naps.persistent.ir.attachments.perVM);} 
             # Container configurations
             {outputs = 
                 lib.mkMerge 
                     (utils.concatMapAttrsToList 
                         (envname: {resources, ...}: lib.mapAttrsToList generateResourceConfig resources)
-                        config.naps.internal.persistent.ir.attachments.perEnv);} 
+                        config.naps.persistent.ir.attachments.perEnv);} 
             # Initialization of the shared volumes + bind-mounts for native services sharing their storage
-            {outputs = lib.mkMerge (lib.mapAttrsToList generateVMSharedResourcesInitConfig config.naps.internal.persistent.ir.attachments.perVM);} 
+            {outputs = lib.mkMerge (lib.mapAttrsToList generateVMSharedResourcesInitConfig config.naps.persistent.ir.attachments.perVM);} 
         ];
 }

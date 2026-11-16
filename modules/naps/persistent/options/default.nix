@@ -58,22 +58,22 @@ let
 in
 
 {
-    options.naps.internal.persistent.disks= lib.mkOption {
+    options.naps.persistent.disks= lib.mkOption {
        description  = "All KVM disks, indexed using their unique identifier: Map DiskUID Disk";
        type = types.attrsOf types.disk;
        default = {};
     };
-    options.naps.internal.persistent.resources = lib.mkOption {
+    options.naps.persistent.resources = lib.mkOption {
        description  = "All resources, indexed using their unique identifier: Map ResourceID Disk";
        type = types.attrsOf types.resource;
        default = {};
     };
-    options.naps.internal.persistent.ir = lib.mkOption {
+    options.naps.persistent.ir = lib.mkOption {
        description  = "All resources assignment";
        type = ir;
        default = {};
     };
-    options.naps.internal.persistent.outputs = lib.mkOption {
+    options.naps.persistent.outputs = lib.mkOption {
        description  = "All configurations";
        type = types.attrsOf types.config;
        default = {};
