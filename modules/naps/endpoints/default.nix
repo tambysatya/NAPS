@@ -51,6 +51,21 @@ let
                 };
             in lib.mkMerge (lib.mapAttrsToList processIR vmir);
 
+
+    generateAssets = 
+        vmname: vmir:
+        let
+            processEndpoint = 
+                genAsset: epname: {endpoint, instances}:
+                lib.mkMerge (lib.mapAttrsToList (insname: ins: genAsset endpoint (utils.insEnv ins)) instances);
+            processIR =
+                protocol: {exposes, reaches}:
+                lib.mkMerge 
+                    (lib.mapAttrsToList 
+                        (processEndpoint config.naps.lib.endpoints.${protocol}.generateAssets) 
+                        exposes);
+
+        in lib.mkMerge (lib.mapAttrsToList processIR vmir);
  
         
 in {
@@ -62,13 +77,5 @@ in {
         {outputs= lib.mkMerge (lib.mapAttrsToList generateOutput config.naps.endpoints.perVM);}
         #{outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.perVM);}
     ];
-    #naps.inputs.assets = lib.mkMerge (lib.mapAttrsToList generateAssets config.naps.endpoints.perEnv);
-    /*
-    naps.internal.endpoints = lib.mkMerge [
-            (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-            {outputs.proxy= lib.mapAttrs generateProxy config.naps.internal.endpoints.ir;}
-            {outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.internal.endpoints.ir);}
-        ];
-    */
-
+    naps.inputs.assets = lib.mkMerge (lib.mapAttrsToList generateAssets config.naps.endpoints.perVM);
 }

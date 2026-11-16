@@ -222,6 +222,8 @@ Migration:
 
 -TLS: increase the lifetime of the certificates to 7d (in case of power cuts...)
 - In health-checks: haproxy does NOT check the ssl certificate. Is it a problem ? THe TLS is checked between the frontend HTTP-passtrhough and the frontend HTTP-termination (both on the same HAProxy isntance...) TODO
+- issue: multiple services exposing the same endpoint will share the same tls certificate (which may cause an issue for refreshing)
+    => asset managment should pass an option "shared" or "unique" ? TODO
 
 - we rely on ANYCORN which is not packaged by nixos so we have to maintain it ouerselve
 
@@ -271,7 +273,7 @@ SERVICES:
 -disabled forgejo-dump. Is it useful ??
 
 PROBLEMS:
-evaluation warning: autoinstall.service is ordered after 'network-online.target' but doesn't depend on it
+- evaluation warning: autoinstall.service is ordered after 'network-online.target' but doesn't depend on it
 
 
 EXPERIMENTS:
