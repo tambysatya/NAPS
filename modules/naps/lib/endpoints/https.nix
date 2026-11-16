@@ -1,8 +1,7 @@
 {flakeRoot, lib, inputs, config, pkgs, ...}:
 let
+    utils = import "${flakeRoot}/lib" {inherit flakeRoot lib inputs;};
     types = lib.types;
-    utils = import ./lib {inherit flakeRoot lib inputs;};
-    rev = import ./reverse.nix {inherit flakeRoot lib inputs config pkgs;};
     extraArgsType = types.submodule {
         options = {
             tls = lib.mkOption {
@@ -36,8 +35,8 @@ let
 in {
     naps.lib.endpoints.https = {
         inherit generateAssets extraArgsType;
-        reverseProxy =  # VMEnv -> Map EndpointName {Endpoint, Hosts}
-            vmenv: epIR: "";
-        forwardProxy = vmenv: allhosts: envIR: "";
+        # VMEnv -> Map Endpoint AllHosts -> Map EnvUID {env, endpoints} -> Map EndpointName {endpoint, instances}
+        generateProxy =  
+            vmenv: allhosts: forward: reverse: "";
     };
 }

@@ -1,10 +1,8 @@
 {...}:
-
 {
-
     imports = [
         ./options.nix
-        ./protocols
+        ./https.nix
+        ./tcp.nix
     ];
-
 }

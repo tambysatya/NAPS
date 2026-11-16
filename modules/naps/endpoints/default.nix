@@ -25,7 +25,7 @@ let
     processExposesProtocol = 
         insname: ins: protocol: exposes:
         #lib.mkMerge (lib.mapAttrsToList (processExposes insname ins protocol) exposes);
-        builtins.trace (utils.insHostUID ins) {};
+        {};
 
     processReachesProtocol = 
         insname: ins: protocol: reaches:
@@ -44,12 +44,8 @@ let
             processIR =
                 protocol: {exposes, reaches}:
                 let
-                    protolib = config.naps.lib.endpoints.${protocol};
-                    allhosts = config.naps.endpoints.all;
-                    inherit (protolib) forwardProxy reverseProxy;
-                    rev = reverseProxy vmenv exposes;
-                    fwd = forwardProxy vmenv allhosts reaches;
-                in lib.mkMerge [rev fwd];
+                    inherit (config.naps.lib.endpoints.${protocol}) generateProxy;
+                in generateProxy vmenv config.naps.endpoints.all exposes reaches;
             in lib.mkMerge (lib.mapAttrsToList processIR vmir);
         
 in {

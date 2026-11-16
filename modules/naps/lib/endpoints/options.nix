@@ -22,27 +22,17 @@ let
                 type = types.functionTo (types.functionTo (types.attrsOf (types.attrsOf types.shippedAsset)));
                 default = ep: env: {};
             };
-            reverseProxy = lib.mkOption {
+            generateProxy = lib.mkOption {
                 description = ''
                     Given the intermediate representation of the VM exposed endpoints
                     generate the haproxy configuration.
-                    Type: VMEnv -> Map EndpointName {endpoint, Map ServiceID ServiceInstance} -> HAProxy configuration
-                    with endpoint: endpoint description
-                         hosts: Map ServiceID ServiceInstances: local instances exposing the endpoint
+                    Type: VMEnv
+                          -> Map EndpointName AllHosts # Services instance exposing each endpoint
+                          -> Map EnvUID {env, Map EndpointName Endpoints} # Endpoints reached by each local environment (for the forward proxy)
+                          -> Map EndpointName {endpoint, Map ServiceID ServiceInstance} # Local service instance exposing each endpoint (for the reverse proxy)
+                          -> HAProxy configuration
                 '';
-                type = types.functionTo (types.functionTo types.str);
-            };
-            forwardProxy = lib.mkOption {
-                description = ''
-                    Given the intermediate representation of the VM exposed endpoints
-                    generate the haproxy configuration. 
-                    Type: VMEnv -> Map EndpointName AllHosts -> Map EnvUID {env, Map EndpointName Endpoints} -> HAProxy configuration
-                    with VMEnv: environment of the hosting VM
-                         AllHosts: All ServiceInstances exposing each endpoint
-                         endpoint: endpoint description
-                         hosts: Map ServiceID ServiceInstances: local instances exposing the endpoint
-                '';
-                type = types.functionTo (types.functionTo (types.functionTo types.str));
+                type = types.functionTo (types.functionTo (types.functionTo (types.functionTo types.str)));
             };
             reverseFirewall = lib.mkOption { # TODO block also connections to the outside ?
                 description = ''
