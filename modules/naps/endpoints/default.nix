@@ -24,8 +24,7 @@ let
         };
     processExposesProtocol = 
         insname: ins: protocol: exposes:
-        #lib.mkMerge (lib.mapAttrsToList (processExposes insname ins protocol) exposes);
-        {};
+        lib.mkMerge (lib.mapAttrsToList (processExposes insname ins protocol) exposes);
 
     processReachesProtocol = 
         insname: ins: protocol: reaches:
@@ -45,7 +44,7 @@ let
                 protocol: {exposes, reaches}:
                 let
                     inherit (config.naps.lib.endpoints.${protocol}) generateProxy;
-                in generateProxy vmenv config.naps.endpoints.all exposes reaches;
+                in generateProxy vmenv config.naps.endpoints.providers.${protocol} reaches exposes;
             in lib.mkMerge (lib.mapAttrsToList processIR vmir);
         
 in {

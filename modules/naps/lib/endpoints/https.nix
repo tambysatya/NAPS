@@ -14,7 +14,7 @@
     TODO: check the haproxy config using haproxy -c -f /etc/haproxy/haproxy.cfg
 */
 let
-    utils = import ./lib {inherit lib inputs;};
+    utils = import ./lib {inherit flakeRoot lib inputs;};
     types = lib.types;
     extraArgsType = types.submodule {
         options = {
@@ -60,7 +60,7 @@ let
 
 
     generateForwardFrontend = # One forward frontend per environment
-        vmenv: hosts: envname:
+        vmenv: envname:
         {env, endpoints}: # Map EndpointName Endpoint
         let
            localmap = mkMap "forward" (builtins.attrValues endpoints);
@@ -78,8 +78,8 @@ let
         endpoints)
     */
     generateForwardBackend =
-        vmenv: hosts:
-        forward@{env, endpoints}: # Map EnvironmentUID {env, (Map EndpointName Endpoint)}
+        vmenv: allinstances:
+        forward: # Map EnvironmentUID {env, (Map EndpointName Endpoint)}
         let
             vmname = utils.envUID vmenv;
             mkBackend = epname: ep@{hostname,...}:
@@ -89,24 +89,91 @@ let
                     ${utils.backendsConfig
                         vmname
                         (ep // {port = 443;}) # we override the port in forward mode: we always use HTTPs
-                        (hosts.${utils.epToString ep})}
+                        (allinstances.${utils.epToString ep}.instances)}
                 '';
-            allEndpoints = lib.foldl' (attr: attr': attr // attr') {} (builtins.attrValues endpoints); # endpoints reached by all the containers
+            endpointsPerEnv = lib.mapAttrsToList (_: {endpoints,...}: endpoints) forward;
+            allEndpoints = lib.foldl' (attr: attr': attr // attr') {} endpointsPerEnv;
         in utils.concatMapAttrsStringsSep "\n" mkBackend allEndpoints;
     generateForward =
-        vmenv: hosts: # Map EndpointName (Map ServiceUID ServiceInstances)
+        vmenv: allinstances: # Map EndpointName (Map ServiceUID ServiceInstances)
         forward: # For each environment, which endpoints are reached: Map EnvUID {Env, Map EndpointName Endpoint}
         ''
-            ${utils.concatMapAttrsStringsSep "\n" (generateForwardFrontend vmenv hosts) forward}
-            ${generateForwardBackend vmenv hosts forward}
+            ${utils.concatMapAttrsStringsSep "\n" (generateForwardFrontend vmenv) forward}
+            ${generateForwardBackend vmenv allinstances forward}
+        '';
+
+    generateReverseBackend =
+        vmenv: reverse: # Map EndpointName {endpoint, (Map InstanceUID ServiceInstance)}
+        let
+            vmname = utils.envUID vmenv;
+            mkBackend =
+                epname: {endpoint, instances}:
+                let
+                    eptype = endpoint.extraArgs.tls; # termination or passthrough
+                    mode = if eptype == "termination" then "http" else "tcp";
+                in ''
+                    backend reverse_${eptype}_be_http_${endpoint.hostname}_443
+                        mode ${mode}
+                        ${utils.backendsConfig vmname endpoint instances}
+                '';
+
+        in utils.concatMapAttrsStringsSep "\n" mkBackend reverse;
+    generateReverse =
+        vmenv:
+        reverse: # Map EndpointName {endpoint, (Map InstanceUID ServiceInstance)}
+        let
+            allEndpoints = lib.mapAttrs (epname: {endpoint, instances}: endpoint) reverse; # get the endpoints descriptions
+
+            # splits the endpoints between these that do terminate TLS by themselve (passthrough) and these that request TLS termination
+            # from HAproxy
+            parts = utils.partitionAttrs (_: {extraArgs,...}: extraArgs.tls == "passthrough") allEndpoints;
+            passthrough = parts.right; # terminate TLS by themselve
+            termination = parts.wrong; # request TLS termination from HAProxy
+
+            # Generate the HAProxy maps
+            mapPassthrough = mkMap "reverse_passthrough" (builtins.attrValues passthrough);
+            mapTermination = mkMap "reverse_termination" (builtins.attrValues termination);
+            crtlist = mkCrtList (builtins.attrValues termination);
+        in ''
+            frontend reverse_http_passthrough
+                mode tcp
+                bind ${utils.envIP vmenv}:443
+                tcp-request inspect-delay 5s
+                tcp-request content accept if { req_ssl_hello_type 1 }
+                use_backend %[req.ssl_sni,lower,map_dom(${mapPassthrough},be_passthrough_fallback)]
+
+            # Enter here if the passthrough did not match any backend. This backend routes to the local HTTP frontend
+            backend be_passthrough_fallback
+                mode tcp
+                server reverse_http_termination 127.0.0.3:443 check check-ssl ca-file /etc/intermediate_ca.crt
+
+            # Since the passthrough failed, we try to terminate the TLS.
+            frontend reverse_http_termination
+                mode http
+                bind 127.0.0.3:443 ssl crt-list ${crtlist}
+                option forwardfor
+                http-request set-header X-Forwarded-Proto https
+                http-request set-header X-Forwarded-Port 443
+                use_backend %[req.hdr(host),lower,map_dom(${mapTermination},be_http_404)]
+
+            ${generateReverseBackend vmenv reverse}
+        '';
+
+        generateProxy = vmenv: allinstances: reaches: exposes:
+        ''
+            # HTTPs Forward Proxy (always TLS passthrough)
+            ${generateForward vmenv allinstances reaches}
+
+            # HTTPs Reverse Proxy (Checks Passthrough then termination)
+            ${generateReverse vmenv exposes}
+            ${backend_404}
         '';
 
 
 in {
     naps.lib.endpoints.https = {
         inherit generateAssets extraArgsType;
-        # VMEnv -> Map Endpoint AllHosts -> Map EnvUID {env, endpoints} -> Map EndpointName {endpoint, instances}
-        generateProxy =  
-            vmenv: allhosts: forward: reverse: "";
+        # VMEnv -> Map Endpoint AllInstances -> Map EnvUID {env, endpoints} -> Map EndpointName {endpoint, instances}
+        inherit generateProxy;
     };
 }
