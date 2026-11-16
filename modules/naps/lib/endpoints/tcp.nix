@@ -78,11 +78,50 @@ let
             ${generateReverse vmenv reverse}
         ''; 
 
+    generateFirewall =
+        vmenv: reaches: exposes:
+        let
+            processReverse =
+                 epname: endpoint@{port,...}: insname: ins:
+                 lib.mkMerge [
+                    (lib.optionalAttrs (utils.runsInContainer ins)
+                     {
+                        ${utils.insEnvUID ins}."eth0".tcp = [port];
+                     })
+                    {
+                        ${utils.envUID vmenv}."enp1s0".tcp = [port];
+                    }
+                 ];
+
+            mkReverseFw =
+                epname: {endpoint, instances}:
+                    lib.mkMerge (lib.mapAttrsToList (processReverse epname endpoint) instances);
+            allReverseFw = lib.mkMerge (lib.mapAttrsToList mkReverseFw exposes);
+
+            mkForwardFw =
+                localenvuid: {env, endpoints}:
+                let
+                    allPorts =
+                        lib.unique
+                            (lib.mapAttrsToList (_: {port,...}: port) endpoints);
+                    processPort =
+                        port: {
+                            ${utils.envUID vmenv}."ve-${localenvuid}".tcp= [port];
+                            #${utils.envUID vmenv}.${localenv.host.veth}.tcp= [port];
+                        };
+                in lib.optionalAttrs
+                    (utils.isContainer env) #open the forward port only for containers
+                    (lib.mkMerge (map processPort allPorts));
+            allForwardFw = lib.mkMerge (lib.mapAttrsToList mkForwardFw reaches);
+        in lib.mkMerge [allReverseFw allForwardFw];
+
 in {
     naps.lib.endpoints.tcp= {
         # VMEnv -> Map Endpoint AllHosts -> Map EnvUID {env, endpoints} -> Map EndpointName {endpoint, instances}
         inherit generateProxy;
-        generateFirewall = vmenv: reaches: exposes: {};
+
+        # VMEnv -> Map EnvUID {env, endpoints} -> Map EndpointName {endpoint, instances}
+        inherit generateFirewall;
     };
 
 }
