@@ -170,7 +170,7 @@ let
                 provider: 
                 assets:
                 let
-                    mkConfig = config.naps.assets.${provider}.apply.config;
+                    mkConfig = config.naps.lib.assets.${provider}.apply.config;
                 in utils.mergeAll (lib.mapAttrsToList (assetname: asset: mkConfig asset) assets);
         in {${envuid} = utils.mergeAll (lib.mapAttrsToList providerConfig allassets);};
         
@@ -184,7 +184,7 @@ let
                 envuid: provider: assets:
                 lib.optionalAttrs 
                     (provider != "plain") 
-                    (lib.mkMerge (lib.mapAttrsToList (processContainerAsset envuid) assets));
+                    (utils.mergeAll (lib.mapAttrsToList (processContainerAsset envuid) assets));
             processEnv =
                 envuid: allassets:
                 let env = config.naps.envs.all.${envuid};
