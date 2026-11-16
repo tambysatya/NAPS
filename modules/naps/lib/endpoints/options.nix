@@ -34,6 +34,7 @@ let
                 '';
                 type = types.functionTo (types.functionTo (types.functionTo (types.functionTo types.str)));
             };
+            /*
             reverseFirewall = lib.mkOption { # TODO block also connections to the outside ?
                 description = ''
                     Given the set of exposed endpoints, generates the firewall configuration
@@ -41,8 +42,8 @@ let
                     Type: VMEnv -> ProxyIR -> Map EnvUID (Map Interface (Map Proto [Port]))
                 ''; #TODO : firewall for containers ?
                 type = types.functionTo (types.functionTo (types.attrsOf (types.attrsOf (types.attrsOf (types.listOf lib.types.port)))));
-                default = env: ir: {};
             };
+            */
         };
     };
        
