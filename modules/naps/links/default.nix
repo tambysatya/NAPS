@@ -45,13 +45,18 @@ let
     generateAssets = 
         link: {consumers, providers}:
         let
+            #genAssets :: Env -> [Env] -> Access -> Map Provider (Map AssetName ShippedAsset)
+            genAssets = config.naps.lib.links.${link}.assets; 
+            allHosts = lib.mapAttrsToList (_: instance: utils.insEnv instance) providers;
             processConsumers = 
-                insname: {instance,accesses}: {};
-            processProviders = 
-                insname: instance: {};
+                insname: {instance,accesses}: 
+                    lib.mkMerge 
+                        (lib.mapAttrsToList 
+                            (accessuid: access: 
+                                genAssets (utils.insEnv instance) allHosts access)
+                            accesses);
         in lib.mkMerge 
-                (lib.mapAttrsToList processConsumers consumers ++ 
-                 lib.mapAttrsToList processProviders providers);
+            (lib.mapAttrsToList processConsumers consumers);
     generateEndpoints = 
         link: {consumers, providers}: 
         let
