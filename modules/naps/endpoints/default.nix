@@ -36,16 +36,22 @@ let
                 (lib.mapAttrsToList (processExposesProtocol insname ins) exposes ++
                  lib.mapAttrsToList (processReachesProtocol insname ins) reaches);
 
-    generateProxy =
+    generateOutput =
         vmname: vmir:
         let
             vmenv = config.naps.envs.all.${vmname};
             processIR =
                 protocol: {exposes, reaches}:
                 let
-                    inherit (config.naps.lib.endpoints.${protocol}) generateProxy;
-                in generateProxy vmenv config.naps.endpoints.providers.${protocol} reaches exposes;
+                    inherit (config.naps.lib.endpoints.${protocol}) generateProxy generateFirewall;
+                in
+                {
+                    proxy.${vmname} = generateProxy vmenv config.naps.endpoints.providers.${protocol} reaches exposes;
+                    firewall = generateFirewall vmenv reaches exposes;
+                };
             in lib.mkMerge (lib.mapAttrsToList processIR vmir);
+
+ 
         
 in {
     imports = [
@@ -53,7 +59,7 @@ in {
     ];
     naps.endpoints = lib.mkMerge [
         (lib.mkMerge (lib.mapAttrsToList processInput config.naps.inputs.endpoints))
-        {outputs.proxy= lib.mapAttrs generateProxy config.naps.endpoints.perVM;}
+        {outputs= lib.mkMerge (lib.mapAttrsToList generateOutput config.naps.endpoints.perVM);}
         #{outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.perVM);}
     ];
     #naps.inputs.assets = lib.mkMerge (lib.mapAttrsToList generateAssets config.naps.endpoints.perEnv);

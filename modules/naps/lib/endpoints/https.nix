@@ -159,15 +159,55 @@ let
             ${generateReverseBackend vmenv reverse}
         '';
 
-        generateProxy = vmenv: allinstances: reaches: exposes:
-        ''
-            # HTTPs Forward Proxy (always TLS passthrough)
-            ${generateForward vmenv allinstances reaches}
+    generateProxy = vmenv: allinstances: reaches: exposes:
+    ''
+        # HTTPs Forward Proxy (always TLS passthrough)
+        ${generateForward vmenv allinstances reaches}
 
-            # HTTPs Reverse Proxy (Checks Passthrough then termination)
-            ${generateReverse vmenv exposes}
-            ${backend_404}
-        '';
+        # HTTPs Reverse Proxy (Checks Passthrough then termination)
+        ${generateReverse vmenv exposes}
+        ${backend_404}
+    '';
+    generateFirewall =
+        vmenv: reaches: exposes:
+        let
+            # Reverse proxies are always open both on the host and the container
+            processFwReverseInstance =
+                epname: endpoint: insname: ins:
+                let
+                    port = endpoint.port;
+                in lib.mkMerge [
+                   # On containers only we open the backend port (not on native instances)
+                    (lib.optionalAttrs
+                        (utils.runsInContainer ins)
+                        {
+                            ${utils.insEnvUID ins}."eth0".tcp = [port];
+                        })
+                    /* We always open the 443 public port on the host
+                       (the only way to reach https endpoints) */
+                    {
+                        ${utils.envUID vmenv}."enp1s0".tcp = [443];
+                    }
+
+                ];
+            fwReverse = epname: epIR@{endpoint, instances}:
+                lib.mkMerge (lib.mapAttrsToList (processFwReverseInstance epname endpoint) instances);
+            allReverseFirewall = lib.mkMerge (lib.mapAttrsToList fwReverse exposes);
+
+            fwForward =
+                localenvuid: {env, endpoints}:
+                let
+                    ctFwdPorts =
+                        lib.unique
+                            (lib.mapAttrsToList (epname: ep: ep.port) endpoints);
+                    fwCtForward =
+                        port: {
+                            ${utils.envHostUID env}."ve-${localenvuid}".tcp = [443];
+                            #${utils.envHostUID localenv}.${localenv.host.veth}.tcp = [443]; #TODO use veth0, veth1...
+                        };
+                in lib.optionalAttrs (utils.isContainer env) (lib.mkMerge (map fwCtForward ctFwdPorts));
+            allForwardFirewall = lib.mkMerge (lib.mapAttrsToList fwForward reaches);
+        in lib.mkMerge [allReverseFirewall allForwardFirewall];
 
 
 in {
@@ -175,5 +215,7 @@ in {
         inherit generateAssets extraArgsType;
         # VMEnv -> Map Endpoint AllInstances -> Map EnvUID {env, endpoints} -> Map EndpointName {endpoint, instances}
         inherit generateProxy;
+        # VMEnv -> Map EnvUID {env, endpoints} -> Map EndpointName {endpoint, instances}
+        inherit generateFirewall;
     };
 }

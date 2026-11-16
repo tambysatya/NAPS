@@ -82,6 +82,7 @@ in {
     naps.lib.endpoints.tcp= {
         # VMEnv -> Map Endpoint AllHosts -> Map EnvUID {env, endpoints} -> Map EndpointName {endpoint, instances}
         inherit generateProxy;
+        generateFirewall = vmenv: reaches: exposes: {};
     };
 
 }
