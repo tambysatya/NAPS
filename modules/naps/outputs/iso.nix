@@ -15,7 +15,7 @@ let
         };
 
     provisionersAddrs = lib.unique (map (builtins.getAttr "provisionerAddr") (builtins.attrValues config.naps.topology.vms));
-    allUsers = lib.mapAttrsToList (_: {users,...}: lib.mkMerge (lib.mapAttrsToList mkUser users)) config.naps.internal.services;
+    allUsers = lib.mapAttrsToList (_: {users,...}: lib.mkMerge (lib.mapAttrsToList mkUser users)) config.naps.services;
 in {
 
     naps.outputs.iso = {

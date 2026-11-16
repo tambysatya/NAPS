@@ -10,6 +10,7 @@ let
             perVM.${utils.insHostUID ins} = {
                 ${protocol}.exposes.${epname} = {inherit endpoint; instances.${insname} = ins;};
             };
+            perEnv.${utils.insEnvUID ins}.${protocol}.exposes.${epname} = endpoint;
         };
     processReaches = 
         insname: ins: protocol: epname: endpoint@{hostname, port, ...}: {
@@ -21,6 +22,7 @@ let
                     endpoints.${epname} = endpoint;
                 };
             };
+            perEnv.${utils.insEnvUID ins}.${protocol}.reaches.${epname} = endpoint;
         };
     processExposesProtocol = 
         insname: ins: protocol: exposes:
@@ -36,7 +38,7 @@ let
                 (lib.mapAttrsToList (processExposesProtocol insname ins) exposes ++
                  lib.mapAttrsToList (processReachesProtocol insname ins) reaches);
 
-    generateOutput =
+    generateProxyAndFirewall =
         vmname: vmir:
         let
             vmenv = config.naps.envs.all.${vmname};
@@ -50,6 +52,19 @@ let
                     firewall = generateFirewall vmenv reaches exposes;
                 };
             in lib.mkMerge (lib.mapAttrsToList processIR vmir);
+
+    generateEtcHosts =
+        envname: alleps:
+        let
+            env = config.naps.envs.all.${envname};            
+            proxy = if utils.isContainer env then utils.envPrivateHostIP env else "127.0.0.1";
+
+            processProtocol =
+                proto: {reaches, ...}:
+                lib.mapAttrsToList (epname: {hostname,...}: hostname) reaches;
+        in {
+            ${proxy}=lib.mkMerge (lib.mapAttrsToList processProtocol alleps);
+        };
 
 
     generateAssets = 
@@ -74,7 +89,8 @@ in {
     ];
     naps.endpoints = lib.mkMerge [
         (lib.mkMerge (lib.mapAttrsToList processInput config.naps.inputs.endpoints))
-        {outputs= lib.mkMerge (lib.mapAttrsToList generateOutput config.naps.endpoints.perVM);}
+        {outputs= lib.mkMerge (lib.mapAttrsToList generateProxyAndFirewall config.naps.endpoints.perVM);}
+        {outputs.hostsFile= lib.mapAttrs generateEtcHosts config.naps.endpoints.perEnv;}
         #{outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.perVM);}
     ];
     naps.inputs.assets = lib.mkMerge (lib.mapAttrsToList generateAssets config.naps.endpoints.perVM);

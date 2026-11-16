@@ -5,7 +5,7 @@ let
     types = import "${flakeRoot}/lib/types" {inherit lib inputs;};
 
     
-    endpointIR = types.submodule {
+    exposesIR = types.submodule {
         options = {
             endpoint = lib.mkOption {
                 description = "Endpoint description";
@@ -19,7 +19,7 @@ let
         };
     };
 
-    envIR = types.submodule {
+    reachesIR = types.submodule {
         options = {
             env = lib.mkOption {
                 description = "Environment description";
@@ -37,12 +37,27 @@ let
         options = {
             exposes = lib.mkOption {
                 description = "Exposed endpoints: Map EndpointName EndpointIR = {endpoint, instances}";
-                type = types.attrsOf endpointIR;
+                type = types.attrsOf exposesIR;
                 default = {};
             };
             reaches = lib.mkOption {
                 description = "Reached endpoints: Map EnvUID EnvIR = {Env, Map EndpointsName Endpoints}";
-                type = types.attrsOf envIR;
+                type = types.attrsOf reachesIR;
+                default = {};
+            };
+        };
+    };
+
+    envIR = types.submodule {
+        options = {
+            exposes = lib.mkOption {
+                description = "Endpoints exposed: Map EndpointName Endpoint";
+                type = types.attrsOf types.endpoint;
+                default = {};
+            };
+            reaches = lib.mkOption {
+                description = "Endpoints reached: Map EndpointName Endpoint";
+                type = types.attrsOf types.endpoint;
                 default = {};
             };
         };
@@ -63,12 +78,18 @@ in {
 
     options.naps.endpoints.providers = lib.mkOption {
         description = "Endpoints providers: Map Protocol (Map hostname:port {endpoint, hosts})";
-        type = types.attrsOf (types.attrsOf endpointIR);
+        type = types.attrsOf (types.attrsOf exposesIR);
         default = {};
     };
     options.naps.endpoints.consumers= lib.mkOption {
         description = "Endpoints consumers: Map Protocol (Map hostname:port {endpoint, hosts})";
-        type = types.attrsOf (types.attrsOf endpointIR);
+        type = types.attrsOf (types.attrsOf reachesIR);
+        default = {};
+    };
+    
+    options.naps.endpoints.perEnv = lib.mkOption {
+        description = "Endpoints exposed and reached by each environment: Map EnvUID (Map Protocol {exposed, reached})";
+        type = types.attrsOf (types.attrsOf envIR);
         default = {};
     };
     options.naps.endpoints.perVM = lib.mkOption {
@@ -94,6 +115,12 @@ in {
         type = types.attrsOf (types.attrsOf (types.attrsOf (types.listOf lib.types.port)));
         default = {};
         apply = lib.mapAttrs (_: lib.mapAttrs (_: lib.mapAttrs (_: lib.unique)));
+    };
+    options.naps.endpoints.outputs.hostsFile = lib.mkOption {
+        description = "Generation of /etc/hosts (option: config.networking.hosts). Type: Map EnvName (Map ProxyIP [Hostname])";
+        type = types.attrsOf (types.attrsOf (types.listOf types.str));
+        default = {};
+        apply = lib.mapAttrs (_: lib.mapAttrs (_: lib.unique));
     };
 
 }

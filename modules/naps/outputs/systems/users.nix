@@ -44,7 +44,7 @@ let
 in {
     naps.outputs.systems = 
         utils.mergeAll [
-            (utils.mergeAll (lib.mapAttrsToList processService config.naps.internal.services))
+            (utils.mergeAll (lib.mapAttrsToList processService config.naps.services))
             (utils.mergeAll (lib.mapAttrsToList mkRoot config.naps.topology.vms))
             (utils.mergeAll (lib.mapAttrsToList mkHAProxy config.naps.topology.vms))
         ];

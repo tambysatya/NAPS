@@ -6,7 +6,7 @@ let
 
     proxyAndFirewallConfigs = 
         let
-            outputs = config.naps.internal.endpoints.outputs;
+            outputs = config.naps.endpoints.outputs;
             processProxy = envuid: str: {
                 config.services.haproxy.config = ''
                         ssl-server-verify none
@@ -36,21 +36,21 @@ let
                             fwconfig;
                     };
             generateEtcHosts = 
-                envuid: {reaches, ...}:
-                let
-                    env = config.naps.internal.envs.all.${envuid};
-                    proxyIP = utils.envPrivateHostIP env;
-                    processEPProvider = provider: endpoints: lib.mapAttrsToList (_: {hostname,...}: hostname) endpoints;
-                in {
-                    config.networking.hosts.${proxyIP} = lib.unique (utils.concatMapAttrsToList processEPProvider reaches);
+                envuid: _:
+                {
+                    config.networking.hosts = config.naps.endpoints.outputs.hostsFile.${envuid};
                 };
             /* Allows haproxy to bind on non-existing interfaces if at least one container
                requires a forward proxy */
             allowNonLocalBind = 
-                envuid: {reaches, ... }: 
-                    let env = config.naps.internal.envs.all.${envuid};
-                    in lib.optionalAttrs (utils.isContainer env && reaches != {}) {
-                        ${utils.envHostUID env}.config.boot.kernel.sysctl = {
+                vmname: alleps: 
+                    let vmenv = config.naps.envs.all.${vmname};
+                        ctRequiresForward =  
+                            builtins.any 
+                                (reaches: lib.mapAttrsToList (envuid: {env, ...}: utils.isContainer env) reaches != {})
+                                (lib.mapAttrsToList (proto: {reaches, exposes}: reaches) alleps);
+                    in lib.optionalAttrs ctRequiresForward {
+                        ${vmname}.config.boot.kernel.sysctl = {
                                 "net.ipv4.ip_nonlocal_bind" = 1;
                                 "net.ipv6.ip_nonlocal_bind" = 1;
                         };
@@ -58,9 +58,9 @@ let
         in utils.mergeAll [
                 (lib.mapAttrs processProxy outputs.proxy)
                 (lib.mapAttrs processFirewall outputs.firewall)
-                (lib.mapAttrs generateEtcHosts config.naps.internal.endpoints.perEnv)
-                (utils.mergeAll (lib.mapAttrsToList allowNonLocalBind config.naps.internal.endpoints.perEnv))
-                (lib.mapAttrs (name: _: {config.services.haproxy.enable = true;}) config.naps.internal.envs.vms)
+                (lib.mapAttrs generateEtcHosts config.naps.endpoints.perEnv)
+                (utils.mergeAll (lib.mapAttrsToList allowNonLocalBind config.naps.endpoints.perVM))
+                (lib.mapAttrs (name: _: {config.services.haproxy.enable = true;}) config.naps.envs.vms)
            ];
 
     processServices = # enable and configures the services on the deployement environment
@@ -80,18 +80,16 @@ in
 
 {
     imports = [
-               #./volumes.nix
-               #./network.nix
                ./users.nix
                ./commons.nix
               ];
     naps.outputs.systems = utils.mergeAll [
-        config.naps.internal.envs.outputs # basic networking for vms and containers (ip addresses, gateway,...)
-        config.naps.internal.persistent.outputs # persistency + root filesystems
-        config.naps.internal.assets.outputs.config # assets services (e.g. step-renew for TLS refresh): defined in internal.assets
-        config.naps.internal.links.outputs # dependencies across the infrastructure (e.g. wait-uplinks services): defined in internal.links
-        proxyAndFirewallConfigs # haproxy + firewall configuration of VMs: defined in internal.endpoints
-        (utils.mergeAll (lib.mapAttrsToList processServices config.naps.internal.services)) # services imports + config (listen...)
+        config.naps.envs.outputs # basic networking for vms and containers (ip addresses, gateway,...)
+        config.naps.persistent.outputs # persistency + root filesystems
+        config.naps.assets.outputs.config # assets services (e.g. step-renew for TLS refresh): defined in assets
+        config.naps.links.outputs # dependencies across the infrastructure (e.g. wait-uplinks services): defined in links
+        proxyAndFirewallConfigs # haproxy + firewall configuration of VMs: defined in endpoints
+        (utils.mergeAll (lib.mapAttrsToList processServices config.naps.services)) # services imports + config (listen...)
     ];
     #naps.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.naps.deploy.systems);
     /*

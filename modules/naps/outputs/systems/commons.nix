@@ -59,8 +59,8 @@ let
 in {
     naps.outputs.systems = 
         utils.mergeAll
-            (lib.mapAttrsToList defaultVMConf config.naps.internal.envs.vms ++
-            lib.mapAttrsToList defaultContainerConf config.naps.internal.envs.containers ++ 
+            (lib.mapAttrsToList defaultVMConf config.naps.envs.vms ++
+            lib.mapAttrsToList defaultContainerConf config.naps.envs.containers ++ 
 
             # adds the container configuration
             lib.mapAttrsToList 
@@ -70,7 +70,7 @@ in {
                         config = config.naps.outputs.systems.${ctname}.config // {imports = config.naps.outputs.systems.${ctname}.imports;};
                      };
                  }) 
-                config.naps.internal.envs.containers);
+                config.naps.envs.containers);
 
 }
 
