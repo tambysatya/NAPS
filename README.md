@@ -280,3 +280,6 @@ EXPERIMENTS:
 - check multiple containers running on the same VM
 - check if instead of having the specified domain we works with "naps.domain". Should work out of the boxe. Should also with test.domain (=> would allow to do loadbalancing during testing)
 
+
+TODO:
+- choose a strategy to outputs multiple config because .mergeAll vs lib.mkMerge leads to errors (!!!)
