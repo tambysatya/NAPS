@@ -290,11 +290,11 @@ let
             args:
             utils.mergeAll [
                 (compileNapsApp args)
-                #(compileGenAssets args) 
-                #(compileInstallAssets args)
-                #(compileBuildDomains args)
-                #(compileProvisioner args)
-               # (compileVisualization args)
+                (compileGenAssets args) 
+                (compileInstallAssets args)
+                (compileBuildDomains args)
+                (compileProvisioner args)
+                #(compileVisualization args)
             ];
 
 
