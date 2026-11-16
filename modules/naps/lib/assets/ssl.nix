@@ -52,7 +52,7 @@ let
                                     "minTLSCertDuration" : "5m", 
                                     "maxTLSCertDuration" : "7d", 
                                     "defaultTLSCertDuration" : "3d"
-                              }' "${paths.git}/ca.json" | ${pkgs.moreutils}/bin/spinge "${paths.git}/ca.json"
+                              }' "${paths.git}/ca.json" | ${pkgs.moreutils}/bin/sponge "${paths.git}/ca.json"
         '';
 
 
