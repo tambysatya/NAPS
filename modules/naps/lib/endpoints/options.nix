@@ -35,9 +35,10 @@ let
             forwardProxy = lib.mkOption {
                 description = ''
                     Given the intermediate representation of the VM exposed endpoints
-                    generate the haproxy configuration.
+                    generate the haproxy configuration. 
                     Type: VMEnv -> Map EndpointName AllHosts -> Map EnvUID {env, Map EndpointName Endpoints} -> HAProxy configuration
-                    with AllHosts: All ServiceInstances exposing each endpoint
+                    with VMEnv: environment of the hosting VM
+                         AllHosts: All ServiceInstances exposing each endpoint
                          endpoint: endpoint description
                          hosts: Map ServiceID ServiceInstances: local instances exposing the endpoint
                 '';

@@ -83,7 +83,7 @@ in {
 
     options.naps.endpoints.outputs.proxy = lib.mkOption {
         description = "HAProxy config of each VM";
-        type = types.attrsOf types.str;
+        type = types.attrsOf types.lines;
         default = {};
     };
     options.naps.endpoints.outputs.firewall = lib.mkOption {

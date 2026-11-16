@@ -7,20 +7,26 @@ let
         insname: ins: protocol: epname: endpoint@{hostname, port, ...}: {
             all.${protocol}.${epname} = endpoint;
             providers.${protocol}.${epname} = {inherit endpoint; instances.${insname} = ins;};
-            perVM.${utils.insHostUID ins}.${protocol}.exposes.${epname} = {inherit endpoint; instances.${insname} = ins;};
+            perVM.${utils.insHostUID ins} = {
+                ${protocol}.exposes.${epname} = {inherit endpoint; instances.${insname} = ins;};
+            };
         };
     processReaches = 
         insname: ins: protocol: epname: endpoint@{hostname, port, ...}: {
             all.${protocol}.${epname} = endpoint;
             consumers.${protocol}.${epname} = {inherit endpoint; instances.${insname} = ins;};
-            perVM.${utils.insHostUID ins}.${protocol}.reaches.${utils.insEnvUID ins} = {
-                env = utils.insEnv ins;
-                endpoints.${epname} = endpoint;
+            perVM.${utils.insHostUID ins} = {
+                ${protocol}.reaches.${utils.insEnvUID ins} = {
+                    env = utils.insEnv ins;
+                    endpoints.${epname} = endpoint;
+                };
             };
         };
     processExposesProtocol = 
         insname: ins: protocol: exposes:
-        lib.mkMerge (lib.mapAttrsToList (processExposes insname ins protocol) exposes);
+        #lib.mkMerge (lib.mapAttrsToList (processExposes insname ins protocol) exposes);
+        builtins.trace (utils.insHostUID ins) {};
+
     processReachesProtocol = 
         insname: ins: protocol: reaches:
         lib.mkMerge (lib.mapAttrsToList (processReaches insname ins protocol) reaches);
@@ -30,6 +36,21 @@ let
         in  lib.mkMerge 
                 (lib.mapAttrsToList (processExposesProtocol insname ins) exposes ++
                  lib.mapAttrsToList (processReachesProtocol insname ins) reaches);
+
+    generateProxy =
+        vmname: vmir:
+        let
+            vmenv = config.naps.envs.all.${vmname};
+            processIR =
+                protocol: {exposes, reaches}:
+                let
+                    protolib = config.naps.lib.endpoints.${protocol};
+                    allhosts = config.naps.endpoints.all;
+                    inherit (protolib) forwardProxy reverseProxy;
+                    rev = reverseProxy vmenv exposes;
+                    fwd = forwardProxy vmenv allhosts reaches;
+                in lib.mkMerge [rev fwd];
+            in lib.mkMerge (lib.mapAttrsToList processIR vmir);
         
 in {
     imports = [
@@ -37,7 +58,7 @@ in {
     ];
     naps.endpoints = lib.mkMerge [
         (lib.mkMerge (lib.mapAttrsToList processInput config.naps.inputs.endpoints))
-        #{outputs.proxy= lib.mapAttrs generateProxy config.naps.endpoints.perVM;}
+        {outputs.proxy= lib.mapAttrs generateProxy config.naps.endpoints.perVM;}
         #{outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.perVM);}
     ];
     #naps.inputs.assets = lib.mkMerge (lib.mapAttrsToList generateAssets config.naps.endpoints.perEnv);
