@@ -48,6 +48,11 @@ let
         sed -i "s+$STEPPATH/secrets+/var/lib/secrets+" "${paths.git}"/ca.json
         sed -i "s+$STEPPATH/certs+/etc+" "${paths.git}"/ca.json 
         sed -i "s+$STEPPATH+/var/lib/step-ca+" "${paths.git}"/ca.json 
+        ${lib.getExe pkgs.jq} '.authority.provisioners.[0].claims = {
+                                    "minTLSCertDuration" : "5m", 
+                                    "maxTLSCertDuration" : "7d", 
+                                    "defaultTLSCertDuration" : "3d"
+                              }' "${paths.git}/ca.json" | ${pkgs.moreutils}/bin/spinge "${paths.git}/ca.json"
         '';
 
 
