@@ -50,7 +50,7 @@ let
         sed -i "s+$STEPPATH+/var/lib/step-ca+" "${paths.git}"/ca.json 
         ${lib.getExe pkgs.jq} '.authority.provisioners.[0].claims = {
                                     "minTLSCertDuration" : "5m", 
-                                    "maxTLSCertDuration" : "7d", 
+                                    "maxTLSCertDuration" : "3d", 
                                     "defaultTLSCertDuration" : "3d"
                               }' "${paths.git}/ca.json" | ${pkgs.moreutils}/bin/sponge "${paths.git}/ca.json"
         '';
