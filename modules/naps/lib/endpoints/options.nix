@@ -26,7 +26,7 @@ let
                 description = ''
                     Given the intermediate representation of the VM exposed endpoints
                     generate the haproxy configuration.
-                    Type: VMEnv -> Map EndpointName {endpoint, hosts} -> HAProxy configuration
+                    Type: VMEnv -> Map EndpointName {endpoint, Map ServiceID ServiceInstance} -> HAProxy configuration
                     with endpoint: endpoint description
                          hosts: Map ServiceID ServiceInstances: local instances exposing the endpoint
                 '';
@@ -36,7 +36,7 @@ let
                 description = ''
                     Given the intermediate representation of the VM exposed endpoints
                     generate the haproxy configuration.
-                    Type: VMEnv -> Map EndpointName AllHosts -> Map EndpointName {endpoint, hosts} -> HAProxy configuration
+                    Type: VMEnv -> Map EndpointName AllHosts -> Map EnvUID {env, Map EndpointName Endpoints} -> HAProxy configuration
                     with AllHosts: All ServiceInstances exposing each endpoint
                          endpoint: endpoint description
                          hosts: Map ServiceID ServiceInstances: local instances exposing the endpoint

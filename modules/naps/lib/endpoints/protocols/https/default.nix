@@ -36,7 +36,8 @@ let
 in {
     naps.lib.endpoints.https = {
         inherit generateAssets extraArgsType;
-        reverseProxy = vmenv: epIR: "";
+        reverseProxy =  # VMEnv -> Map EndpointName {Endpoint, Hosts}
+            vmenv: epIR: "";
         forwardProxy = vmenv: allhosts: envIR: "";
     };
 }

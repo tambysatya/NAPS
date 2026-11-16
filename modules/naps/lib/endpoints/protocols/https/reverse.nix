@@ -90,35 +90,14 @@ let
 
 in 
 {
-    naps.lib.endpoints.https = {
-        extraArgsType = types.submodule {
-            options = {
-                tls = lib.mkOption {
-                    description = "How TLS is implemented through HAproxy. Passthrough means that the service handles TLS while termination means that HAProxy terminates TLS and the endpoints receives an HTTP connection.";
-                    type = types.enum ["passthrough" "termination"];
-                };
-            };
-        };
 
-        reverseProxy= vmenv: reverse:
-        ''
-            # HTTPs Reverse Proxy (Checks Passthrough then termination)
-            ${generateReverse vmenv reverse}
-            ${backend_404}
-        '';
-        /*
-        generateProxy = vmenv: hosts: consumers: ir@{forward, reverse}:
-        ''
-            # HTTPs Forward Proxy (always TLS passthrough)
-            ${generateForward vmenv hosts forward}
+    reverseProxy= vmenv: reverse:
+    ''
+        # HTTPs Reverse Proxy (Checks Passthrough then termination)
+        ${generateReverse vmenv reverse}
+        ${backend_404}
+    '';
 
-            # HTTPs Reverse Proxy (Checks Passthrough then termination)
-            ${generateReverse vmenv consumers reverse}
-            ${backend_404}
-        '';
-        */
-
-    };
 }
 
 
