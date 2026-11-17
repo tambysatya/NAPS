@@ -40,11 +40,13 @@ deploy :
 
 
 iso:
+
 	 [ -f bootstrap.iso ] && rm -f bootstrap.iso
 	 nix build  .#nixosConfigurations.iso.config.system.build.isoImage
 	 cp result/iso/*.iso bootstrap.iso
 
 apps:
+
 	nix build .#nixosConfigurations.apps.config.system.build.toplevel
 
 doc:

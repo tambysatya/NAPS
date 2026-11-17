@@ -297,6 +297,9 @@ let
                 #(compileVisualization args)
             ];
 
+    # documentation
+    module = compileModule exampleArgs;
+    optionsJSON = (pkgs.nixosOptionsDoc {options = module.options;}).optionsJSON;
 
     in utils.mergeAll [
         (exposeApps exampleArgs) #TODO
@@ -317,8 +320,17 @@ let
           checks.${system} = gen-config-checks inputs;
 
           packages.${system}.options-doc = 
-            let module = compileModule exampleArgs;
-            in (pkgs.nixosOptionsDoc {options = module.options;}).optionsJSON;
+            pkgs.runCommand "naps-doc" {
+                nativeBuildInputs = [pkgs.ndg];
+            } ''
+                mkdir -p out
+                ndg -c ${./docs}/ndg.toml \
+                   html \
+                   --input-dir ${./docs} \
+                    --output-dir $out \
+                   --module-options ${optionsJSON}/share/doc/nixos/options.json 
+                    #--title "NAPS documentation" \
+            '';
                        
 
           nixosConfigurations = compileNixos exampleArgs;
