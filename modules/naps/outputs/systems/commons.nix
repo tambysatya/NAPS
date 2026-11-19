@@ -58,7 +58,7 @@ let
 
 in {
     naps.outputs.systems = 
-        utils.mergeAll
+        lib.mkMerge
             (lib.mapAttrsToList defaultVMConf config.naps.envs.vms ++
             lib.mapAttrsToList defaultContainerConf config.naps.envs.containers ++ 
 
@@ -67,7 +67,7 @@ in {
                 (ctname: ctenv: 
                  {
                     ${utils.envHostUID ctenv}.config.containers.${ctname}= {
-                        config = config.naps.outputs.systems.${ctname}.config // {imports = config.naps.outputs.systems.${ctname}.imports;};
+                        config = config.naps.outputs.systems.${ctname}; 
                      };
                  }) 
                 config.naps.envs.containers);

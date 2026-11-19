@@ -13,7 +13,7 @@ let
             byprovider = lib.groupBy (builtins.getAttr "provider") namedlist; # {provider => [{name, provider, ...}]}
             byproviderbyname = lib.mapAttrs 
                                     (_: vs: 
-                                        utils.mergeAll 
+                                        lib.mkMerge 
                                             (lib.map (v: {${v.name} = {inherit (v) generateArgs installArgs reload;};}) vs))
                                     byprovider;
         in byproviderbyname;
@@ -171,8 +171,8 @@ let
                 assets:
                 let
                     mkConfig = config.naps.lib.assets.${provider}.apply.config;
-                in utils.mergeAll (lib.mapAttrsToList (assetname: asset: mkConfig asset) assets);
-        in {${envuid} = utils.mergeAll (lib.mapAttrsToList providerConfig allassets);};
+                in lib.mkMerge (lib.mapAttrsToList (assetname: asset: mkConfig asset) assets);
+        in {${envuid} = lib.mkMerge (lib.mapAttrsToList providerConfig allassets);};
         
     generateContainersBinds =
         vmname: envassets:
@@ -184,13 +184,13 @@ let
                 envuid: provider: assets:
                 lib.optionalAttrs 
                     (provider != "plain") 
-                    (utils.mergeAll (lib.mapAttrsToList (processContainerAsset envuid) assets));
+                    (lib.mkMerge (lib.mapAttrsToList (processContainerAsset envuid) assets));
             processEnv =
                 envuid: allassets:
                 let env = config.naps.envs.all.${envuid};
                 in lib.optionalAttrs (utils.isContainer env) 
-                        (utils.mergeAll (lib.mapAttrsToList (processContainerProvider envuid) allassets));
-        in utils.mergeAll (lib.mapAttrsToList processEnv envassets);
+                        (lib.mkMerge (lib.mapAttrsToList (processContainerProvider envuid) allassets));
+        in lib.mkMerge (lib.mapAttrsToList processEnv envassets);
 
 
 in {
@@ -204,20 +204,11 @@ in {
             outputs.scripts.generate = generateScript;
             outputs.scripts.install = installScript;
             outputs.config = 
-                utils.mergeAll 
+                lib.mkMerge
                     (lib.mapAttrsToList generateConfig config.naps.assets.perEnv ++ 
                      lib.mapAttrsToList generateContainersBinds config.naps.assets.perVM); # bind-mounts of containers secrets
 
         }
 
     ];
-    /*
-    naps.internal.assets = lib.mkMerge [
-                                (lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-                                {outputs.scripts.generate = generateScript;}
-                                {outputs.scripts.install = installScript;}
-                                {outputs.config = utils.mergeAll (lib.mapAttrsToList generateConfig config.naps.internal.assets.perEnv);}
-                                {outputs.config = utils.mergeAll (lib.mapAttrsToList generateContainersBinds config.naps.internal.assets.perVM);} # bind-mounts of containers secrets
-                            ];
-*/
 }
