@@ -52,7 +52,7 @@ let
                                 Extra Configuration appended to the system config.
                                 Asset -> ConfigModule
                             '';
-                            type = types.functionTo types.attrs;
+                            type = types.functionTo types.deferredModule;
                             default = asset: {};
                         };
                     };

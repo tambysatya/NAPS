@@ -26,7 +26,7 @@ let
                     config.networking.firewall.interfaces = 
                         lib.mapAttrs 
                             (iface: protoconfig: 
-                                utils.mergeAll (
+                                lib.mkMerge (
                                     lib.mapAttrsToList 
                                         (proto: ports: 
                                             if proto == "tcp" then {allowedTCPPorts = ports;}
@@ -55,11 +55,11 @@ let
                                 "net.ipv6.ip_nonlocal_bind" = 1;
                         };
                 };
-        in utils.mergeAll [
+        in lib.mkMerge [
                 (lib.mapAttrs processProxy outputs.proxy)
                 (lib.mapAttrs processFirewall outputs.firewall)
                 (lib.mapAttrs generateEtcHosts config.naps.endpoints.perEnv)
-                (utils.mergeAll (lib.mapAttrsToList allowNonLocalBind config.naps.endpoints.perVM))
+                (lib.mkMerge (lib.mapAttrsToList allowNonLocalBind config.naps.endpoints.perVM))
                 (lib.mapAttrs (name: _: {config.services.haproxy.enable = true;}) config.naps.envs.vms)
            ];
 
@@ -73,7 +73,7 @@ let
                     imports = [path];
                 };
             };
-        in utils.mergeAll (lib.mapAttrsToList processInstance instances);
+        in lib.mkMerge (lib.mapAttrsToList processInstance instances);
 
 
 in
@@ -83,21 +83,12 @@ in
                ./users.nix
                ./commons.nix
               ];
-    naps.outputs.systems = utils.mergeAll [
+    naps.outputs.systems = lib.mkMerge [
         config.naps.envs.outputs # basic networking for vms and containers (ip addresses, gateway,...)
         config.naps.persistent.outputs # persistency + root filesystems
         config.naps.assets.outputs.config # assets services (e.g. step-renew for TLS refresh): defined in assets
         config.naps.links.outputs # dependencies across the infrastructure (e.g. wait-uplinks services): defined in links
         proxyAndFirewallConfigs # haproxy + firewall configuration of VMs: defined in endpoints
-        (utils.mergeAll (lib.mapAttrsToList processServices config.naps.services)) # services imports + config (listen...)
+        (lib.mkMerge (lib.mapAttrsToList processServices config.naps.services)) # services imports + config (listen...)
     ];
-    #naps.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.naps.deploy.systems);
-    /*
-    naps.outputs.systems = 
-        utils.mergeAll [
-            (lib.mapAttrs processUsers config.naps.deploy.systems)
-            (lib.mapAttrs mkRoot config.naps.deploy.systems)
-            (utils.mergeAll (lib.mapAttrsToList addServices config.naps.internal.services))
-        ];
-    */
 }
