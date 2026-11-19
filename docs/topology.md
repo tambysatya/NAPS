@@ -79,7 +79,12 @@ For this purpose, it is mandatory to specify how to reach the provisioning serve
 
 - `naps.topology.provisioner.ssh`
 
-In addition to the above options, the secrets-provisioning server can be located on a different machine than the one used to deploy the configuration. NAPS can automatically upload the secrets and configure the service through ssh, if this option is filled. Note that if `lingering` is not enabled on the remote provisioning machine (using `sudo loginctl enable-linger <username>`) to enable persistency of user-defined services, an ssh session should be opened during the entire deployement process.
+In addition to the above options, the secrets-provisioning server can be located on a different machine than the one used to deploy the configuration. NAPS can automatically upload the secrets and configure the service through ssh, if this option is filled. 
+::: {.important}
+Note that if `lingering` is not enabled on the remote provisioning machine to allow persistency of user-defined services, an ssh session should be opened during the entire deployement process. 
+
+`lingering` can ben enabled using `sudo loginctl enable-linger <username>`.
+:::
 
 ```nix
     ssh = lib.mkOption {
@@ -141,12 +146,12 @@ This means that the nextcloud has requested that `/var/lib/nextcloud/data` shoul
         ip = "10.0.0.53";
         containers = ["nc-main"]; 
         disks = [
-            {type="disk"; location="/dev/mapper/nextcloud-persistent"; mount="/var/lib/nextcloud/data"; filesystem="xfs"; options=["noatime"];}
+            {type="disk"; location="/dev/mapper/nextcloud-persistent-data"; mount="/var/lib/nextcloud/data"; filesystem="xfs"; options=["noatime"];}
         ];
 };
 ```
 
-Dedicating an entire partition for small directory might be painful. Therefore, NAPS provides a way to specify that a disk can be `shared` to store the persistent datas of multiple files. For instance, since nextcloud uses the centralized postgres database and the S3 storage for storing the datas, `/var/lib/nextcloud/data` only contains text configuration files in practice. Similarily, forgajo (a code forge) behave similarily. It is then possible to store both configs on the same partition by enabling sharing using the flag `shared=true`:
+Note that nextcloud additionaly requests `/var/lib/nextcloud/config` to be persistent as well. However, declaring an entire partition for each small directory might be painful. Therefore, NAPS provides a way to specify that a disk can be `shared` to store the persistent datas of multiple files. For instance, since nextcloud uses the centralized postgres database and the S3 storage for storing the datas, `/var/lib/nextcloud/data` and `/var/lib/nextcloud/config` only contain text configuration files in practice. Similarily, forgajo (a code forge) behave similarily. It is then possible to store both configs on the same partition by enabling sharing using the flag `shared=true`:
 
 ```nix
  naps.topology.vms.apps = {
