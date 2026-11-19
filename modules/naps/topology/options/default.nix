@@ -36,7 +36,7 @@ let
             ips = lib.mkOption {
                 description = "Addresses of the provisioning server. It will be used to reach the secrets. This ip can be overrided in each vm configuration.";
                 type = types.listOf types.str;
-                example = "192.168.1.200";
+                example = ["192.168.1.200"];
             };
             ports = lib.mkOption {
                 description = "TCP ports selection";

@@ -91,7 +91,6 @@ in {
         (lib.mkMerge (lib.mapAttrsToList processInput config.naps.inputs.endpoints))
         {outputs= lib.mkMerge (lib.mapAttrsToList generateProxyAndFirewall config.naps.endpoints.perVM);}
         {outputs.hostsFile= lib.mapAttrs generateEtcHosts config.naps.endpoints.perEnv;}
-        #{outputs.firewall= utils.mergeAll (lib.mapAttrsToList generateFirewall config.naps.endpoints.perVM);}
     ];
     naps.inputs.assets = lib.mkMerge (lib.mapAttrsToList generateAssets config.naps.endpoints.perVM);
 }

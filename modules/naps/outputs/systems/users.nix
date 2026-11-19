@@ -30,7 +30,7 @@ let
         let
             processUser = 
                 insname: ins: username: {uid, ...}:
-                utils.mergeAll [
+                lib.mkMerge [
                     {${utils.insEnvUID ins}.config.users = mkUser username uid;}
                     # If the service runs within a container, the user must be created on the VM as well
                     (lib.optionalAttrs (utils.runsInContainer ins) {
@@ -38,15 +38,15 @@ let
                     })
                 ];
             processInstance = 
-                insname: ins: utils.mergeAll (lib.mapAttrsToList (processUser insname ins) users);
-        in utils.mergeAll (lib.mapAttrsToList processInstance instances);
+                insname: ins: lib.mkMerge (lib.mapAttrsToList (processUser insname ins) users);
+        in lib.mkMerge (lib.mapAttrsToList processInstance instances);
 
 in {
     naps.outputs.systems = 
-        utils.mergeAll [
-            (utils.mergeAll (lib.mapAttrsToList processService config.naps.services))
-            (utils.mergeAll (lib.mapAttrsToList mkRoot config.naps.topology.vms))
-            (utils.mergeAll (lib.mapAttrsToList mkHAProxy config.naps.topology.vms))
+        lib.mkMerge [
+            (lib.mkMerge (lib.mapAttrsToList processService config.naps.services))
+            (lib.mkMerge (lib.mapAttrsToList mkRoot config.naps.topology.vms))
+            (lib.mkMerge (lib.mapAttrsToList mkHAProxy config.naps.topology.vms))
         ];
 }
 

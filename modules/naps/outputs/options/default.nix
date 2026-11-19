@@ -61,7 +61,7 @@ in
 {
     options.naps.outputs.systems = lib.mkOption {
             description = "System configurations";
-            type = types.attrsOf types.config;
+            type = types.attrsOf types.deferredModule;
             default = {};
     };
     options.naps.outputs.domains= lib.mkOption {

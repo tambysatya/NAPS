@@ -283,3 +283,4 @@ EXPERIMENTS:
 
 TODO:
 - choose a strategy to outputs multiple config because .mergeAll vs lib.mkMerge leads to errors (!!!)
+- serviceInstance => replace serviceIdentity in naps.topology (the deployement field is set to null by default)

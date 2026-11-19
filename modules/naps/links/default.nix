@@ -25,7 +25,7 @@ let
                         };
                     };
                 };
-        in utils.mergeAll (lib.mapAttrsToList processLinkType alllinks);
+        in lib.mkMerge (lib.mapAttrsToList processLinkType alllinks);
 
     processInputs = 
         insname: {provides, consumes}:
@@ -80,8 +80,6 @@ in {
     imports = [./options];
     naps.links = lib.mkMerge [
         (lib.mkMerge (lib.mapAttrsToList processInputs config.naps.inputs.links))
-        #(lib.mkMerge (lib.mapAttrsToList processService config.naps.internal.services))
-        #{outputs = utils.mergeAll [(lib.mapAttrs generateOutputs config.naps.internal.links.perEnv)];}
     ];
     naps.inputs = {
         assets = lib.mkMerge (lib.mapAttrsToList generateAssets config.naps.links.all);
