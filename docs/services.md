@@ -92,6 +92,34 @@ assets."password" = {
 Each provider expects the assets to have two field: `generateArgs` and `installArgs` which serves as parameters of the generation and installation procedure respectively. For instance, the `password` provider uses under the box `openssl rand` and thus requests the parameters to the command. In addition, the field `reload` describes which services should be restarted if the asset changes.
 The list of available providers as well as the type of the expected inputs of their respective generation and installation procedure, please consult `naps.lib.assets`.
 
+Obviously, multiple assets coming from multiple providers can be declared, as depicted below (a snippet of the hydra service declaration):
+
+```nix
+assets = {
+    "password" = {
+        "hydra-admin-pass.key" = {
+            generateArgs = {opensslType = "base64"; opensslSize = 64;};
+            installArgs = {owner = "hydra";};
+            inherit reload;
+        };
+    };
+    "ssh-keygen" = {
+        "hydra-ssh" = {
+            generateArgs = {keyname = "hydra";};
+            installArgs = {owner = "hydra"; path = "/var/lib/hydra/.ssh";};
+            inherit reload;
+        };
+    };
+    "nix-store" = {
+        "hydra-cache" = {
+            generateArgs = {keyname = "hydra";};
+            installArgs = {owner = "hydra"; mode="0440";};
+            inherit reload;
+        };
+    };
+};
+```
+
 # Endpoints
 
 ```nix
