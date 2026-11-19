@@ -136,11 +136,11 @@ Using the same formalism as previously described for the assets declaration, eac
 :::
 
 ```nix
-    endpoints.https = [{
-                   hostname = hostname;
-                   port = 80; 
-                   extraArgs = {tls = "termination";};
-                 }];
+endpoints.https = [{
+               hostname = hostname;
+               port = 80; 
+               extraArgs = {tls = "termination";};
+             }];
 ```
 
 When declaring endpoints, it is also mandatory to provide a method to allow NAPS to configure the listening address. Indeed, when NAPS binds the services differently depending if they are runned natively or within a contaienr. Therefore, the field `configureListen` should be provided with a function that takes an IP address into argument (as a string) and that provides an attrset containing the part of the configurations which sets the binding address, as below:
@@ -150,9 +150,32 @@ configureListen = addr: {
     services.nginx.virtualHosts.${hostname}.listen = [ {inherit addr; port=80;}];
 };
 ```
-```nix
 
-```
-```nix
+## Links
 
+Services can depend on other services of the infrastructure. For instance, nextcloud requires a s3 bucket and a postgres database. This is mentionned in the `links` option, which summarizes, for each link type, the set of `accesses` that are requested. Similarily to the assets formalism, `accesses` have a specific type that depends of their type.
+
+```nix
+links = {
+    postgres = [
+        {database = "nextcloud"; inherit owner reload;}
+    ];
+    s3 = [
+        {bucket = "nextcloud"; inherit owner reload;}
+    ];
+};
 ```
+
+Based on this declaration, NAPS will generate the corresponding accesses, send it to the s3 and database hosts, create the new buckets and databases, and configure the static network in order to allow nextcloud to reach these hosts.
+
+
+In the opposite, if a service provides a new link, this can be done using the `provide` option, like in the code below from the postgres naps declaration:
+```nix
+naps.services.postgres = {
+    ...
+    provides = ["postgres"];
+    ...
+};
+```
+
+Based on this declaration, NAPS will automatically create the endpoints, and ship the postgres secrets to each database host.
