@@ -106,3 +106,89 @@ hosts = lib.mkOption {
             };
 
 ```
+
+## Virtual machines
+
+Finally, the configuration of the virtual machines is the core of the declaration of the infrastructure. Obvious fields are the `host`, the number of `vcpu`, the allocated `memory` and the static `ip` address. Services instances running natively are declared under the `service` option while services runing within nixos-containers are declared under `containers`.
+
+In addition of this, some services may request data-persistency. For instance, the following code declaring a virtual machine running nextcloud will not evaluate:
+
+```nix
+ naps.topology.services = {
+    nc-main = {is = "nextcloud";};
+ };
+ naps.topology.vms.apps = {
+        host = "cpuhost1";
+        vcpu = 8;
+        memory = 16000;
+        ip = "10.0.0.53";
+        containers = ["nc-main"]; 
+ };
+```
+and an error will be raised:
+```
+error: No persistent volume for resource nc-main:/var/lib/nextcloud/data on apps. Either assign a dedicated volume on apps or enable sharing.
+
+```
+
+This means that the nextcloud has requested that `/var/lib/nextcloud/data` should be persistent and it is thus mandatory to mention where to store this resource. Therefore, a dedicated partition should be created on the host (`cpuhost1` in the example).
+
+```nix
+ naps.topology.vms.apps = {
+        host = "cpuhost1";
+        vcpu = 8;
+        memory = 16000;
+        ip = "10.0.0.53";
+        containers = ["nc-main"]; 
+        disks = [
+            {type="disk"; location="/dev/mapper/nextcloud-persistent"; mount="/var/lib/nextcloud/data"; filesystem="xfs"; options=["noatime"];}
+        ];
+};
+```
+
+Dedicating an entire partition for small directory might be painful. Therefore, NAPS provides a way to specify that a disk can be `shared` to store the persistent datas of multiple files. For instance, since nextcloud uses the centralized postgres database and the S3 storage for storing the datas, `/var/lib/nextcloud/data` only contains text configuration files in practice. Similarily, forgajo (a code forge) behave similarily. It is then possible to store both configs on the same partition by enabling sharing using the flag `shared=true`:
+
+```nix
+ naps.topology.vms.apps = {
+        host = "cpuhost1";
+        vcpu = 8;
+        memory = 16000;
+
+        ip = "10.0.0.53";
+        containers = ["nc-main" "git-main"]; 
+        disks = [
+            {type="qcow"; location="persistent"; filesystem="ext4"; shared=true; options = ["nofail"];}
+        ];
+      };
+```
+
+The code above generates a qcow image that will be shared between the different services requiring persistency of their data. Note that some services can explicitely forbid the use of sharing (e.g. when the amount of data to be stored is huge). For instance, the following code, deploying a postgres database, will not evaluate:
+```nix
+ naps.topology.services = {
+    pg-main = {is = "postgres";};
+ };
+ naps.topology.vms.postgres = {
+        host = "cpuhost1";
+        vcpu = 4;
+        memory = 8000;
+        ip = "10.0.0.52";
+        services = ["pg-main"]; 
+      };
+```
+and will raise the following error:
+```
+error: No persistent volume for resource pg-main:/var/lib/postgresql on postgres. This resource REQUIRES an individual volume
+```
+
+Setting a disk with `shared=false` fixes the problem.
+
+## Deployement of the configuration
+
+Running `naps apply` should do the work. It will sequentially:
+
+- generate the secrets
+- upload the secrets on the provisioning server (if `naps.topology.provisioner.ssh` is set)
+- generate the terraform virtual machines configurations (using `terranix`)
+- generate single-use tokens and pass them to each vitual machine via the `smbios` field
+- generate a self-installable bootable iso
+- deploy the virtual machines
