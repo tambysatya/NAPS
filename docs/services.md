@@ -58,6 +58,11 @@ naps.services.nextcloud = {
 
 Specifies the location of the nix configuration file of the service, which will serve as a *default* configuration file. 
 
+:::{.note}
+This configuration module is provided with the `naps` structure, allowing it to inspect the internal options in order to specialize the configuration. These internal structures will be described later in this documentation. However, most of time, only the fields `naps.topology.hostname` is used to parametrize the configuration.
+:::
+
+
 ```nix
 path = ./default.nix; 
 ```
@@ -131,11 +136,19 @@ Using the same formalism as previously described for the assets declaration, eac
 :::
 
 ```nix
-
+    endpoints.https = [{
+                   hostname = hostname;
+                   port = 80; 
+                   extraArgs = {tls = "termination";};
+                 }];
 ```
 
-```nix
+When declaring endpoints, it is also mandatory to provide a method to allow NAPS to configure the listening address. Indeed, when NAPS binds the services differently depending if they are runned natively or within a contaienr. Therefore, the field `configureListen` should be provided with a function that takes an IP address into argument (as a string) and that provides an attrset containing the part of the configurations which sets the binding address, as below:
 
+```nix
+configureListen = addr: {
+    services.nginx.virtualHosts.${hostname}.listen = [ {inherit addr; port=80;}];
+};
 ```
 ```nix
 
