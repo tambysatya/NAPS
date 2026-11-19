@@ -95,7 +95,7 @@ max_heading_level = 3
 # include_internal = true
 
 # Sidebar configuration
-# [sidebar]
+[sidebar]
 # Enable numbering for sidebar items
 # numbered = true
 
@@ -105,15 +105,28 @@ max_heading_level = 3
 
 # Ordering algorithm for sidebar items: "alphabetical", "custom", or "filesystem"
 # ordering = "alphabetical"
+ordering = "custom"
 
 # Pattern-based sidebar matching rules
 # Rules are evaluated in order, and the first matching rule is applied.
 # All specified conditions are expected to match.
 
 # Simple exact path match (shorthand syntax)
-# [[sidebar.matches]]
-# path = "getting-started.md"
-# position = 1
+[[sidebar.matches]]
+path = "index.md"
+position = 1
+
+[[sidebar.matches]]
+path = "topology.md"
+position = 2
+
+[[sidebar.matches]]
+path = "services.md"
+position = 3
+
+[[sidebar.matches]]
+path = "extending.md"
+position = 4
 
 # Exact title match with override (shorthand syntax)
 # [[sidebar.matches]]
