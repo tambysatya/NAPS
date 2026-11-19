@@ -62,8 +62,10 @@ in rec {
     serviceInstance = types.submodule {
         options = {
             deployement = lib.mkOption {
+                internal = true;
                 description = "Deployement environment of this service";
-                type = deployementEnvironment;
+                type = types.nullOr deployementEnvironment;
+                default = null;
             };
             priority = lib.mkOption{
                 description = "Max priority is the primary";
