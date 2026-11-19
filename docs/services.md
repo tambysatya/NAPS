@@ -122,6 +122,14 @@ assets = {
 
 # Endpoints
 
+A service can also expose endpoints in order to allow interaction with other services or users. Based on this declaration, NAPS will automatically generate the proxy, the network and the firewall configuration as well as the potentially required secrets (e.g. if an endpoints requires HTTPs, the certificates will be generated and a service refreshing them automatically will be setup).
+
+Using the same formalism as previously described for the assets declaration, each service declares which endpoints are exposed under which protocol. So far, two protocols are implemented: generic `tcp` and `https`.
+
+::: {.note}
+    Despite HTTPs being a subset of TCP, this distinction provides more expressivity in the declaration of HTTPS endpoints, in particular the TLS certificate generation.
+:::
+
 ```nix
 
 ```
