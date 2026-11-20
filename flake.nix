@@ -297,9 +297,21 @@ let
                 #(compileVisualization args)
             ];
 
-    # documentation
-    module = compileModule exampleArgs;
-    optionsJSON = (pkgs.nixosOptionsDoc {options = module.options;}).optionsJSON;
+        # documentation
+        module = compileModule exampleArgs;
+        optionsJSON = (pkgs.nixosOptionsDoc {options = module.options;}).optionsJSON;
+
+        # Returns the hash of each configuration (iso excluded)
+        getVMStates = 
+            lib.filterAttrs (name: _: name != "iso")
+                (lib.mapAttrs 
+                    (name: config:
+                    let toplevel = config.config.system.build.toplevel;
+                    in {
+                        drv = lib.toString toplevel.drvPath;
+                        out = lib.toString toplevel.outPath;
+                    })
+                    self.nixosConfigurations);
 
     in utils.mergeAll [
         (exposeApps exampleArgs) #TODO
@@ -307,6 +319,7 @@ let
           
 
           lib = {
+            inherit getVMStates;
             inherit compileModule compileNAPS compileTerranix exposeApps compileNixos compileIso;
             inherit gen-config-checks;
             inherit utils;
