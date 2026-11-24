@@ -35,6 +35,7 @@ naps.services.nextcloud = {
     persistent = {
         "/var/lib/nextcloud/config" = {shareable=true; inherit owner reload;};
         "/var/lib/nextcloud/data" = {shareable=true; inherit owner reload;};
+        "/var/lib/nextcloud/store-apps" = {shareable=true; inherit owner reload;};
     };
     endpoints.https = endpoints;
     configureListen = addr: {

@@ -28,7 +28,7 @@ let
         let hostname = config.naps.topology.vms.${vmname}.host;
             qcows = lib.filterAttrs (_: {type,...}: type == "qcow") disks;
             root = generateRootQcow vmname hostname;
-            defaultSize = 100*1024*1024;
+            defaultSize = 20*1024*1024*1024;
             processQcowMapping =
                 diskname: {location, type, ...}:
                 generateQcow vmname hostname {name=diskname; size=defaultSize;  persistentP = true;};
