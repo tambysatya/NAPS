@@ -32,9 +32,9 @@
         "pg-backup".is = "postgres";
         "nc-main" = {
             is = "nextcloud";
-            config = {...}: {
+            config = {naps, ...}: {
                 services.nextcloud = {
-                    settings.trusted_proxies = ["1.1.1.1"];
+                    settings.trusted_proxies = [naps.topology.gateway];
                 };
             };
         };
