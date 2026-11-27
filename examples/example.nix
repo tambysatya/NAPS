@@ -27,10 +27,17 @@
         "pg-main".is = "postgres";
         "hydra-main".is = "hydra";
         "log-main".is = "journald-remote";
-        "nc-main".is = "nextcloud";
         "nc-bkup".is = "nextcloud";
         "git-main".is = "forgejo";
         "pg-backup".is = "postgres";
+        "nc-main" = {
+            is = "nextcloud";
+            config = {naps, ...}: {
+                services.nextcloud = {
+                    settings.trusted_proxies = [naps.topology.gateway];
+                };
+            };
+        };
     };
     hosts = {
       cpuhost1 = {

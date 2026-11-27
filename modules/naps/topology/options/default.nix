@@ -6,24 +6,7 @@ let
     mytypes = import "${flakeRoot}/lib/types" { inherit lib inputs;};
     types = libtypes // vmtypes // mytypes;
      /* Options definitions */
-    serviceIdentity = types.submodule {
-        options = {
-            is = lib.mkOption {
-                description = "Name of the service";
-                type = types.str;
-            };
-            priority = lib.mkOption {
-                description = "Max priority is the primary service";
-                type = types.int;
-                default = 100;
-            };
-            tags = lib.mkOption {
-                description = "Tags to trigger specific behavior";
-                type = types.listOf (types.oneOf [types.deployementTag types.str]);
-                default = [];
-            };
-        };
-    };
+
 
     provisioner = types.submodule {
         options = {
@@ -83,7 +66,7 @@ let
             };
             services = lib.mkOption {
                 description = "All services instances, referenced using an unique identifier. Required to handle migrations.";
-                type = types.attrsOf serviceIdentity;
+                type = types.attrsOf types.serviceInstance;
                 default = {};
             };
 

@@ -1,4 +1,4 @@
-{flakeRoot, lib, inputs, pkgs, config, path, ...}:
+{flakeRoot, lib, inputs, pkgs, config, path, extraArgs, ...}:
 
 let
 
@@ -67,11 +67,15 @@ let
         srvname: srvconf@{configureListen, instances, path, ...}:
         let
             processInstance = insname: ins: {
-                ${utils.insEnvUID ins} = {
-                    # native endpoints listens on 127.0.0.2 because 127.0.0.1 belongs to the forward proxy
-                    config = configureListen (if utils.runsInContainer ins then "0.0.0.0" else "127.0.0.2"); 
-                    imports = [path];
-                };
+                ${utils.insEnvUID ins} = 
+                    {
+                        # native endpoints listens on 127.0.0.2 because 127.0.0.1 belongs to the forward proxy
+                        config = configureListen (if utils.runsInContainer ins then "0.0.0.0" else "127.0.0.2"); 
+                        imports = [
+                            path
+                            ins.config
+                        ];
+                    };
             };
         in lib.mkMerge (lib.mapAttrsToList processInstance instances);
 

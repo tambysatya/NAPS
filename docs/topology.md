@@ -23,8 +23,17 @@
         default = 100;
     };
 ```
+- `naps.topology.services.<name>.config`. WIP: allows customisation of the service configuration
 
-- `naps.topology.services.tags`. WIP: allows customisation of the service configuration
+```nix
+    config = lib.mkOption {
+        description = "The extra-configuration module merged with the system configuration";
+        type = types.deferredModule;
+        default = {config, ...}:{};
+    };
+```
+
+- `naps.topology.services.<name>.tags`. WIP: allows customisation of the service configuration (interactions with NAPS)
 
 ```nix
     tags = lib.mkOption {
@@ -33,6 +42,8 @@
         default = [];
     };
 ```
+
+
 
 
 - `naps.topology.services.deployement` 

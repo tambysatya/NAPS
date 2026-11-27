@@ -82,6 +82,11 @@ in rec {
                 type = types.str;
                 example = "nextcloud";
             };
+            config = lib.mkOption {
+                description = "The extra-configuration module merged with the system configuration";
+                type = types.deferredModule;
+                default = {config, ...}:{};
+            };
         };
     };
 
