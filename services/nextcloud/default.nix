@@ -47,16 +47,17 @@ in {
                 #log_type = "file";
                 maintenance_window_start = 0;
                 maintenance_window_end = 3;
-                trusted_domains = [
-                    "nextcloud.${domain}"	
-                ];
+
                 trusted_proxies = [
-                    #"162.38.243.60"
                     naps.topology.vmSubnet
                     "192.168.100.0" #containers proxy TODO
                     
                 ];
-                overwritehost = hostname;
+                trusted_domains = [
+                    # TODO: add the public domain if exposed on the frontend
+                    "nextcloud.${domain}"	
+                ];
+                # overwritehost = hostname; # TODO
                 overwriteprotocol = "https"; #TODO usefull ?
             };
             config.objectstore.s3 = {
