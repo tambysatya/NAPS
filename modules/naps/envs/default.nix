@@ -38,13 +38,13 @@ let
     declaredInstances = 
         let processSrv = vmname: srvuid: {
                 ${srvuid} = {
-                    inherit (config.naps.topology.services.${srvuid}) priority tags is;
+                    inherit (config.naps.topology.services.${srvuid}) priority tags is config;
                     deployement = config.naps.envs.vms.${vmname};
                 };
             };
             processCT = vmname: srvuid: {
                 ${srvuid} = {
-                    inherit (config.naps.topology.services.${srvuid}) priority tags is;
+                    inherit (config.naps.topology.services.${srvuid}) priority tags is config;
                     deployement = config.naps.envs.containers.${srvuid};
                 };
             };
